@@ -1,3 +1,3 @@
 # TCC
 
-Python code co work with visiongl library
+Python code to work with visiongl library
