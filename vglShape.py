@@ -59,7 +59,7 @@ class VglShape(object):
 		if(ndim == 1):
 			maxi == 2
 
-		for i in range(0, vc.VGL_MAX_DIM()):
+		for i in range(0, vc.VGL_MAX_DIM()+1):
 			if(i <= maxi):
 				self.shape[i] = shape[i]
 				
@@ -116,7 +116,7 @@ class VglShape(object):
 	def getIndexFromCoord(self, coord):
 		result = 0
 
-		for d in range(0, ndim):
+		for d in range(0, ndim+1):
 			result += self.offset[d] * coord[d]
 
 		return result
@@ -183,8 +183,8 @@ class VglShape(object):
 
 	def getNFrames(self):
 		nframes = 1
-		ndim = getNdim()
-		for i in range(3, ndim):
+		ndim = self.getNdim()
+		for i in range(3, ndim+1):
 			nframes *= self.shape[i]
 		return nframes
 
@@ -206,7 +206,7 @@ class VglShape(object):
 		result.ndim = self.ndim
 		result.size = self.size
 		
-		for i in range(0, vc.VGL_MAX_DIM()):
+		for i in range(0, vc.VGL_MAX_DIM()+1):
 			result.shape[i] = self.shape[i]
 			result.offset[i] = self.offset[i]
 
