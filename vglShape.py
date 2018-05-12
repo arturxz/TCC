@@ -126,7 +126,7 @@ class VglShape(object):
 		Get coordinate array from index. Calculates value of coordinates by dividing index 
 		by respective offset.
 	"""
-	def getCoorFromIndex(self, index, coord):
+	def getCoordFromIndex(self, index, coord):
 		ndim = self.getNdim()
 		shape = self.getShape()
 		offset = self.getOffset()

@@ -1,5 +1,5 @@
 from skimage import io
-from vglShape import vglShape
+from vglShape import vglShape, vglClShape
 import matplotlib.pyplot as mp
 import pyopencl as cl
 import numpy as np
@@ -121,14 +121,14 @@ class vgl:
 		# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
 		cl.enqueue_copy(self.queue, self.img_in_cl, self.img.tobytes(), is_blocking=True)
 
-	def makeShape():
-		self.imgVglShape = vglShape()
-
+	def loadShape():
+		self.vglShape_cl = vglShape(self.img_ndim, self.img_nchannels, self.img_shape[0], self.img_shape[1])
+		self.vglClShape_cl = self.vglShape.asVglClShape()
 
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
-		self.pgr.vglClNdConvolution(self.queue, self.img_shape, None, self.img_in_cl, self.img_out_cl).wait()
+		self.pgr.vglClNdConvolution(self.queue, self.img_shape, None, self.img_in_cl, self.img_out_cl, self.cglClShape_cl).wait()
 
 		# CREATING BUFFER TO GET IMAGE FROM DEVICE
 		if( self.img_nchannels == 1 ):

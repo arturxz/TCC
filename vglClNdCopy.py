@@ -114,7 +114,7 @@ class vgl:
 
 		# SETTING THE OPENCL IMAGE OBJECTS, WITHOUT THE COPY
 		self.imgFormat = cl.ImageFormat(self.img_channel_order_cl, self.img_dtype_cl)
-		self.img_in_cl = cl.Buffer(self.ctx, self.mf.READ_ONLY)
+		self.img_in_cl = cl.Buffer(self.ctx, self.mf.READ_ONLY, self.img.nbytes)
 		self.img_out_cl = cl.Buffer(self.ctx, self.mf.WRITE_ONLY, self.img.nbytes)
 
 		# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
