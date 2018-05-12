@@ -6,7 +6,7 @@
 def VGL_SHAPE_NCHANNELS():
 	return 0
 
-def VGL_SHAPE_WIGTH():
+def VGL_SHAPE_WIDTH():
 	return 1
 
 def VGL_SHAPE_HEIGHT():
@@ -19,7 +19,7 @@ def VGL_MAX_DIM():
 	return 10
 
 def VGL_ARR_SHAPE_SIZE():
-	return _VGL_MAX_DIM()+1
+	return VGL_MAX_DIM()+1
 
 def VGL_ARR_CLSTREL_SIZE():
 	return 256
