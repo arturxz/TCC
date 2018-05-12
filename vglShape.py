@@ -1,14 +1,14 @@
 import numpy as np
 import vglConst as vc
 
-class vglClShape(object):
+class VglClShape(object):
 	def __init__(self, ndim=0, size=0):
 		self.ndim = ndim
 		self.shape = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.offset = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.size = size
 
-class vglShape(object):
+class VglShape(object):
 
 	"""
 		ndim
@@ -40,30 +40,9 @@ class vglShape(object):
 		self.shape = np.zeros((vc.VGL_MAX_DIM()+1), np.int32)
 		self.offset = np.zeros((vc.VGL_MAX_DIM()+1), np.int32)
 		self.size = -1
-		self.bps = -1
+		self.bps = 8
 
-		# METHOD DATA, TO CALL _vglCreateShape
-		shape = np.zeros((vc.VGL_MAX_DIM()+1), np.int32)
-		ndim = ndim
-		if(ndim == 1): # 1D SHAPE CONSTRUCTOR
-			ndim = 2
-			shape[0] = 1
-			shape[1] = width
-			shape[2] = height
-		elif(ndim == 2): # 2D SHAPE CONSTRUCTOR
-			shape[0] = nChannels
-			shape[1] = width
-			shape[2] = height
-		elif(ndim == 3): # 3D SHAPE CONSTRUCTOR
-			shape[0] = nChannels
-			shape[1] = width
-			shape[2] = height
-			shape[3] = depht
-
-		_vglCreateShape(shape, ndim)
-
-
-	def _vglCreateShape(self, shape, ndim, bps=8):
+	def vglCreateShape(self, shape, ndim, bps=8):
 
 		self.ndim = ndim
 		self.bps = bps
@@ -87,7 +66,7 @@ class vglShape(object):
 				if(i == 0):
 					self.offset[i] = 1
 				elif(i == 2):
-					self.offset[i] = findWidthStep(bps, w, c)
+					self.offset[i] = self.findWidthStep(bps, w, c)
 				else:
 					self.offset[i] = shape[i-1] * self.offset[i-1]
 			else:
@@ -95,12 +74,46 @@ class vglShape(object):
 				self.offset[i] = 0
 		self.size *= self.shape[maxi] * self.offset[maxi]
 
+	def constructorFromVglShape(self, vglShape):
+		self.vglCreateShape(vglShape.getShape(), vglShape.getNdim(), vglShape.getBps())
+
+	def constructorFromShapeNdimBps(self, shape, ndim, bps=8):
+		self.vglCreateShape(shape, ndim, bps)
+
+	def constructor1DShape(self, w, h):
+		shape = np.ones((vc.VGL_MAX_DIM()+1), np.int32)
+		ndim = 2
+		shape[0] = 1
+		shape[1] = w
+		shape[2] = h
+
+		self.vglCreateShape(shape, ndim)
+
+	def constructor2DShape(self, nChannels, w, h):
+		shape = np.ones((vc.VGL_MAX_DIM()+1), np.int32)
+		ndim = 2
+		shape[0] = nChannels
+		shape[1] = w
+		shape[2] = h
+
+		self.vglCreateShape(shape, ndim)
+
+	def constructor3DShape(self, nChannels, w, h, d3):
+		shape = np.ones((vc.VGL_MAX_DIM()+1), np.int32)
+		ndim = 3
+		shape[0] = nChannels
+		shape[1] = w
+		shape[2] = h
+		shape[3] = d3
+
+		self.vglCreateShape(shape, ndim)
+
 	"""
 		brief Get index from coordinate array.
 		Get index from coordinate array. Calculates value of index by multiplying coordinate values 
 		by respective offset, and summing up the results.
 	"""
-	def _getIndexFromCoord(self, coord):
+	def getIndexFromCoord(self, coord):
 		result = 0
 
 		for d in range(0, ndim):
@@ -113,10 +126,10 @@ class vglShape(object):
 		Get coordinate array from index. Calculates value of coordinates by dividing index 
 		by respective offset.
 	"""
-	def _getCoorFromIndex(self, index, coord):
-		ndim = getNdim()
-		shape = getShape()
-		offset = getOffset()
+	def getCoorFromIndex(self, index, coord):
+		ndim = self.getNdim()
+		shape = self.getShape()
+		offset = self.getOffset()
 		ires = index
 		idim = 0.0
 
@@ -152,7 +165,7 @@ class vglShape(object):
 	def getWidth(self):
 		if(self.ndim == 1):
 			return self.shape[vc.VGL_SHAPE_WIDTH()] * self.shape[vc.VGL_SHAPE_HEIGHT()]
-		return self.shape[_VGL_SHAPE_WIDTH()]
+		return self.shape[VGL_SHAPE_WIDTH()]
 
 	def getHeight(self):
 		if(self.ndim == 1):
@@ -166,7 +179,7 @@ class vglShape(object):
 		return self.shape[vc.VGL_SHAPE_WIDTH()]
 
 	def getHeightIn(self):
-		return self.shaé[vc.VGL_SHAPE_HEIGHT()]
+		return self.shape[vc.VGL_SHAPE_HEIGHT()]
 
 	def getNFrames(self):
 		nframes = 1
@@ -178,7 +191,7 @@ class vglShape(object):
 	def findBitsPerSample(depht):
 		return depht & 255
 
-	def _findWidthStep(self, bps, width, nChannels):
+	def findWidthStep(self, bps, width, nChannels):
 		
 		if(bps == 1):
 			return (width-1) / (8+1)
@@ -205,18 +218,4 @@ class vglShape(object):
 
 		return result
 
-"""
-	DEFINING CONSTRUCTORS:
-		THE WAY TO CONSTRUCT THE STREL MUST BE SENT TO THE PYTHON CONSTRUCTOR.
-		THE OTHER ARGUMENTS MUST BE SENT INSIDE THE DICT OBJECT IN PYTHON.
-		REFERENCE TO DICTS CAN BE CONSULTED HERE: https://docs.python.org/3/tutorial/datastructures.html
 
-	'construct': responsable to define way to construct the vglStrEl object.
-		1 is compatible to C++ constructor: VglStrEl::VglStrEl(float* data, VglShape* vglShape) 
-		2 is compatible to C++ constructor: VglStrEl::VglStrEl(int type, int ndim)
-	data: array with convolution elements
-	vglShape: shape or dimension sizes, associated with array
-
-"""
-class vglStrEl(object):
-	def __init__(self, **kwargs):
