@@ -4,19 +4,16 @@ from vglShape import VglShape
 
 class VglClStrEl(object):
 	def __init__(self):
-		self.data = np.zeros((vc.VGL_ARR_CLSTREL_SIZE()), np.int32)
+		self.data = np.zeros((vc.VGL_ARR_CLSTREL_SIZE()), np.float32)
 		self.ndim = 0
 		self.shape = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.offset = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
-		self.int = 0
+		self.size = 0
 
 class VglStrEl(object):
 	def __init__(self):
-		self.data = np.zeros((vc.VGL_ARR_CLSTREL_SIZE()), np.int32)
-		self.ndim = 0
-		self.shape = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
-		self.offset = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
-		self.int = 0
+		self.vglShape = VglShape()
+		self.data = np.zeros((1), np.float32)
 
 	def VglCreateStrEl(self, data, vglShape):
 		size = vglShape.getSize()
@@ -70,7 +67,7 @@ class VglStrEl(object):
 				coord[d] = 1
 
 		elif( Type == vc.VGL_STREL_GAUSS() ):
-			coord = np.zeros((vc.VGL_ARR_SHAPE_SIZE), np.int32)
+			coord = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
 			coord[0] = 0
 			size = vglShape.getSize()
 
@@ -86,13 +83,16 @@ class VglStrEl(object):
 
 				data[i] = val
 
-
 		elif( Type == vc.VGL_STREL_MEAN() ):
 
 			for i in range(0, size):
 				data[i] = 1.0 / size
 
-		else( Type == vc.VGL_STREL_CUBE() ):
+		elif( Type == vc.VGL_STREL_CUBE() ):
+
+			for i in range(0, size):
+				data[i] = 1.0
+		else:
 
 			for i in range(0, size):
 				data[i] = 1.0
@@ -101,25 +101,25 @@ class VglStrEl(object):
 		del vglShape
 		del data
 
-	def getData()
+	def getData(self):
 		return self.data
 
-	def getSize()
+	def getSize(self):
 		return self.vglShape.getSize()
 
-	def getNpixels():
+	def getNpixels(self):
 		return self.vglShape.getNpixels()
 
-	def getNdim():
+	def getNdim(self):
 		return self.vglShape.getNdim()
 
-	def getShape():
+	def getShape(self):
 		return self.vglShape.getShape()
 
-	def getOffset():
+	def getOffset(self):
 		return self.vglShape.getOffset()
 
-	def asVglClStrEl():
+	def asVglClStrEl(self):
 		result = VglClStrEl()
 		shape = self.vglShape.asVglClShape()
 		size = self.getSize()
@@ -138,9 +138,3 @@ class VglStrEl(object):
 			result.data[i] = self.data[i]
 
 		return result
-
-
-
-
-
-
