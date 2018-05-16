@@ -1,9 +1,18 @@
+# IMAGE MANIPULATION LIBRARYS
 from skimage import io
-from vglShape import vglShape, vglClShape
 import matplotlib.pyplot as mp
-import pyopencl as cl
 import numpy as np
-import sys
+
+# OPENCL LIBRARYS
+import pyopencl as cl
+
+# VGL LIBRARYS
+from vglShape import *
+from vglStrEl import *
+import vglConst as vc
+
+# SYSTEM LIBRARYS
+import sys, glob, os
 
 """
 	img:
@@ -41,19 +50,37 @@ class vgl:
 		self.queue = cl.CommandQueue(self.ctx)
 		self.builded = False
 
+	def getDir(self, filePath):
+		size = len(filePath)-1
+		bar = -1
+		for i in range(0, size):
+			if(filePath[i] == '/'):
+				bar = i
+				i = -1
+		return filePath[:bar+1]
+
 	# THIS FUNCTION WILL LOAD THE KERNEL FILE
 	# AND BUILD IT IF NECESSARY.
 	def loadCL(self, filepath):
 		print("Loading OpenCL Kernel")
 		self.kernel_file = open(filepath, "r")
+		#self.build_options = []
+		#self.build_options.append("-I "+self.getDir(filepath))
+		#self.build_options.append("-I /home/artur/visiongl/src/CL_ND")
+
+		for file in glob.glob(self.getDir(filepath)+"/*.h"):
+			self.pgr = cl.Program(self.ctx, open(self.getDir(filepath)+"/"+file, "r"))
 
 		if ((self.builded == False)):
 			self.pgr = cl.Program(self.ctx, self.kernel_file.read())
+			#self.pgr.build(options=self.build_options)
 			self.pgr.build()
-			self.kernel_file.close()
 			self.builded = True
 		else:
 			print("Kernel already builded. Going to next step...")
+
+		self.kernel_file.close()
+		print("Kernel", self.pgr.get_info(cl.program_info.KERNEL_NAMES), "compiled.")
 
 	def loadImage(self, imgpath):
 		print("Opening image to be processed")
@@ -115,20 +142,31 @@ class vgl:
 
 		# SETTING THE OPENCL IMAGE OBJECTS, WITHOUT THE COPY
 		self.imgFormat = cl.ImageFormat(self.img_channel_order_cl, self.img_dtype_cl)
-		self.img_in_cl = cl.Buffer(self.ctx, self.mf.READ_ONLY)
+		self.img_in_cl = cl.Buffer(self.ctx, self.mf.READ_ONLY, self.img.nbytes)
 		self.img_out_cl = cl.Buffer(self.ctx, self.mf.WRITE_ONLY, self.img.nbytes)
 
 		# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
 		cl.enqueue_copy(self.queue, self.img_in_cl, self.img.tobytes(), is_blocking=True)
 
-	def loadShape():
-		self.vglShape_cl = vglShape(self.img_ndim, self.img_nchannels, self.img_shape[0], self.img_shape[1])
-		self.vglClShape_cl = self.vglShape.asVglClShape()
+	def loadShape(self):
+		self.vglShape_cl = VglShape()
+		self.vglClShape_cl = self.vglShape_cl.constructor2DShape(self.img_nchannels, self.img_shape[1], self.img_shape[0])
+		"""print("shape:", self.vglShape_cl.asVglClShape().shape)
+		print("offset:", self.vglShape_cl.asVglClShape().offset)
+		print("ndim:", self.vglShape_cl.asVglClShape().ndim)
+		print("size:", self.vglShape_cl.asVglClShape().size)"""
+
+		self.strEl = VglStrEl()
+		self.strEl.constructorFromTypeNdim(vc.VGL_STREL_GAUSS(), 5) # gaussian blur of size 5
+		self.vglClStrEl = self.strEl.asVglClStrEl()
 
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
-		self.pgr.vglClNdConvolution(self.queue, self.img_shape, None, self.img_in_cl, self.img_out_cl, self.cglClShape_cl).wait()
+		self.pgr.vglClNdConvolution(self.queue, self.img_shape, None, self.img_in_cl, 
+																	  self.img_out_cl, 
+																	  self.vglClShape_cl.tobytes(),
+																	  self.vglClStrEl.tobytes()).wait()
 
 		# CREATING BUFFER TO GET IMAGE FROM DEVICE
 		if( self.img_nchannels == 1 ):
@@ -177,4 +215,5 @@ ouPath = sys.argv[2]
 process = vgl()
 process.loadCL(CLPath)
 process.loadImage(inPath)
+process.loadShape()
 process.execute(ouPath)
