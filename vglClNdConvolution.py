@@ -5,6 +5,8 @@ import numpy as np
 
 # OPENCL LIBRARYS
 import pyopencl as cl
+import pyopencl.tools
+import pyopencl.array
 
 # VGL LIBRARYS
 from vglShape import *
@@ -68,6 +70,7 @@ class vgl:
 		#self.build_options.append("-I "+self.getDir(filepath))
 		#self.build_options.append("-I /home/artur/visiongl/src/CL_ND")
 
+		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
 		for file in glob.glob(self.getDir(filepath)+"/*.h"):
 			self.pgr = cl.Program(self.ctx, open(self.getDir(filepath)+"/"+file, "r"))
 
@@ -148,25 +151,34 @@ class vgl:
 		# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
 		cl.enqueue_copy(self.queue, self.img_in_cl, self.img.tobytes(), is_blocking=True)
 
-	def loadShape(self):
-		self.vglShape_cl = VglShape()
-		self.vglClShape_cl = self.vglShape_cl.constructor2DShape(self.img_nchannels, self.img_shape[1], self.img_shape[0])
-		"""print("shape:", self.vglShape_cl.asVglClShape().shape)
-		print("offset:", self.vglShape_cl.asVglClShape().offset)
-		print("ndim:", self.vglShape_cl.asVglClShape().ndim)
-		print("size:", self.vglShape_cl.asVglClShape().size)"""
+	def loadVglObjects(self):
+		self.vglShape = VglShape()
+		self.vglShape.constructor2DShape(self.img_nchannels, self.img_shape[1], self.img_shape[0])
+		self.vglClShape = self.vglShape.asVglClShape()
 
 		self.strEl = VglStrEl()
 		self.strEl.constructorFromTypeNdim(vc.VGL_STREL_GAUSS(), 5) # gaussian blur of size 5
 		self.vglClStrEl = self.strEl.asVglClStrEl()
+
+		self.makeStructures()
+
+	def makeStructures(self):
+		self.vglClShape_struct = np.dtype([ ("ndim",	np.int32), 
+										    ("shape",	np.int32), 
+										    ("offset",	np.int32),
+										    ("size",	np.int32) ])
+
+		vglClShape_struct, vglClShape_struct_c_decl = cl.tools.match_dtype_to_c_struct(self.ctx.devices[0], "VglClShape", self.vglClShape_struct)
+		vglClShape_struct = cl.tools.get_or_register_dtype("VglClShape", vglClShape_struct)
+		print(vglClShape_struct)
 
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
 		self.pgr.vglClNdConvolution(self.queue, self.img_shape, None, self.img_in_cl, 
 																	  self.img_out_cl, 
-																	  self.vglClShape_cl.tobytes(),
-																	  self.vglClStrEl.tobytes()).wait()
+																	  bytes(self.vglShape_cl),
+																	  self.vglClStrEl).wait()
 
 		# CREATING BUFFER TO GET IMAGE FROM DEVICE
 		if( self.img_nchannels == 1 ):
@@ -215,5 +227,5 @@ ouPath = sys.argv[2]
 process = vgl()
 process.loadCL(CLPath)
 process.loadImage(inPath)
-process.loadShape()
-process.execute(ouPath)
+process.loadVglObjects()
+#process.execute(ouPath)
