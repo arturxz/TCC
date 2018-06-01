@@ -3,12 +3,12 @@ import vglConst as vc
 from vglShape import VglShape
 
 class VglClStrEl(object):
-	def __init__(self):
+	def __init__(self, ndim=0, size=0):
 		self.data = np.zeros((vc.VGL_ARR_CLSTREL_SIZE()), np.float32)
-		self.ndim = 0
+		self.ndim = np.int32(0)
 		self.shape = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.offset = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
-		self.size = 0
+		self.size = np.int32(0)
 
 class VglStrEl(object):
 	def __init__(self):
@@ -127,14 +127,14 @@ class VglStrEl(object):
 		if( size > vc.VGL_ARR_CLSTREL_SIZE() ):
 			print("Error: structuring element size > VGL_ARR_CLSTREL_SIZE. Change this value in vglClStrEl.h to a greater one.")
 
-		result.ndim = self.vglShape.getNdim()
-		result.size = self.vglShape.getSize()
+		result.ndim = np.int32(self.vglShape.getNdim())
+		result.size = np.int32(self.vglShape.getSize())
 		
 		for i in range(0, vc.VGL_MAX_DIM()+1):
-			result.shape[i] = shape.shape[i]
-			result.offset[i] = shape.offset[i]
+			result.shape[i] = np.int32(shape.shape[i])
+			result.offset[i] = np.int32(shape.offset[i])
 		
 		for i in range(0, size):
-			result.data[i] = self.data[i]
+			result.data[i] = np.int32(self.data[i])
 
 		return result

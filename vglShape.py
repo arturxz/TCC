@@ -3,10 +3,10 @@ import vglConst as vc
 
 class VglClShape(object):
 	def __init__(self, ndim=0, size=0):
-		self.ndim = ndim
+		self.ndim = np.int32(ndim)
 		self.shape = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.offset = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
-		self.size = size
+		self.size = np.int32(size)
 
 class VglShape(object):
 
@@ -33,7 +33,7 @@ class VglShape(object):
 		print methods ( print(String:msg) and printInfo() )
 	"""
 	
-	def __init__(self, ndim=0, nChannels=0, width=0, height=0, depht=0):
+	def __init__(self):
 
 		# CREATING CLASS DATA
 		self.ndim = -1
@@ -203,18 +203,18 @@ class VglShape(object):
 	def asVglClShape(self):
 		
 		result = VglClShape()
-		result.ndim = self.ndim
-		result.size = self.size
+		result.ndim = np.int32(self.ndim)
+		result.size = np.int32(self.size)
 		
 		for i in range(0, vc.VGL_MAX_DIM()+1):
-			result.shape[i] = self.shape[i]
-			result.offset[i] = self.offset[i]
+			result.shape[i] = np.int32(self.shape[i])
+			result.offset[i] = np.int32(self.offset[i])
 
 		if(self.ndim == 1):
-			result.shape[vc.VGL_SHAPE_WIDTH()] = self.getWidth()
-			result.offset[vc.VGL_SHAPE_WIDTH()] = result.shape[vc.VGL_SHAPE_WIDTH()-1] * result.offset[vc.VGL_SHAPE_WIDTH()-1]
-			result.shape[vc.VGL_SHAPE_HEIGHT()] = self.getHeight()
-			result.offset[vc.VGL_SHAPE_HEIGHT()] = result.shape[vc.VGL_SHAPE_HEIGHT()-1] * result.offset[vc.VGL_SHAPE_HEIGHT()-1]
+			result.shape[vc.VGL_SHAPE_WIDTH()] = np.int32(self.getWidth())
+			result.offset[vc.VGL_SHAPE_WIDTH()] = np.int32(result.shape[vc.VGL_SHAPE_WIDTH()-1] * result.offset[vc.VGL_SHAPE_WIDTH()-1])
+			result.shape[vc.VGL_SHAPE_HEIGHT()] = np.int32(self.getHeight())
+			result.offset[vc.VGL_SHAPE_HEIGHT()] = np.int32(result.shape[vc.VGL_SHAPE_HEIGHT()-1] * result.offset[vc.VGL_SHAPE_HEIGHT()-1])
 
 		return result
 
