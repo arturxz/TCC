@@ -165,7 +165,7 @@ class VglShape(object):
 	def getWidth(self):
 		if(self.ndim == 1):
 			return self.shape[vc.VGL_SHAPE_WIDTH()] * self.shape[vc.VGL_SHAPE_HEIGHT()]
-		return self.shape[VGL_SHAPE_WIDTH()]
+		return self.shape[vc.VGL_SHAPE_WIDTH()]
 
 	def getHeight(self):
 		if(self.ndim == 1):
