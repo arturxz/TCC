@@ -12,6 +12,7 @@ import pyopencl.array as clarray
 from vglShape import *
 from vglStrEl import *
 import vglConst as vc
+from structSizes import *
 
 # SYSTEM LIBRARYS
 import sys, glob, os
@@ -66,9 +67,10 @@ class vgl:
 	def loadCL(self, filepath):
 		print("Loading OpenCL Kernel")
 		self.kernel_file = open(filepath, "r")
+		buildDir = self.getDir(filepath)
+
 		self.build_options = ""
-		self.build_options = self.build_options + "-I "+self.getDir(filepath)
-		#self.build_options.append("-I /home/artur/visiongl/src/CL_ND")
+		self.build_options = self.build_options + "-I "+buildDir
 		self.build_options = self.build_options + " -D VGL_SHAPE_NCHANNELS={0}".format(vc.VGL_SHAPE_NCHANNELS())
 		self.build_options = self.build_options + " -D VGL_SHAPE_WIDTH={0}".format(vc.VGL_SHAPE_WIDTH())
 		self.build_options = self.build_options + " -D VGL_SHAPE_HEIGHT={0}".format(vc.VGL_SHAPE_HEIGHT())
@@ -84,8 +86,8 @@ class vgl:
 		print("Build Options:\n", self.build_options)
 
 		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
-		for file in glob.glob(self.getDir(filepath)+"/*.h"):
-			self.pgr = cl.Program(self.ctx, open(self.getDir(filepath)+"/"+file, "r"))
+		for file in glob.glob(buildDir+"/*.h"):
+			self.pgr = cl.Program(self.ctx, open(file, "r"))
 
 		if ((self.builded == False)):
 			self.pgr = cl.Program(self.ctx, self.kernel_file.read())
@@ -176,21 +178,35 @@ class vgl:
 		self.makeStructures()
 
 	def makeStructures(self):
+		ss = StructSizes()
+		ss = ss.get_struct_sizes()
+		print("####GPU RESPONSE####")
+		print(ss)
 
-		self.vglClShape_cl = np.array([	self.vglClShape.ndim,
-									 	self.vglClShape.shape,
-									 	self.vglClShape.offset,
-									 	self.vglClShape.size],
-									 	dtype='int32, int32, int32, int32')
+		self.teste_strel = np.zeros(ss[0], dtype=np.uint8)
+		self.teste_shape = np.zeros(ss[6], dtype=np.uint8)
 
-		self.vglClStrEl_cl = np.array([	self.vglClStrEl.data,
-										self.vglClStrEl.ndim,
-										self.vglClStrEl.shape,
-										self.vglClStrEl.offset,
-										self.vglClStrEl.size ],
-										dtype='float32, int32, int32, int32, int32')
-		print(self.vglClShape_cl)
-		print(self.vglClStrEl_cl)
+		print("---------->STREL<----------")
+		print(self.teste_strel)
+		self.copy_into_byte_array(self.vglClStrEl.data,  self.teste_strel, 0)
+		self.copy_into_byte_array(self.vglClStrEl.ndim, self.teste_strel, ss[2]) 
+		self.copy_into_byte_array(self.vglClStrEl.shape,self.teste_strel, ss[3]) 
+		self.copy_into_byte_array(self.vglClStrEl.offset,  self.teste_strel, ss[4])
+		self.copy_into_byte_array(self.vglClStrEl.size,  self.teste_strel, ss[5])
+		print(self.teste_strel)
+
+
+		print("---------->SHAPE<----------")
+		print(self.teste_shape)
+		self.copy_into_byte_array(self.vglClShape.ndim,  self.teste_shape, 0) 
+		self.copy_into_byte_array(self.vglClShape.shape, self.teste_shape, ss[8]) 
+		self.copy_into_byte_array(self.vglClShape.offset,self.teste_shape, ss[9]) 
+		self.copy_into_byte_array(self.vglClShape.size,  self.teste_shape, ss[10])
+		print(self.teste_shape)
+
+	def copy_into_byte_array(self, value, byte_array, offset):
+		for i,b in enumerate( value.tobytes() ):
+			byte_array[i+offset] = b
 		
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
@@ -240,7 +256,7 @@ class vgl:
 		# SAVING IMAGE (USING PIL PLUGIN)
 		io.imsave(outputpath, self.img_out, plugin='pil')
 
-CLPath = "../CL_ND/vglClNdConvolution.cl"
+CLPath = "../../CL_ND/vglClNdConvolution.cl"
 inPath = sys.argv[1]
 ouPath = sys.argv[2] 
 
@@ -248,4 +264,4 @@ process = vgl()
 process.loadCL(CLPath)
 process.loadImage(inPath)
 process.loadVglObjects()
-process.execute(ouPath)
+#process.execute(ouPath)

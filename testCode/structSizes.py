@@ -1,8 +1,6 @@
 from skimage import io
-import matplotlib.pyplot as mp
 import pyopencl as cl
 import numpy as np
-import sys
 
 """
 	img:
@@ -27,7 +25,7 @@ import sys
 		2D images must have 1 in the z-axis 
 """
 
-class vgl:
+class StructSizes:
 	# THE vgl CONSTRUCTOR CREATES A NEW CONTEXT
 	# AND INITIATES THE QUEUE, ADDING QUE CONTEXT TO IT.
 	def __init__(self):
@@ -39,12 +37,16 @@ class vgl:
 		#self.ctx = cl.create_some_context()
 		self.queue = cl.CommandQueue(self.ctx)
 		self.builded = False
+		self.filepath = "get_struct_sizes.cl"
+
+		self.loadCL()
+		self.execute()
 
 	# THIS FUNCTION WILL LOAD THE KERNEL FILE
 	# AND BUILD IT IF NECESSARY.
-	def loadCL(self, filepath):
+	def loadCL(self):
 		print("Loading OpenCL Kernel")
-		self.kernel_file = open(filepath, "r")
+		self.kernel_file = open(self.filepath, "r")
 
 		if ((self.builded == False)):
 			print("Building OpenCL kernel")
@@ -57,7 +59,7 @@ class vgl:
 
 	def execute(self):
 		# CREATING NUMPY ARRAY
-		self.struct_sizes_host = np.zeros(9, np.uint8)
+		self.struct_sizes_host = np.zeros(11, np.uint8)
 
 		self.mf = cl.mem_flags
 		self.struct_sizes_device = cl.Buffer( self.ctx, self.mf.READ_ONLY | self.mf.COPY_HOST_PTR, hostbuf=self.struct_sizes_host )
@@ -68,12 +70,5 @@ class vgl:
 
 		cl.enqueue_copy(self.queue, self.struct_sizes_host, self.struct_sizes_device)
 
-		print("########## GPU RESPONSE ##########")
-		print(self.struct_sizes_host)
-
-		
-
-CLPath = "get_struct_sizes.cl"
-process = vgl()
-process.loadCL(CLPath)
-process.execute()
+	def get_struct_sizes(self):
+		return self.struct_sizes_host
