@@ -182,7 +182,7 @@ class vgl:
 		ss = ss.get_struct_sizes()
 		print("####GPU RESPONSE####")
 		print(ss)
-
+		"""
 		self.teste_strel = np.zeros(ss[0], dtype=np.uint8)
 		self.teste_shape = np.zeros(ss[6], dtype=np.uint8)
 
@@ -203,7 +203,7 @@ class vgl:
 		self.copy_into_byte_array(self.vglClShape.offset,self.teste_shape, ss[9]) 
 		self.copy_into_byte_array(self.vglClShape.size,  self.teste_shape, ss[10])
 		print(self.teste_shape)
-
+		"""
 	def copy_into_byte_array(self, value, byte_array, offset):
 		for i,b in enumerate( value.tobytes() ):
 			byte_array[i+offset] = b

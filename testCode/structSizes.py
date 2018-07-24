@@ -59,16 +59,18 @@ class StructSizes:
 
 	def execute(self):
 		# CREATING NUMPY ARRAY
-		self.struct_sizes_host = np.zeros(11, np.uint8)
+		self.struct_sizes_host = np.zeros(9, np.uint32)
+		print(self.struct_sizes_host)
 
 		self.mf = cl.mem_flags
-		self.struct_sizes_device = cl.Buffer( self.ctx, self.mf.READ_ONLY | self.mf.COPY_HOST_PTR, hostbuf=self.struct_sizes_host )
+		self.struct_sizes_device = cl.Buffer( self.ctx, self.mf.READ_ONLY, self.struct_sizes_host.nbytes )
 
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
-		self.pgr.get_struct_sizes(self.queue, self.struct_sizes_host.shape, None, self.struct_sizes_device)
+		self.pgr.get_struct_sizes(self.queue, self.struct_sizes_host.shape, None, self.struct_sizes_device).wait()
 
-		cl.enqueue_copy(self.queue, self.struct_sizes_host, self.struct_sizes_device)
+		cl.enqueue_copy(self.queue, self.struct_sizes_host, self.struct_sizes_device, is_blocking=True)
+		print(self.struct_sizes_host)
 
 	def get_struct_sizes(self):
 		return self.struct_sizes_host

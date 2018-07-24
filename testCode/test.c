@@ -19,17 +19,17 @@ typedef struct VglClShape{
 int main(){
 	VglClStrEl strel;
     VglClShape shape;
-    int a;
+    unsigned int a, i;
     float b;
     unsigned int offset = (unsigned int)sizeof(strel);
-	
-	printf("\t data %u\n", (unsigned int) &(strel.data));
-	printf("\t ndim %u\n", (unsigned int) &(strel.ndim)-offset);
-	printf("\t shape %u\n", (unsigned int) &(strel.shape)-offset);
-	printf("\t offset %u\n", (unsigned int) &(strel.offset)-offset);
-	printf("\t size %u\n", (unsigned int) &(strel.size)-offset);
-	
-	printf("Shape: %u\n", (unsigned int) sizeof(shape));
+
+    printf("VglStrEl Structure\n");
+    i = (unsigned int) &strel;
+    printf("data: %u\n", (unsigned int) (&strel.data)-i);
+    printf("shape: %u\n", (unsigned int) (&strel.shape)-i);
+    printf("offset: %u\n", (unsigned int) (&strel.offset)-i);
+    printf("ndim: %u\n", (unsigned int) (&strel.ndim)-i);
+    printf("size: %u\n", (unsigned int) (&strel.size)-i);
 	
 	return 0;
 }
