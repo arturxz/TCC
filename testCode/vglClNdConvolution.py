@@ -83,7 +83,7 @@ class vgl:
 		self.build_options = self.build_options + " -D VGL_STREL_GAUSS={0}".format(vc.VGL_STREL_GAUSS())
 		self.build_options = self.build_options + " -D VGL_STREL_MEAN={0}".format(vc.VGL_STREL_MEAN())
 
-		print("Build Options:\n", self.build_options)
+		#print("Build Options:\n", self.build_options)
 
 		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
 		for file in glob.glob(buildDir+"/*.h"):
@@ -98,7 +98,7 @@ class vgl:
 			print("Kernel already builded. Going to next step...")
 
 		self.kernel_file.close()
-		print("Kernel", self.pgr.get_info(cl.program_info.KERNEL_NAMES), "compiled.")
+		#print("Kernel", self.pgr.get_info(cl.program_info.KERNEL_NAMES), "compiled.")
 
 	def loadImage(self, imgpath):
 		print("Opening image to be processed")
@@ -181,29 +181,26 @@ class vgl:
 		ss = StructSizes()
 		ss = ss.get_struct_sizes()
 		print("####GPU RESPONSE####")
-		print(ss)
-		"""
-		self.teste_strel = np.zeros(ss[0], dtype=np.uint8)
-		self.teste_shape = np.zeros(ss[6], dtype=np.uint8)
+		print("tam 1",ss[0])
+		print("tam 2",ss[6])
 
-		print("---------->STREL<----------")
-		print(self.teste_strel)
-		self.copy_into_byte_array(self.vglClStrEl.data,  self.teste_strel, 0)
-		self.copy_into_byte_array(self.vglClStrEl.ndim, self.teste_strel, ss[2]) 
-		self.copy_into_byte_array(self.vglClStrEl.shape,self.teste_strel, ss[3]) 
-		self.copy_into_byte_array(self.vglClStrEl.offset,  self.teste_strel, ss[4])
-		self.copy_into_byte_array(self.vglClStrEl.size,  self.teste_strel, ss[5])
-		print(self.teste_strel)
+		self.vgl_strel_obj = np.zeros(ss[0], np.uint8)
+		self.vgl_shape_obj = np.zeros(ss[6], np.uint8)
 
+		print("siz 1",self.vgl_strel_obj.nbytes)
+		print("siz 2",self.vgl_shape_obj.nbytes)
 
-		print("---------->SHAPE<----------")
-		print(self.teste_shape)
-		self.copy_into_byte_array(self.vglClShape.ndim,  self.teste_shape, 0) 
-		self.copy_into_byte_array(self.vglClShape.shape, self.teste_shape, ss[8]) 
-		self.copy_into_byte_array(self.vglClShape.offset,self.teste_shape, ss[9]) 
-		self.copy_into_byte_array(self.vglClShape.size,  self.teste_shape, ss[10])
-		print(self.teste_shape)
-		"""
+		self.copy_into_byte_array(self.vglClStrEl.data, self.vgl_strel_obj, ss[1])
+		self.copy_into_byte_array(self.vglClStrEl.ndim, self.vgl_strel_obj, ss[2])
+		self.copy_into_byte_array(self.vglClStrEl.shape, self.vgl_strel_obj, ss[3])
+		self.copy_into_byte_array(self.vglClStrEl.offset, self.vgl_strel_obj, ss[4])
+		self.copy_into_byte_array(self.vglClStrEl.size, self.vgl_strel_obj, ss[5])
+
+		self.copy_into_byte_array(self.vglClShape.ndim, self.vgl_shape_obj, ss[7])
+		self.copy_into_byte_array(self.vglClShape.shape, self.vgl_shape_obj, ss[8])
+		self.copy_into_byte_array(self.vglClShape.offset, self.vgl_shape_obj, ss[9])
+		self.copy_into_byte_array(self.vglClShape.size, self.vgl_shape_obj, ss[10])
+
 	def copy_into_byte_array(self, value, byte_array, offset):
 		for i,b in enumerate( value.tobytes() ):
 			byte_array[i+offset] = b
@@ -213,8 +210,8 @@ class vgl:
 		print("Executing kernel")
 		self.pgr.vglClNdConvolution(self.queue, self.img_shape, None, self.img_in_cl, 
 																	  self.img_out_cl, 
-																	  self.vglClShape_cl,
-																	  self.vglClStrEl_cl).wait()
+																	  bytes(self.vgl_shape_obj),
+																	  bytes(self.vgl_strel_obj)).wait()
 
 		# CREATING BUFFER TO GET IMAGE FROM DEVICE
 		if( self.img_nchannels == 1 ):
@@ -264,4 +261,4 @@ process = vgl()
 process.loadCL(CLPath)
 process.loadImage(inPath)
 process.loadVglObjects()
-#process.execute(ouPath)
+process.execute(ouPath)

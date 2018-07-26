@@ -59,7 +59,7 @@ class StructSizes:
 
 	def execute(self):
 		# CREATING NUMPY ARRAY
-		self.struct_sizes_host = np.zeros(9, np.uint32)
+		self.struct_sizes_host = np.zeros(11, np.uint32)
 		print(self.struct_sizes_host)
 
 		self.mf = cl.mem_flags
@@ -70,7 +70,7 @@ class StructSizes:
 		self.pgr.get_struct_sizes(self.queue, self.struct_sizes_host.shape, None, self.struct_sizes_device).wait()
 
 		cl.enqueue_copy(self.queue, self.struct_sizes_host, self.struct_sizes_device, is_blocking=True)
-		print(self.struct_sizes_host)
+		#print(self.struct_sizes_host)
 
 	def get_struct_sizes(self):
 		return self.struct_sizes_host

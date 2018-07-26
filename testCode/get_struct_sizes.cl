@@ -42,27 +42,19 @@ __kernel void get_struct_sizes( __global uint *struct_sizes )
     
     if (global_id == 0){
         base = (unsigned int) &strel;
-		struct_sizes[0] = (uint) (&strel.data)-base;
-		struct_sizes[1] = (uint) (&strel.shape)-base;
-		struct_sizes[2] = (uint) (&strel.offset)-base;
-		struct_sizes[3] = (uint) (&strel.ndim)-base;
-		struct_sizes[4] = (uint) (&strel.size)-base;
+        struct_sizes[0] = (uint) sizeof(strel);
+		struct_sizes[1] = (uint) (&strel.data)-base;
+		struct_sizes[2] = (uint) (&strel.shape)-base;
+		struct_sizes[3] = (uint) (&strel.offset)-base;
+		struct_sizes[4] = (uint) (&strel.ndim)-base;
+		struct_sizes[5] = (uint) (&strel.size)-base;
 		
         base = (unsigned int) &shape;
-		struct_sizes[5] = (uint) (&shape.ndim)-base;
-		struct_sizes[6] = (uint) (&shape.shape)-base;
-		struct_sizes[7] = (uint) (&shape.offset)-base;
-		struct_sizes[8] = (uint) (&shape.size)-base;
-		
-		printf("struct_sizes[0]: %u\n", struct_sizes[0]);
-		printf("struct_sizes[1]: %u\n", struct_sizes[1]);
-		printf("struct_sizes[2]: %u\n", struct_sizes[2]);
-		printf("struct_sizes[3]: %u\n", struct_sizes[3]);
-		printf("struct_sizes[4]: %u\n", struct_sizes[4]);
-		printf("struct_sizes[5]: %u\n", struct_sizes[5]);
-		printf("struct_sizes[6]: %u\n", struct_sizes[6]);
-		printf("struct_sizes[7]: %u\n", struct_sizes[7]);
-		printf("struct_sizes[8]: %u\n", struct_sizes[8]);
+		struct_sizes[6] = (uint) sizeof(shape);
+		struct_sizes[7] = (uint) (&shape.ndim)-base;
+		struct_sizes[8] = (uint) (&shape.shape)-base;
+		struct_sizes[9] = (uint) (&shape.offset)-base;
+		struct_sizes[10] = (uint) (&shape.size)-base;
     }
     return;
 }
