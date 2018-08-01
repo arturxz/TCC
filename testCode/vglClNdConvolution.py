@@ -184,22 +184,31 @@ class vgl:
 		print("tam 1",ss[0])
 		print("tam 2",ss[6])
 
-		self.vgl_strel_obj = np.zeros(ss[0], np.uint8)
-		self.vgl_shape_obj = np.zeros(ss[6], np.uint8)
+		vgl_strel_obj = np.zeros(ss[0], np.uint8)
+		vgl_shape_obj = np.zeros(ss[6], np.uint8)
 
-		print("siz 1",self.vgl_strel_obj.nbytes)
-		print("siz 2",self.vgl_shape_obj.nbytes)
+		print("siz 1", vgl_strel_obj.nbytes)
+		print("siz 2", vgl_shape_obj.nbytes)
 
-		self.copy_into_byte_array(self.vglClStrEl.data, self.vgl_strel_obj, ss[1])
-		self.copy_into_byte_array(self.vglClStrEl.ndim, self.vgl_strel_obj, ss[2])
-		self.copy_into_byte_array(self.vglClStrEl.shape, self.vgl_strel_obj, ss[3])
-		self.copy_into_byte_array(self.vglClStrEl.offset, self.vgl_strel_obj, ss[4])
-		self.copy_into_byte_array(self.vglClStrEl.size, self.vgl_strel_obj, ss[5])
+		# COPYING DATA AS BYTES TO HOST BUFFER
+		self.copy_into_byte_array(self.vglClStrEl.data, vgl_strel_obj, ss[1])
+		self.copy_into_byte_array(self.vglClStrEl.ndim, vgl_strel_obj, ss[2])
+		self.copy_into_byte_array(self.vglClStrEl.shape, vgl_strel_obj, ss[3])
+		self.copy_into_byte_array(self.vglClStrEl.offset, vgl_strel_obj, ss[4])
+		self.copy_into_byte_array(self.vglClStrEl.size, vgl_strel_obj, ss[5])
 
-		self.copy_into_byte_array(self.vglClShape.ndim, self.vgl_shape_obj, ss[7])
-		self.copy_into_byte_array(self.vglClShape.shape, self.vgl_shape_obj, ss[8])
-		self.copy_into_byte_array(self.vglClShape.offset, self.vgl_shape_obj, ss[9])
-		self.copy_into_byte_array(self.vglClShape.size, self.vgl_shape_obj, ss[10])
+		self.copy_into_byte_array(self.vglClShape.ndim, vgl_shape_obj, ss[7])
+		self.copy_into_byte_array(self.vglClShape.shape, vgl_shape_obj, ss[8])
+		self.copy_into_byte_array(self.vglClShape.offset, vgl_shape_obj, ss[9])
+		self.copy_into_byte_array(self.vglClShape.size, vgl_shape_obj, ss[10])
+
+		# CREATING DEVICE BUFFER TO HOLD STRUCT DATA
+		self.vglstrel_buffer = cl.Buffer(self.ctx, self.mf.READ_ONLY, vgl_strel_obj.nbytes)
+		self.vglshape_buffer = cl.Buffer(self.ctx, self.mf.READ_ONLY, vgl_shape_obj.nbytes)
+		
+		# COPYING DATA FROM HOST TO DEVICE
+		cl.enqueue_copy(self.queue, self.vglstrel_buffer, vgl_strel_obj, is_blocking=True)
+		cl.enqueue_copy(self.queue, self.vglshape_buffer, vgl_shape_obj, is_blocking=True)
 
 	def copy_into_byte_array(self, value, byte_array, offset):
 		for i,b in enumerate( value.tobytes() ):
@@ -208,10 +217,15 @@ class vgl:
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
+		
+		#buffer_list = [self.img_in_cl, self.img_out_cl, self.vglstrel_buffer, self.vglshape_buffer]
+		#self.pgr.vglClNdConvolution.set_args(*buffer_list)
+		#self.pgr.vglClNdConvolution.set_scalar_arg_dtypes( [None]*len(buffer_list) )
+
 		self.pgr.vglClNdConvolution(self.queue, self.img_shape, None, self.img_in_cl, 
-																	  self.img_out_cl, 
-																	  bytes(self.vgl_shape_obj),
-																	  bytes(self.vgl_strel_obj)).wait()
+																	  self.img_out_cl,
+																	  self.vglshape_buffer,
+																	  self.vglstrel_buffer).wait()
 
 		# CREATING BUFFER TO GET IMAGE FROM DEVICE
 		if( self.img_nchannels == 1 ):
