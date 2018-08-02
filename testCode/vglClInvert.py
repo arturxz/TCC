@@ -60,7 +60,9 @@ class vgl:
 		print("Opening image to be processed")
 		
 		self.vglimage = VglImage(imgpath)
-		self.vglimage.rgb_to_rgba()
+		if( self.vglimage.getVglShape().getNChannels() == 3 ):
+			self.vglimage.rgb_to_rgba()
+
 		self.vglimage.vglImageUpload(self.ctx, self.queue)
 		self.img_out_cl = self.vglimage.get_similar_device_image_object(self.ctx, self.queue)
 	
@@ -75,7 +77,8 @@ class vgl:
 		
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
-		self.vglimage.rgba_to_rgb()
+		if( self.vglimage.getVglShape().getNChannels() == 4 ):
+			self.vglimage.rgba_to_rgb()
 		self.vglimage.img_save(outputpath)
 
 

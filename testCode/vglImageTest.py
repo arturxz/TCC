@@ -27,7 +27,14 @@ class VglImage(object):
 			print("The image was founded. Loading data.")
 
 			self.vglshape = VglShape()
-			self.vglshape.constructor2DShape(self.img_host.shape[2], self.img_host.shape[1], self.img_host.shape[0])
+			if( len(self.img_host.shape) == 2 ):
+				# SHADES OF GRAY IMAGE
+				print("VglImage LUMINANCE")
+				self.vglshape.constructor2DShape(1, self.img_host.shape[1], self.img_host.shape[0])
+			elif(len(self.img_host.shape) == 3):
+				# MORE THAN ONE COLOR CHANNEL
+				print("VglImage RGB")
+				self.vglshape.constructor2DShape(self.img_host.shape[2], self.img_host.shape[1], self.img_host.shape[0])
 
 		self.last_changed_host = True
 		self.last_changed_device = False
@@ -37,6 +44,7 @@ class VglImage(object):
 			self.img_host = io.imread(imgPath)
 		except FileNotFoundError as fnf:
 			print("Image wasn't found. ")    
+			print(str(fnf))
 		except Exception as e:
 			print("Unrecognized error:")
 			print(str(e))
