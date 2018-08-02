@@ -68,31 +68,13 @@ class VglImage(object):
 			self.create_vglShape()
 
 	def vglImageUpload(self, ctx, queue):
-		mf = cl.mem_flags
-
 		# IMAGE VARS
 		origin = ( 0, 0, 0 )
 		region = ( self.vglshape.getHeight(), self.vglshape.getWidth(), 1 )
 		shape  = ( self.vglshape.getHeight(), self.vglshape.getWidth() )
 
-		img_device_dtype = None
-		if( self.img_host.dtype == np.uint8 ):
-			img_device_dtype = cl.channel_type.UNORM_INT8
-		elif( self.img_host.dtype == np.uint8 ):
-			img_device_dtype = cl.channel_type.UNORM_INT16
-
-		img_device_channel_order = None
-		if( self.vglshape.getNChannels() == 1 ):
-			img_device_channel_order = cl.channel_order.LUMINANCE
-		elif( self.vglshape.getNChannels() == 2 ):
-			img_device_channel_order = cl.channel_order.RG
-		elif( self.vglshape.getNChannels() == 3 ):
-			img_device_channel_order = cl.channel_order.RGB
-		elif( self.vglshape.getNChannels() == 4 ):
-			img_device_channel_order = cl.channel_order.RGBA
-
-
-		imgFormat = cl.ImageFormat(img_device_channel_order, img_device_dtype)
+		mf = cl.mem_flags
+		imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
 		self.img_device = cl.Image(ctx, mf.READ_ONLY, imgFormat, shape)
 
 		# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
@@ -122,7 +104,7 @@ class VglImage(object):
 		self.last_changed_device = False
 		self.last_changed_host = True
 
-	def sync_img(self, ctx, queue):
+	def sync(self, ctx, queue):
 		if( not self.img_sync ):
 			if( self.last_changed_device ):
 				self.vglImageDownload(ctx, queue)
@@ -134,19 +116,65 @@ class VglImage(object):
 	def img_save(self, name):
 		print("Saving Picture in Hard Drive")
 		io.imsave(name, self.img_host)
+	
+	def get_similar_device_image_object(self, ctx, queue):
 
+		shape  = ( self.vglshape.getHeight(), self.vglshape.getWidth() )
+		
+		mf = cl.mem_flags
+		imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
+		return cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
+	
+	def set_device_image(self, img):
+		if( isinstance(img, cl.Image) ):
+			self.img_device = img
+			
+			self.img_sync = False
+			self.last_changed_device = True
+			self.last_changed_host = False
+		else:
+			print("Invalid object. cl.Image objects only.")
+
+	
 	def getVglShape(self):
 		return self.vglshape
+	
+	def get_device_image(self):
+		return self.img_device
+	
+	def get_host_image(self):
+		return self.img_host
+	
+	def get_toDevice_dtype(self):
+		img_device_dtype = None
+		if( self.img_host.dtype == np.uint8 ):
+			img_device_dtype = cl.channel_type.UNORM_INT8
+		elif( self.img_host.dtype == np.uint8 ):
+			img_device_dtype = cl.channel_type.UNORM_INT16
+
+		return img_device_dtype
+	
+	def get_toDevice_channel_order(self):
+		img_device_channel_order = None
+		if( self.vglshape.getNChannels() == 1 ):
+			img_device_channel_order = cl.channel_order.LUMINANCE
+		elif( self.vglshape.getNChannels() == 2 ):
+			img_device_channel_order = cl.channel_order.RG
+		elif( self.vglshape.getNChannels() == 3 ):
+			img_device_channel_order = cl.channel_order.RGB
+		elif( self.vglshape.getNChannels() == 4 ):
+			img_device_channel_order = cl.channel_order.RGBA
+		
+		return img_device_channel_order
 
 
+#ctx = cl.create_some_context()
+#queue = cl.CommandQueue(ctx)
 
-ctx = cl.create_some_context()
-queue = cl.CommandQueue(ctx)
-
-img = VglImage("yamamoto.jpg")
-img.rgb_to_rgba()
-print("shape", img.img_host.shape)
-img.vglImageUpload(ctx, queue)
-img.vglImageDownload(ctx, queue)
-img.rgba_to_rgb()
-img.img_save("saida.jpg")
+#img = VglImage("yamamoto.jpg")
+#img.rgb_to_rgba()
+#print("shape", img.img_host.shape)
+#img.vglImageUpload(ctx, queue)
+#img.vglImageDownload(ctx, queue)
+#img.rgba_to_rgb()
+#img.img_save("saida.jpg")
