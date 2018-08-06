@@ -1,5 +1,4 @@
 from skimage import io
-import matplotlib.pyplot as mp
 import pyopencl as cl
 import numpy as np
 import sys
@@ -10,7 +9,8 @@ from vglStrEl import *
 import vglConst as vc
 
 class VglImage(object):
-	def __init__(self, imgPath):
+	def __init__(self, imgPath, imgDim=vc.VGL_IMAGE_2D_IMAGE()):
+		# IF THE IMAGE TYPE IS NOT SPECIFIED, A 2D IMAGE WILL BE ASSUMED
 		# INICIALIZING DATA
 		self.img_host = None
 		self.img_device = None
@@ -20,26 +20,39 @@ class VglImage(object):
 		self.last_changed_device = False
 
 		# OPENING IMAGE
-		self.set_image_host(imgPath)
+		self.set_image_host(imgPath, imgDim)
 
-	def create_vglShape(self):
+	def create_vglShape(self, imgDim):
 		if(self.img_host is not None):
 			print("The image was founded. Loading data.")
 
 			self.vglshape = VglShape()
-			if( len(self.img_host.shape) == 2 ):
-				# SHADES OF GRAY IMAGE
-				print("VglImage LUMINANCE")
-				self.vglshape.constructor2DShape(1, self.img_host.shape[1], self.img_host.shape[0])
-			elif(len(self.img_host.shape) == 3):
-				# MORE THAN ONE COLOR CHANNEL
-				print("VglImage RGB")
-				self.vglshape.constructor2DShape(self.img_host.shape[2], self.img_host.shape[1], self.img_host.shape[0])
+			if( imgDim == vc.VGL_IMAGE_2D_IMAGE() ):
+				print("2D Image")
+				if( len(self.img_host.shape) == 2 ):
+					# SHADES OF GRAY IMAGE
+					print("VglImage LUMINANCE")
+					self.vglshape.constructor2DShape(1, self.img_host.shape[1], self.img_host.shape[0])
+				elif(len(self.img_host.shape) == 3):
+					# MORE THAN ONE COLOR CHANNEL
+					print("VglImage RGB")
+					self.vglshape.constructor2DShape(self.img_host.shape[2], self.img_host.shape[1], self.img_host.shape[0])
+			elif( imgDim == vc.VGL_IMAGE_3D_IMAGE() ):
+				print("3D Image")
+				if( len(self.img_host.shape) == 3 ):
+					# SHADES OF GRAY IMAGE
+					print("VglImage LUMINANCE")
+					self.vglshape.constructor3DShape( 1, self.img_host.shape[2], self.img_host.shape[1], self.img_host.shape[0] )
+				elif(len(self.img_host.shape) == 4):
+					# MORE THAN ONE COLOR CHANNEL
+					print("VglImage RGB")
+					self.vglshape.constructor3DShape( self.img_host.shape[3], self.img_host.shape[2], self.img_host.shape[1], self.img_host.shape[0] )
+		
+			self.img_sync = False
+			self.last_changed_host = True
+			self.last_changed_device = False
 
-		self.last_changed_host = True
-		self.last_changed_device = False
-
-	def set_image_host(self, imgPath):
+	def set_image_host(self, imgPath, imgDim):
 		try:
 			self.img_host = io.imread(imgPath)
 		except FileNotFoundError as fnf:
@@ -49,7 +62,11 @@ class VglImage(object):
 			print("Unrecognized error:")
 			print(str(e))
 
-		self.create_vglShape()
+		self.img_sync = False
+		self.last_changed_host = True
+		self.last_changed_device = False
+
+		self.create_vglShape(imgDim)
 
 	def rgb_to_rgba(self):
 		img_host_rgba = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 4), self.img_host.dtype)
@@ -77,13 +94,21 @@ class VglImage(object):
 
 	def vglImageUpload(self, ctx, queue):
 		# IMAGE VARS
-		origin = ( 0, 0, 0 )
-		region = ( self.vglshape.getHeight(), self.vglshape.getWidth(), 1 )
-		shape  = ( self.vglshape.getHeight(), self.vglshape.getWidth() )
+		if( self.vglshape.getNFrames == 1 ):
+			origin = ( 0, 0, 0 )
+			region = ( self.vglshape.getHeight(), self.vglshape.getWidth(), 1 )
+			shape  = ( self.vglshape.getHeight(), self.vglshape.getWidth() )
 
-		mf = cl.mem_flags
-		imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
-		self.img_device = cl.Image(ctx, mf.READ_ONLY, imgFormat, shape)
+			mf = cl.mem_flags
+			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
+			self.img_device = cl.Image(ctx, mf.READ_ONLY, imgFormat, shape)
+		elif( self.vglshape.getNFrames > 1 ):
+			origin = ( 0, 0, 0 )
+			region = ( self.vglshape.getHeight(), self.vglshape.getWidth(), self.vglshape.getNFrames() )
+			shape = ( self.vglshape.getHeight, self.vglshape.getWidth(), self.vglshape.getNFrames() )
+		else:
+			print("VglImage not created or wrong. Please, make create_vglShape() before Upload.")
+			return
 
 		# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
 		cl.enqueue_copy(queue, self.img_device, self.img_host.tobytes(), origin=origin, region=region, is_blocking=True)
@@ -174,15 +199,3 @@ class VglImage(object):
 			img_device_channel_order = cl.channel_order.RGBA
 		
 		return img_device_channel_order
-
-
-#ctx = cl.create_some_context()
-#queue = cl.CommandQueue(ctx)
-
-#img = VglImage("yamamoto.jpg")
-#img.rgb_to_rgba()
-#print("shape", img.img_host.shape)
-#img.vglImageUpload(ctx, queue)
-#img.vglImageDownload(ctx, queue)
-#img.rgba_to_rgb()
-#img.img_save("saida.jpg")

@@ -1,9 +1,6 @@
-from skimage import io
 import pyopencl as cl
 import numpy as np
 import sys
-
-#testando
 from vglImageTest import *
 
 """

@@ -35,3 +35,9 @@ def VGL_STREL_GAUSS():
 
 def VGL_STREL_MEAN():
 	return 4
+
+def VGL_IMAGE_3D_IMAGE():
+	return 0
+
+def VGL_IMAGE_2D_IMAGE():
+	return 1
