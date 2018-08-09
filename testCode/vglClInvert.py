@@ -3,29 +3,6 @@ import numpy as np
 import sys
 from vglImageTest import *
 
-"""
-	img:
-		is the input image
-	img_size:
-		3D Images:
-			The OpenCL's default is to be (img_width, img_height, img_depht)
-		2D Images:
-			The The OpenCL's default is to be (img_width, img_height)
-	img_pitch:
-		3D Images (needed):
-			The OpenCL's default is to be (img_width*bytes_per_pixel, img_height*img_width*bytes_per_pixel)
-			and it is assumed if pitch=(0, 0) is given
-		2D Images (optional):
-			The OpenCL's default is to be (img_width*bytes_per_pixel)
-			and it is assumed if pitch=(0) is given
-	img_origin
-		Is the origin of the image, where to start copying the image.
-		2D images must have 0 in the z-axis
-	img_region
-		Is where to end the copying of the image.
-		2D images must have 1 in the z-axis 
-"""
-
 class vgl:
 	# THE vgl CONSTRUCTOR CREATES A NEW CONTEXT
 	# AND INITIATES THE QUEUE, ADDING QUE CONTEXT TO IT.

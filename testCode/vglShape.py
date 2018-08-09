@@ -21,7 +21,7 @@ class VglShape(object):
 				[1] Image width 
 				[2] Image height
 			3D Images:
-				[0] Image Channels
+				[0] Image Channels (RGB=3, RGBA=4, GreyScale=1)
 				[1] Image width
 				[2] Image height
 				[3] Image depht

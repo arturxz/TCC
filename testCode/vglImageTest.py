@@ -8,10 +8,34 @@ from vglShape import *
 from vglStrEl import *
 import vglConst as vc
 
+"""
+	img:
+		is the input image
+	cl_shape:
+		3D Images:
+			The OpenCL's default is to be (img_width, img_height, img_depht)
+		2D Images:
+			The The OpenCL's default is to be (img_width, img_height)
+	cl_pitch:
+		3D Images (needed):
+			The OpenCL's default is to be (img_width*bytes_per_pixel, img_height*img_width*bytes_per_pixel)
+			and it is assumed when pitch=(0, 0) is given
+		2D Images (optional):
+			The OpenCL's default is to be (img_width*bytes_per_pixel)
+			and it is assumed when pitch=(0) is given
+	cl_origin
+		Is the origin of the image, where to start copying the image.
+		2D images must have 0 in the z-axis
+	cl_region
+		Is where to end the copying of the image.
+		2D images must have 1 in the z-axis 
+"""
+
 class VglImage(object):
 	def __init__(self, imgPath, imgDim=vc.VGL_IMAGE_2D_IMAGE()):
 		# IF THE IMAGE TYPE IS NOT SPECIFIED, A 2D IMAGE WILL BE ASSUMED
 		# INICIALIZING DATA
+		self.imgDim = imgDim
 		self.img_host = None
 		self.img_device = None
 		self.img_sync = False
@@ -19,15 +43,20 @@ class VglImage(object):
 		self.last_changed_host = False
 		self.last_changed_device = False
 
-		# OPENING IMAGE
-		self.set_image_host(imgPath, imgDim)
+		if(self.imgDim == vc.VGL_IMAGE_2D_IMAGE()):
+			print("Creating 2D Image!")
+		elif(self.imgDim == vc.VGL_IMAGE_3D_IMAGE()):
+			print("Creating 3D Image!")
 
-	def create_vglShape(self, imgDim):
+		# OPENING IMAGE
+		self.set_image_host(imgPath)
+
+	def create_vglShape(self):
 		if(self.img_host is not None):
-			print("The image was founded. Loading data.")
+			print("The image was founded. Creating vglShape.")
 
 			self.vglshape = VglShape()
-			if( imgDim == vc.VGL_IMAGE_2D_IMAGE() ):
+			if( self.imgDim == vc.VGL_IMAGE_2D_IMAGE() ):
 				print("2D Image")
 				if( len(self.img_host.shape) == 2 ):
 					# SHADES OF GRAY IMAGE
@@ -37,7 +66,7 @@ class VglImage(object):
 					# MORE THAN ONE COLOR CHANNEL
 					print("VglImage RGB")
 					self.vglshape.constructor2DShape(self.img_host.shape[2], self.img_host.shape[1], self.img_host.shape[0])
-			elif( imgDim == vc.VGL_IMAGE_3D_IMAGE() ):
+			elif( self.imgDim == vc.VGL_IMAGE_3D_IMAGE() ):
 				print("3D Image")
 				if( len(self.img_host.shape) == 3 ):
 					# SHADES OF GRAY IMAGE
@@ -51,8 +80,10 @@ class VglImage(object):
 			self.img_sync = False
 			self.last_changed_host = True
 			self.last_changed_device = False
+		else:
+			print("Impossible to create a vglImage object. host_image is None.")
 
-	def set_image_host(self, imgPath, imgDim):
+	def set_image_host(self, imgPath):
 		try:
 			self.img_host = io.imread(imgPath)
 		except FileNotFoundError as fnf:
@@ -66,9 +97,10 @@ class VglImage(object):
 		self.last_changed_host = True
 		self.last_changed_device = False
 
-		self.create_vglShape(imgDim)
+		self.create_vglShape()
 
 	def rgb_to_rgba(self):
+		print("[RGB -> RGBA]")
 		img_host_rgba = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 4), self.img_host.dtype)
 
 		img_host_rgba[:,:,0] = self.img_host[:,:,0]
@@ -80,7 +112,7 @@ class VglImage(object):
 		self.create_vglShape()
 
 	def rgba_to_rgb(self):
-
+		print("[RGBA -> RGB]")
 		if( (self.img_host[0,0,:].size < 4) | (self.img_host[0,0,:].size > 4) ):
 			print("IMAGE IS NOT RGBA")
 		else:
@@ -94,24 +126,29 @@ class VglImage(object):
 
 	def vglImageUpload(self, ctx, queue):
 		# IMAGE VARS
-		if( self.vglshape.getNFrames == 1 ):
+		print("Uploading image to device.")
+		if( self.getVglShape().getNFrames() == 1 ):
 			origin = ( 0, 0, 0 )
-			region = ( self.vglshape.getHeight(), self.vglshape.getWidth(), 1 )
-			shape  = ( self.vglshape.getHeight(), self.vglshape.getWidth() )
+			region = ( self.getVglShape().getHeight(), self.getVglShape().getWidth(), 1 )
+			shape  = ( self.getVglShape().getHeight(), self.getVglShape().getWidth() )
 
 			mf = cl.mem_flags
 			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
 			self.img_device = cl.Image(ctx, mf.READ_ONLY, imgFormat, shape)
-		elif( self.vglshape.getNFrames > 1 ):
+		elif( self.getVglShape().getNFrames() > 1 ):
 			origin = ( 0, 0, 0 )
-			region = ( self.vglshape.getHeight(), self.vglshape.getWidth(), self.vglshape.getNFrames() )
-			shape = ( self.vglshape.getHeight, self.vglshape.getWidth(), self.vglshape.getNFrames() )
+			region = ( self.getVglShape().getWidth(), self.getVglShape().getHeight(), self.getVglShape().getNFrames() )
+			shape = ( self.getVglShape().getWidth(), self.getVglShape().getHeight(), self.getVglShape().getNFrames() )
+
+			mf = cl.mem_flags
+			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
+			self.img_device = cl.Image(ctx, mf.READ_ONLY, imgFormat, shape)
 		else:
-			print("VglImage not created or wrong. Please, make create_vglShape() before Upload.")
+			print("VglImage NFrames wrong. NFrames returns:", self.getVglShape().getNFrames() )
 			return
 
 		# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
-		cl.enqueue_copy(queue, self.img_device, self.img_host.tobytes(), origin=origin, region=region, is_blocking=True)
+		cl.enqueue_copy(queue, self.img_device, self.img_host, origin=origin, region=region, is_blocking=True)
 
 		self.img_sync = False
 		self.last_changed_host = False
@@ -119,19 +156,35 @@ class VglImage(object):
 
 	def vglImageDownload(self, ctx, queue):
 		# MAKE IMAGE DOWNLOAD HERE
-		origin = ( 0, 0, 0 )
-		region = ( self.vglshape.getHeight(), self.vglshape.getWidth(), 1 )
-		shape  = ( self.vglshape.getHeight(), self.vglshape.getWidth() )
+		print("Downloading Image from device.")
 
-		buffer = np.zeros(self.vglshape.getWidth()*self.vglshape.getHeight()*self.vglshape.getNChannels(), self.img_host.dtype)
-		cl.enqueue_copy(queue, buffer, self.img_device, origin=origin, region=region, is_blocking=True)
+		if( self.getVglShape().getNFrames() == 1 ):
+			origin = ( 0, 0, 0 )
+			region = ( self.getVglShape().getHeight(), self.getVglShape().getWidth(), 1 )
+			totalSize = self.getVglShape().getHeight() * self.getVglShape().getWidth() * self.getVglShape().getNChannels()
 
-		if( self.vglshape.getNChannels() == 1 ):
-			buffer = np.frombuffer( buffer, self.img_host.dtype ).reshape( self.vglshape.getHeight(), self.vglshape.getWidth() )
-		elif( (self.vglshape.getNChannels() == 3) or (self.vglshape.getNChannels() == 4) ):
-			buffer = np.frombuffer( buffer, self.img_host.dtype ).reshape( self.vglshape.getHeight(), self.vglshape.getWidth(), self.vglshape.getNChannels() )
+			buffer = np.zeros(totalSize, self.img_host.dtype)
+			cl.enqueue_copy(queue, buffer, self.img_device, origin=origin, region=region, is_blocking=True)
+
+			if( self.getVglShape().getNChannels() == 1 ):
+				buffer = np.frombuffer( buffer, self.img_host.dtype ).reshape( self.getVglShape().getHeight(), self.getVglShape().getWidth() )
+			elif( (self.getVglShape().getNChannels() == 3) or (self.getVglShape().getNChannels() == 4) ):
+				buffer = np.frombuffer( buffer, self.img_host.dtype ).reshape( self.getVglShape().getHeight(), self.getVglShape().getWidth(), self.getVglShape().getNChannels() )
+		elif( self.getVglShape().getNFrames() > 1 ):
+			origin = ( 0, 0, 0 )
+			region = ( self.getVglShape().getHeight(), self.getVglShape().getWidth(), self.getVglShape().getNFrames() )
+			totalSize = self.getVglShape().getHeight() * self.getVglShape().getWidth() * self.getVglShape().getNFrames()
+
+			buffer = np.zeros(totalSize, self.img_host.dtype)
+			cl.enqueue_copy(queue, buffer, self.img_device, origin=origin, region=region, is_blocking=True)
+
+			if( self.getVglShape().getNChannels() == 1 ):
+				buffer = np.frombuffer( buffer, self.img_host.dtype ).reshape( self.getVglShape().getNFrames(), self.getVglShape().getHeight(), self.getVglShape().getWidth() )
+			elif( (self.getVglShape().getNChannels() == 3) or (self.getVglShape().getNChannels() == 4) ):
+				buffer = np.frombuffer( buffer, self.img_host.dtype ).reshape( self.getVglShape().getNFrames(), self.getVglShape().getHeight(), self.getVglShape().getWidth(), self.getVglShape().getNChannels() )
 
 		self.img_host = buffer
+		self.create_vglShape()
 
 		self.img_sync = False
 		self.last_changed_device = False
@@ -141,7 +194,7 @@ class VglImage(object):
 		if( not self.img_sync ):
 			if( self.last_changed_device ):
 				self.vglImageDownload(ctx, queue)
-			elif(self.last_changed_host ):
+			elif( self.last_changed_host ):
 				self.vglImageUpload(ctx, queue)
 		else:
 			print("Already synced")
@@ -153,7 +206,6 @@ class VglImage(object):
 	def get_similar_device_image_object(self, ctx, queue):
 
 		shape  = ( self.vglshape.getHeight(), self.vglshape.getWidth() )
-		
 		mf = cl.mem_flags
 		imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
 		return cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
@@ -182,20 +234,20 @@ class VglImage(object):
 		img_device_dtype = None
 		if( self.img_host.dtype == np.uint8 ):
 			img_device_dtype = cl.channel_type.UNORM_INT8
-		elif( self.img_host.dtype == np.uint8 ):
+		elif( self.img_host.dtype == np.uint16 ):
 			img_device_dtype = cl.channel_type.UNORM_INT16
 
 		return img_device_dtype
 	
 	def get_toDevice_channel_order(self):
 		img_device_channel_order = None
-		if( self.vglshape.getNChannels() == 1 ):
+		if( self.getVglShape().getNChannels() == 1 ):
 			img_device_channel_order = cl.channel_order.LUMINANCE
-		elif( self.vglshape.getNChannels() == 2 ):
+		elif( self.getVglShape().getNChannels() == 2 ):
 			img_device_channel_order = cl.channel_order.RG
-		elif( self.vglshape.getNChannels() == 3 ):
+		elif( self.getVglShape().getNChannels() == 3 ):
 			img_device_channel_order = cl.channel_order.RGB
-		elif( self.vglshape.getNChannels() == 4 ):
+		elif( self.getVglShape().getNChannels() == 4 ):
 			img_device_channel_order = cl.channel_order.RGBA
 		
 		return img_device_channel_order

@@ -1,10 +1,6 @@
-from skimage import io
-import matplotlib.pyplot as mp
 import pyopencl as cl
 import numpy as np
 import sys
-
-#testing
 from vglImageTest import *
 
 class vgl:
@@ -37,63 +33,34 @@ class vgl:
 	def loadImage(self, imgpath):
 		print("Opening image to be processed")
 		
-		self.vglimage = VglImage(imgpath)
-		if( self.vglimage.getVglShape().getNChannels() == 3 ):
-			self.vglimage.rgb_to_rgba()
-
+		self.vglimage = VglImage(imgpath, vc.VGL_IMAGE_3D_IMAGE())
 		self.vglimage.vglImageUpload(self.ctx, self.queue)
 		self.img_out_cl = self.vglimage.get_similar_device_image_object(self.ctx, self.queue)
 
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
-		self.pgr.vglCl3dBlurSq3(self.queue, self.img_in_cl.shape, None, self.img_in_cl, self.img_out_cl)
+		self.pgr.vglCl3dBlurSq3(self.queue,
+								self.img_out_cl.shape, 
+								None, 
+								self.vglimage.get_device_image(), 
+								self.img_out_cl)
 
-		# CREATING BUFFER TO GET IMAGE FROM DEVICE
-		if( self.img_nchannels == 1 ):
-			self.buffer = np.zeros(self.img_shape[2]*self.img_shape[1]*self.img_shape[0], self.img_dtype)
-		elif( self.img_nchannels == 3 or self.img_nchannels == 4 ):
-			self.buffer = np.zeros(self.img_shape[2]*self.img_shape[1]*self.img_shape[0]*4, self.img_dtype)
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+		print("out_image shape:", self.vglimage.get_host_image().shape)
+		for i in range(0, self.vglimage.get_host_image().shape[0]):
+			for j in range(0, self.vglimage.get_host_image().shape[1]):
+				for k in range(0, self.vglimage.get_host_image().shape[2]):
+					if(self.vglimage.get_host_image()[i,j,k] > 0):
+						print("isn't zero!", self.vglimage.get_host_image()[i,j,k])
+		self.vglimage.img_save(outputpath)
 
-		# COPYING IMAGE FROM OPENCL IMAGE OBJECT TO NDARRAY
-		cl.enqueue_copy(self.queue, self.buffer, self.img_out_cl, origin=self.img_origin, region=self.img_region, pitches=self.img_pitch, is_blocking=True)
-
-		# TURNING BUFFER INTO A NDARRAY WITH SHAPE SENDED TO THE DEVICE 
-		# AND IMG_OUT NDARRAY, THAT HAS THE CORRECT SHAPE TO SAVE IMAGE (AS THE READED IMAGE IS RGB)
-		if( self.img_nchannels == 1 ):
-			self.buffer = np.frombuffer( self.buffer, self.img_dtype ).reshape( self.img_shape[2], self.img_shape[1], self.img_shape[0] )
-		elif( self.img_nchannels == 2 or self.img_nchannels == 3 or self.img_nchannels == 4 ):
-			self.buffer = np.frombuffer( self.buffer, self.img_dtype ).reshape( self.img_shape[2], self.img_shape[1], self.img_shape[0], 4 )
-			self.img_out = np.empty( (self.img_shape[2], self.img_shape[1], self.img_shape[0], self.img_nchannels), dtype=self.img_dtype )
-
-		# PREPARING TO SAVE THE IMAGE
-		if( self.img_nchannels == 1 ):
-			# GRAY-SHADES IMAGE
-			self.img_out = self.buffer
-
-		elif( self.img_nchannels == 2 ):
-			# TWO COLOR CHANNEL IMAGE
-			self.img_out = self.buffer
-		
-		elif( self.img_nchannels == 3 ):
-			# THEN WAS ADDED A ALPHA CHANNEL TO IT.
-			# NOW, THIS ALPHA CHANNEL WILL BE REMOVED AND THEN THE IMAGE WILL BE SAVED.
-			self.img_out[:,:,:,0] = self.buffer[:,:,:,0]
-			self.img_out[:,:,:,1] = self.buffer[:,:,:,1]
-			self.img_out[:,:,:,2] = self.buffer[:,:,:,2]
-
-		elif( self.img_nchannels == 4 ):
-			# THEN ITS WAS A RGBA IMAGE, AND DO NOT NEED ALTERATIONS IN IT.
-			self.img_out = self.buffer
-
-		# SAVING IMAGE
-		io.imsave(outputpath, self.img_out, plugin='tifffile')
-
-CLPath = "../CL/vglCl3dBlurSq3.cl"
+CLPath = "../../CL/vglCl3dBlurSq3.cl"
 inPath = sys.argv[1]
 ouPath = sys.argv[2] 
 
 process = vgl()
 process.loadCL(CLPath)
 process.loadImage(inPath)
-#process.execute(ouPath)
+process.execute(ouPath)
