@@ -129,8 +129,8 @@ class VglImage(object):
 		print("Uploading image to device.")
 		if( self.getVglShape().getNFrames() == 1 ):
 			origin = ( 0, 0, 0 )
-			region = ( self.getVglShape().getHeight(), self.getVglShape().getWidth(), 1 )
-			shape  = ( self.getVglShape().getHeight(), self.getVglShape().getWidth() )
+			region = ( self.getVglShape().getWidth(), self.getVglShape().getHeight(), 1 )
+			shape  = ( self.getVglShape().getWidth(), self.getVglShape().getHeight() )
 
 			mf = cl.mem_flags
 			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
@@ -160,7 +160,7 @@ class VglImage(object):
 
 		if( self.getVglShape().getNFrames() == 1 ):
 			origin = ( 0, 0, 0 )
-			region = ( self.getVglShape().getHeight(), self.getVglShape().getWidth(), 1 )
+			region = ( self.getVglShape().getWidth(), self.getVglShape().getHeight(), 1 )
 			totalSize = self.getVglShape().getHeight() * self.getVglShape().getWidth() * self.getVglShape().getNChannels()
 
 			buffer = np.zeros(totalSize, self.img_host.dtype)
@@ -171,12 +171,14 @@ class VglImage(object):
 			elif( (self.getVglShape().getNChannels() == 3) or (self.getVglShape().getNChannels() == 4) ):
 				buffer = np.frombuffer( buffer, self.img_host.dtype ).reshape( self.getVglShape().getHeight(), self.getVglShape().getWidth(), self.getVglShape().getNChannels() )
 		elif( self.getVglShape().getNFrames() > 1 ):
+			pitch = (0, 0)
 			origin = ( 0, 0, 0 )
-			region = ( self.getVglShape().getHeight(), self.getVglShape().getWidth(), self.getVglShape().getNFrames() )
+			region = ( self.getVglShape().getWidth(), self.getVglShape().getHeight(), self.getVglShape().getNFrames() )
 			totalSize = self.getVglShape().getHeight() * self.getVglShape().getWidth() * self.getVglShape().getNFrames()
 
 			buffer = np.zeros(totalSize, self.img_host.dtype)
 			cl.enqueue_copy(queue, buffer, self.img_device, origin=origin, region=region, is_blocking=True)
+
 
 			if( self.getVglShape().getNChannels() == 1 ):
 				buffer = np.frombuffer( buffer, self.img_host.dtype ).reshape( self.getVglShape().getNFrames(), self.getVglShape().getHeight(), self.getVglShape().getWidth() )
@@ -205,10 +207,21 @@ class VglImage(object):
 	
 	def get_similar_device_image_object(self, ctx, queue):
 
-		shape  = ( self.vglshape.getHeight(), self.vglshape.getWidth() )
-		mf = cl.mem_flags
-		imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
-		return cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
+		if(self.imgDim == vc.VGL_IMAGE_2D_IMAGE()):
+			shape  = ( self.vglshape.getWidth(), self.vglshape.getHeight() )
+			mf = cl.mem_flags
+			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
+			img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
+		elif(self.imgDim == vc.VGL_IMAGE_3D_IMAGE()):
+			shape  = ( self.vglshape.getWidth(), self.vglshape.getHeight(), self.vglshape.getNFrames() )
+			mf = cl.mem_flags
+			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
+			img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
+
+		print("--> Orig:", self.get_device_image().width, self.get_device_image().height, self.get_device_image().depth)
+		print("--> Copy:", img_copy.width, img_copy.height, img_copy.depth)
+
+		return img_copy
 	
 	def set_device_image(self, img):
 		if( isinstance(img, cl.Image) ):
@@ -234,8 +247,10 @@ class VglImage(object):
 		img_device_dtype = None
 		if( self.img_host.dtype == np.uint8 ):
 			img_device_dtype = cl.channel_type.UNORM_INT8
+			print("8bit Channel Size!")
 		elif( self.img_host.dtype == np.uint16 ):
 			img_device_dtype = cl.channel_type.UNORM_INT16
+			print("16bit Channel Size!")
 
 		return img_device_dtype
 	
