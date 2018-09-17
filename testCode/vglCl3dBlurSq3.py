@@ -48,12 +48,6 @@ class vgl:
 
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
-		print("out_image shape:", self.vglimage.get_host_image().shape)
-		for i in range(0, self.vglimage.get_host_image().shape[0]):
-			for j in range(0, self.vglimage.get_host_image().shape[1]):
-				for k in range(0, self.vglimage.get_host_image().shape[2]):
-					if(self.vglimage.get_host_image()[i,j,k] > 0):
-						print("isn't zero!", self.vglimage.get_host_image()[i,j,k])
 		self.vglimage.img_save(outputpath)
 
 CLPath = "../../CL/vglCl3dBlurSq3.cl"
