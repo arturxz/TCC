@@ -1,31 +1,21 @@
+# IMAGE MANIPULATION LIBRARYS
 from skimage import io
 import matplotlib.pyplot as mp
-import pyopencl as cl
 import numpy as np
-import sys
 
-"""
-	img:
-		is the input image
-	img_size:
-		3D Images:
-			The OpenCL's default is to be (img_width, img_height, img_depht)
-		2D Images:
-			The The OpenCL's default is to be (img_width, img_height)
-	img_pitch:
-		3D Images (needed):
-			The OpenCL's default is to be (img_width*bytes_per_pixel, img_height*img_width*bytes_per_pixel)
-			and it is assumed if pitch=(0, 0) is given
-		2D Images (optional):
-			The OpenCL's default is to be (img_width*bytes_per_pixel)
-			and it is assumed if pitch=(0) is given
-	img_origin
-		Is the origin of the image, where to start copying the image.
-		2D images must have 0 in the z-axis
-	img_region
-		Is where to end the copying of the image.
-		2D images must have 1 in the z-axis 
-"""
+# OPENCL LIBRARYS
+import pyopencl as cl
+import pyopencl.tools
+import pyopencl.array as clarray
+
+# VGL LIBRARYS
+from vglImage import *
+from vglStrEl import *
+import vglConst as vc
+from structSizes import *
+
+# SYSTEM LIBRARYS
+import sys, glob, os
 
 class vgl:
 	# THE vgl CONSTRUCTOR CREATES A NEW CONTEXT
@@ -40,85 +30,86 @@ class vgl:
 		self.queue = cl.CommandQueue(self.ctx)
 		self.builded = False
 
+	def getDir(self, filePath):
+		size = len(filePath)-1
+		bar = -1
+		for i in range(0, size):
+			if(filePath[i] == '/'):
+				bar = i
+				i = -1
+		return filePath[:bar+1]
+
 	# THIS FUNCTION WILL LOAD THE KERNEL FILE
 	# AND BUILD IT IF NECESSARY.
 	def loadCL(self, filepath):
 		print("Loading OpenCL Kernel")
 		self.kernel_file = open(filepath, "r")
+		buildDir = self.getDir(filepath)
+
+		self.build_options = ""
+		self.build_options = self.build_options + "-I "+buildDir
+		self.build_options = self.build_options + " -D VGL_SHAPE_NCHANNELS={0}".format(vc.VGL_SHAPE_NCHANNELS())
+		self.build_options = self.build_options + " -D VGL_SHAPE_WIDTH={0}".format(vc.VGL_SHAPE_WIDTH())
+		self.build_options = self.build_options + " -D VGL_SHAPE_HEIGHT={0}".format(vc.VGL_SHAPE_HEIGHT())
+		self.build_options = self.build_options + " -D VGL_SHAPE_LENGTH={0}".format(vc.VGL_SHAPE_LENGTH())
+		self.build_options = self.build_options + " -D VGL_MAX_DIM={0}".format(vc.VGL_MAX_DIM())
+		self.build_options = self.build_options + " -D VGL_ARR_SHAPE_SIZE={0}".format(vc.VGL_ARR_SHAPE_SIZE())
+		self.build_options = self.build_options + " -D VGL_ARR_CLSTREL_SIZE={0}".format(vc.VGL_ARR_CLSTREL_SIZE())
+		self.build_options = self.build_options + " -D VGL_STREL_CUBE={0}".format(vc.VGL_STREL_CUBE())
+		self.build_options = self.build_options + " -D VGL_STREL_CROSS={0}".format(vc.VGL_STREL_CROSS())
+		self.build_options = self.build_options + " -D VGL_STREL_GAUSS={0}".format(vc.VGL_STREL_GAUSS())
+		self.build_options = self.build_options + " -D VGL_STREL_MEAN={0}".format(vc.VGL_STREL_MEAN())
+
+		#print("Build Options:\n", self.build_options)
+
+		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
+		for file in glob.glob(buildDir+"/*.h"):
+			self.pgr = cl.Program(self.ctx, open(file, "r"))
 
 		if ((self.builded == False)):
 			self.pgr = cl.Program(self.ctx, self.kernel_file.read())
-			self.pgr.build()
-			self.kernel_file.close()
+			self.pgr.build(options=self.build_options)
+			#self.pgr.build()
 			self.builded = True
 		else:
 			print("Kernel already builded. Going to next step...")
 
+		self.kernel_file.close()
+		#print("Kernel", self.pgr.get_info(cl.program_info.KERNEL_NAMES), "compiled.")
+
 	def loadImage(self, imgpath):
 		print("Opening image to be processed")
-		self.mf = cl.mem_flags
-
-		# GETTING NDARRAY IMAGE AND DATA ABOUT THE IMAGE
-		self.img = io.imread(imgpath)
-		self.img_dtype = self.img.dtype
-		self.img_ndim = self.img.ndim
-		self.img_shape = (self.img.shape[1],self.img.shape[0])
-
-		# GETTING THE DIMENSIONS OF THE IMAGE
-		if( self.img_ndim == 2 ):
-			# IF THE IMAGE IS 2-DIMENSIONAL, THEN IT IS A SHADES OF GRAY IMAGE
-			# AND THE IMAGE TYPE IS LUMINANCE
-			self.img_nchannels = 1
-		elif( self.img_ndim == 3 ):
-			# IF THE IMAGE ARRAY IS 3-DIMENSIONAL, THEN IT HAS MORE THAN 1 COLOR CHANNEL
-
-			if( self.img[0,0,:].size == 2 ):
-				# THEN IT CAN BE ANY 2-CHANNEL IMAGE.
-				# DON'T HAVE ACCES TO ANY IMAGE LIKE THAT YET.
-				self.img_nchannels = 2
-
-			if( self.img[0,0,:].size == 3 ):
-				# THEN IT CAN BE ANY 3-CHANNEL IMAGE. IS NEEDED TO ADD THE 4TH CHANNEL TO IT
-				self.img_nchannels = 3
-
-		# SETTING THE OPENCL IMAGE OBJECTS, WITHOUT THE COPY
-		self.img_in_cl = cl.Buffer(self.ctx, self.mf.READ_ONLY, self.img.nbytes)
-		self.img_out_cl = cl.Buffer(self.ctx, self.mf.WRITE_ONLY, self.img.nbytes)
-
+		
+		self.vglimage = VglImage(imgpath)
+		if( self.vglimage.getVglShape().getNChannels() == 3 ):
+			self.vglimage.rgb_to_rgba()
+		
+		mf = cl.mem_flags
+		self.img_in_cl = cl.Buffer(self.ctx, mf.READ_ONLY, self.vglimage.get_host_image().nbytes)
+		self.img_out_cl = cl.Buffer(self.ctx, mf.WRITE_ONLY, self.vglimage.get_host_image().nbytes)
+		
 		# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
-		cl.enqueue_copy(self.queue, self.img_in_cl, self.img, is_blocking=True)
-		io.imsave('img_in.jpg', self.img)
+		cl.enqueue_copy(self.queue, self.img_in_cl, self.vglimage.get_host_image().tobytes(), is_blocking=True)
 
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
-		self.pgr.vglClNdCopy(self.queue, self.img_shape, None, self.img_in_cl, self.img_out_cl).wait()
-
-		# CREATING BUFFER TO GET IMAGE FROM DEVICE
-		if( self.img_nchannels == 1 ):
-			self.buffer = np.zeros(self.img_shape[0]*self.img_shape[1], self.img_dtype)
-		elif( self.img_nchannels > 1 ):
-			self.buffer = np.zeros(self.img_shape[0]*self.img_shape[1]*self.img_nchannels, self.img_dtype)
-
-		cl.enqueue_copy(self.queue, self.buffer, self.img_in_cl, is_blocking=True)
+		self.pgr.vglClNdCopy(self.queue,
+							self.vglimage.get_host_image().shape,
+							None,
+							self.img_in_cl,
+							self.img_out_cl).wait()
 		
-		# TURNING BUFFER INTO A NDARRAY WITH SHAPE SENDED TO THE DEVICE 
-		# AND IMG_OUT NDARRAY, THAT HAS THE CORRECT SHAPE TO SAVE IMAGE (AS THE READED IMAGE IS RGB)
-		if( self.img_nchannels == 1 ):
-			self.buffer = np.frombuffer( self.buffer, self.img_dtype ).reshape( self.img_shape[1], self.img_shape[0] )
-		
-		elif( self.img_nchannels > 1 ):
-			self.buffer = np.frombuffer( self.buffer, self.img_dtype ).reshape( self.img_shape[1], self.img_shape[0], self.img_nchannels )
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+		if( self.vglimage.getVglShape().getNChannels() == 4 ):
+			self.vglimage.rgba_to_rgb()
+		self.vglimage.img_save(outputpath)
 
-		self.img_out = self.buffer
 
-		# SAVING IMAGE (USING PIL PLUGIN)
-		io.imsave('img_out.jpg', self.buffer)
-		io.imsave(outputpath, self.img_out)
-
-CLPath = "../CL_ND/vglClNdCopy.cl"
+CLPath = "../../CL_ND/vglClNdCopy.cl"
 inPath = sys.argv[1]
-ouPath = sys.argv[2]
+ouPath = sys.argv[2] 
 
 process = vgl()
 process.loadCL(CLPath)
