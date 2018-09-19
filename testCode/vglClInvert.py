@@ -1,7 +1,7 @@
 import pyopencl as cl
 import numpy as np
 import sys
-from vglImageTest import *
+from vglImage import *
 
 class vgl:
 	# THE vgl CONSTRUCTOR CREATES A NEW CONTEXT

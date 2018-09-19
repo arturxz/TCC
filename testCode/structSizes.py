@@ -29,6 +29,7 @@ class StructSizes:
 	# THE vgl CONSTRUCTOR CREATES A NEW CONTEXT
 	# AND INITIATES THE QUEUE, ADDING QUE CONTEXT TO IT.
 	def __init__(self):
+		print("--> SSs")
 		print("Starting OpenCL")
 		self.platform = cl.get_platforms()[0]
 		self.devs = self.platform.get_devices()
@@ -60,7 +61,7 @@ class StructSizes:
 	def execute(self):
 		# CREATING NUMPY ARRAY
 		self.struct_sizes_host = np.zeros(11, np.uint32)
-		print(self.struct_sizes_host)
+		#print("In:", self.struct_sizes_host)
 
 		self.mf = cl.mem_flags
 		self.struct_sizes_device = cl.Buffer( self.ctx, self.mf.READ_ONLY, self.struct_sizes_host.nbytes )
@@ -70,7 +71,8 @@ class StructSizes:
 		self.pgr.get_struct_sizes(self.queue, self.struct_sizes_host.shape, None, self.struct_sizes_device).wait()
 
 		cl.enqueue_copy(self.queue, self.struct_sizes_host, self.struct_sizes_device, is_blocking=True)
-		#print(self.struct_sizes_host)
+		#print("Out:", self.struct_sizes_host)
 
 	def get_struct_sizes(self):
+		print("Getting Structure Sizes")
 		return self.struct_sizes_host

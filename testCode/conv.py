@@ -79,14 +79,13 @@ class vgl:
 
 	def loadImage(self, imgpath):
 		print("Opening image to be processed")
-
+		
 		self.vglimage = VglImage(imgpath)
 		if( self.vglimage.getVglShape().getNChannels() == 3 ):
 			self.vglimage.rgb_to_rgba()
-		self.vglimage.vglImageUpload(self.ctx, self.queue)
-		self.img_out_cl = self.vglimage.get_similar_device_image_object(self.ctx, self.queue)
 
-		self.makeStructures()
+		self.vglimage.vglNdImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage.get_similar_device_image_object(self.ctx, self.queue)
 
 	def makeStructures(self):
 		print("Making Structures")
@@ -117,50 +116,34 @@ class vgl:
 		self.copy_into_byte_array(image_cl_shape.size, vgl_shape_obj, ss[10])
 
 		# CREATING DEVICE BUFFER TO HOLD STRUCT DATA
-		self.vglstrel_buffer = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_strel_obj.nbytes)
-		self.vglshape_buffer = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_shape_obj.nbytes)
+		self.window = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_strel_obj.nbytes)
+		self.img_shape = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_shape_obj.nbytes)
 				
 		# COPYING DATA FROM HOST TO DEVICE
-		cl.enqueue_copy(self.queue, self.vglstrel_buffer, vgl_strel_obj, is_blocking=True)
-		cl.enqueue_copy(self.queue, self.vglshape_buffer, vgl_shape_obj, is_blocking=True)
+		cl.enqueue_copy(self.queue, self.window, vgl_strel_obj, is_blocking=True)
+		cl.enqueue_copy(self.queue, self.img_shape, vgl_shape_obj, is_blocking=True)
 
 	def copy_into_byte_array(self, value, byte_array, offset):
 		for i,b in enumerate( value.tobytes() ):
 			byte_array[i+offset] = b
-		
+
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
-		"""
-		buffer_list = [self.vglimage.get_device_image(), self.img_out_cl, self.vglshape_buffer, self.vglstrel_buffer]
-		self.pgr.vglClNdConvolution.set_args(*buffer_list)
-		self.pgr.vglClNdConvolution.set_scalar_arg_dtypes( [None]*len(buffer_list) )
-		
-		# COMPUTAR KERNEL
-		cl.event = cl.enqueue_nd_range_kernel(self.queue,
-											  self.pgr.vglClNdConvolution, 
-											  self.vglimage.get_device_image().shape, 
-											  None)
-		# Fetch the data back from the GPU and finish
-		# cl.enqueue_copy(cl_state.queue, img_output, img_output_buffer)
-		self.queue.finish() 
-		"""
-		
-		self.pgr.vglClNdConvolution(self.queue,
-									self.vglimage.get_device_image().shape,
-									None, 
-									self.vglimage.get_device_image(), 
-									self.img_out_cl,
-									self.vglshape_buffer,
-									self.vglstrel_buffer).wait()
+		self.pgr.vglClNdConvolution(self.queue, 
+							        self.img_out_cl.shape, 
+							        None,
+							        self.vglimage.get_device_image(), 
+							        self.img_out_cl,
+                                    self.img_shape,
+                                    self.window).wait()
 		
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
-
 		if( self.vglimage.getVglShape().getNChannels() == 4 ):
 			self.vglimage.rgba_to_rgb()
-		
 		self.vglimage.img_save(outputpath)
+
 
 CLPath = "../../CL_ND/vglClNdConvolution.cl"
 inPath = sys.argv[1]
@@ -169,4 +152,5 @@ ouPath = sys.argv[2]
 process = vgl()
 process.loadCL(CLPath)
 process.loadImage(inPath)
+process.makeStructures()
 process.execute(ouPath)
