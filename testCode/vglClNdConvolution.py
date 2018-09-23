@@ -79,12 +79,12 @@ class vgl:
 
 	def loadImage(self, imgpath):
 		print("Opening image to be processed")
-
+		
 		self.vglimage = VglImage(imgpath)
-		if( self.vglimage.getVglShape().getNChannels() == 3 ):
-			self.vglimage.rgb_to_rgba()
-		self.vglimage.vglImageUpload(self.ctx, self.queue)
-		self.img_out_cl = self.vglimage.get_similar_device_image_object(self.ctx, self.queue)
+		
+		mf = cl.mem_flags
+		self.vglimage.vglNdImageUpload(self.ctx, self.queue)
+		self.img_out_cl = cl.Buffer(self.ctx, mf.WRITE_ONLY, self.vglimage.get_host_image().nbytes)
 
 		self.makeStructures()
 
@@ -100,9 +100,12 @@ class vgl:
 		self.strEl.constructorFromTypeNdim(vc.VGL_STREL_GAUSS(), 5) # gaussian blur of size 5
 		self.vglClStrEl = self.strEl.asVglClStrEl()
 
+		print("Structurant Element")
+		print(self.strEl.data.shape )
+
 		vgl_strel_obj = np.zeros(ss[0], np.uint8)
 		vgl_shape_obj = np.zeros(ss[6], np.uint8)
-
+		
 		# COPYING DATA AS BYTES TO HOST BUFFER
 		self.copy_into_byte_array(self.vglClStrEl.data, vgl_strel_obj, ss[1])
 		self.copy_into_byte_array(self.vglClStrEl.ndim, vgl_strel_obj, ss[2])
@@ -131,23 +134,9 @@ class vgl:
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
-		"""
-		buffer_list = [self.vglimage.get_device_image(), self.img_out_cl, self.vglshape_buffer, self.vglstrel_buffer]
-		self.pgr.vglClNdConvolution.set_args(*buffer_list)
-		self.pgr.vglClNdConvolution.set_scalar_arg_dtypes( [None]*len(buffer_list) )
-		
-		# COMPUTAR KERNEL
-		cl.event = cl.enqueue_nd_range_kernel(self.queue,
-											  self.pgr.vglClNdConvolution, 
-											  self.vglimage.get_device_image().shape, 
-											  None)
-		# Fetch the data back from the GPU and finish
-		# cl.enqueue_copy(cl_state.queue, img_output, img_output_buffer)
-		self.queue.finish() 
-		"""
 		
 		self.pgr.vglClNdConvolution(self.queue,
-									self.vglimage.get_device_image().shape,
+									self.vglimage.get_host_image().shape,
 									None, 
 									self.vglimage.get_device_image(), 
 									self.img_out_cl,
@@ -155,11 +144,7 @@ class vgl:
 									self.vglstrel_buffer).wait()
 		
 		self.vglimage.set_device_image(self.img_out_cl)
-		self.vglimage.sync(self.ctx, self.queue)
-
-		if( self.vglimage.getVglShape().getNChannels() == 4 ):
-			self.vglimage.rgba_to_rgb()
-		
+		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
 		self.vglimage.img_save(outputpath)
 
 CLPath = "../../CL_ND/vglClNdConvolution.cl"
