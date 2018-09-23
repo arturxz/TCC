@@ -81,16 +81,11 @@ class vgl:
 		print("Opening image to be processed")
 		
 		self.vglimage = VglImage(imgpath)
-		if( self.vglimage.getVglShape().getNChannels() == 3 ):
-			self.vglimage.rgb_to_rgba()
 		
 		mf = cl.mem_flags
 		self.vglimage.vglNdImageUpload(self.ctx, self.queue)
 		self.img_out_cl = cl.Buffer(self.ctx, mf.WRITE_ONLY, self.vglimage.get_host_image().nbytes)
 		
-		# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
-		cl.enqueue_copy(self.queue, self.vglimage.get_device_image(), self.vglimage.get_host_image().tobytes(), is_blocking=True)
-
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
@@ -102,8 +97,6 @@ class vgl:
 		
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
-		if( self.vglimage.getVglShape().getNChannels() == 4 ):
-			self.vglimage.rgba_to_rgb()
 		self.vglimage.img_save(outputpath)
 
 
