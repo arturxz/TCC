@@ -33,7 +33,7 @@ class VglStrEl(object):
 		Then, on this object, the name "Type" will replace "type".
 	"""
 	def constructorFromTypeNdim(self, Type, ndim):
-		shape = np.zeros((vc.VGL_MAX_DIM()), np.int32)
+		shape = np.zeros(vc.VGL_MAX_DIM(), np.int32)
 		shape[0] = 1
 		shape[2] = 1
 
@@ -51,35 +51,35 @@ class VglStrEl(object):
 			coord = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
 
 			for i in range(0, size):
-				data[i] = 0.0
+				data[i] = np.float32(0.0)
 
 			for d in range(1, ndim+1):
-				coord[d] = 1
+				coord[d] = np.int32(1)
 
 			index = vglShape.getIndexFromCoord(coord)
-			data[index] = 1.0
+			data[index] = np.float32(1.0)
 
 			for d in range(1, ndim+1):
-				coord[d] = 0
+				coord[d] = np.int32(0)
 				index = vglShape.getIndexFromCoord(coord)
-				data[index] = 1.0
+				data[index] = np.float32(1.0)
 
-				coord[d] = 1
+				coord[d] = np.int32(1)
 
 		elif( Type == vc.VGL_STREL_GAUSS() ):
 			coord = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
-			coord[0] = 0
+			coord[0] = np.int32(0)
 			size = vglShape.getSize()
 
 			for i in range(0, size):
-				val = 1.0
+				val = np.float32(1.0)
 				vglShape.getCoordFromIndex(i, coord)
 
 				for d in range(1, ndim+1):
 					if( coord[d] == 1 ):
-						val *= 0.5
+						val *= np.float32(0.5)
 					else:
-						val *= 0.25
+						val *= np.float32(0.25)
 
 				data[i] = val
 

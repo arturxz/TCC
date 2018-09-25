@@ -85,74 +85,22 @@ class vgl:
 		mf = cl.mem_flags
 		self.vglimage.vglNdImageUpload(self.ctx, self.queue)
 		self.img_out_cl = cl.Buffer(self.ctx, mf.WRITE_ONLY, self.vglimage.get_host_image().nbytes)
-
-		self.makeStructures()
-
-	def makeStructures(self):
-		print("Making Structures")
-		mf = cl.mem_flags
-
-		ss = StructSizes()
-		ss = ss.get_struct_sizes()
-
-		# MAKING STRUCTURING ELEMENT
-		self.strEl = VglStrEl()
-		self.strEl.constructorFromTypeNdim(vc.VGL_STREL_MEAN(), 2) # gaussian blur of size 5
-		self.vglClStrEl = self.strEl.asVglClStrEl()
-
-		vgl_strel_obj = np.zeros(ss[0], np.uint8)
-		vgl_shape_obj = np.zeros(ss[6], np.uint8)
-		
-		# COPYING DATA AS BYTES TO HOST BUFFER
-		self.copy_into_byte_array(self.vglClStrEl.data, vgl_strel_obj, ss[1])
-		self.copy_into_byte_array(self.vglClStrEl.ndim, vgl_strel_obj, ss[2])
-		self.copy_into_byte_array(self.vglClStrEl.shape, vgl_strel_obj, ss[3])
-		self.copy_into_byte_array(self.vglClStrEl.offset, vgl_strel_obj, ss[4])
-		self.copy_into_byte_array(self.vglClStrEl.size, vgl_strel_obj, ss[5])
-
-		image_cl_shape = self.vglimage.getVglShape().asVglClShape()
-		self.copy_into_byte_array(image_cl_shape.ndim, vgl_shape_obj, ss[7])
-		self.copy_into_byte_array(image_cl_shape.shape, vgl_shape_obj, ss[8])
-		self.copy_into_byte_array(image_cl_shape.offset, vgl_shape_obj, ss[9])
-		self.copy_into_byte_array(image_cl_shape.size, vgl_shape_obj, ss[10])
-
-		print("##########ORIGINAL##########")
-		print("StrEl shape:", self.vglClStrEl.shape)
-		print("StrEl data:", self.vglClStrEl.data)
-		print("StrEl ndim:", self.vglClStrEl.ndim)
-		print("StrEl size:", self.vglClStrEl.size)
-		print("Shape ndim:", image_cl_shape.ndim)
-		print("Shape ndim:", image_cl_shape.size)
-
-		# CREATING DEVICE BUFFER TO HOLD STRUCT DATA
-		self.vglstrel_buffer = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_strel_obj.nbytes)
-		self.vglshape_buffer = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_shape_obj.nbytes)
-				
-		# COPYING DATA FROM HOST TO DEVICE
-		cl.enqueue_copy(self.queue, self.vglstrel_buffer, vgl_strel_obj.tobytes(), is_blocking=True)
-		cl.enqueue_copy(self.queue, self.vglshape_buffer, vgl_shape_obj.tobytes(), is_blocking=True)
-
-	def copy_into_byte_array(self, value, byte_array, offset):
-		for it,Byte in enumerate( value.tobytes() ):
-			byte_array[it+offset] = Byte
 		
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
-		
-		self.pgr.vglClNdConvolution(self.queue,
-						   self.vglimage.get_host_image().shape,
-						   None, 
-						   self.vglimage.get_device_image(), 
-						   self.img_out_cl,
-						   self.vglshape_buffer,
-						   self.vglstrel_buffer).wait()
+		self.pgr.vglClNdNot(self.queue,
+							self.vglimage.get_host_image().shape,
+							None,
+							self.vglimage.get_device_image(),
+							self.img_out_cl).wait()
 		
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
 		self.vglimage.img_save(outputpath)
 
-CLPath = "../../CL_ND/vglClNdConvolution.cl"
+
+CLPath = "../../CL_ND/vglClNdNot.cl"
 inPath = sys.argv[1]
 ouPath = sys.argv[2] 
 

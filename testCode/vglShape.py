@@ -116,7 +116,7 @@ class VglShape(object):
 	def getIndexFromCoord(self, coord):
 		result = 0
 
-		for d in range(0, ndim+1):
+		for d in range(0, self.getNdim()+1):
 			result += self.offset[d] * coord[d]
 
 		return result
