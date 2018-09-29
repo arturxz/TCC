@@ -1,17 +1,5 @@
-typedef struct VglClStrEl{ 
-    float data[256];
-    int ndim;
-    int shape[20];
-    int offset[20];
-    int size;
-} VglClStrEl;
-
-typedef struct VglClShape{ 
-    int ndim;
-    int shape[20];
-    int offset[20];
-    int size;
-} VglClShape;
+#include "vglClShape.h"
+#include "vglClStrEl.h"
 
 __kernel void get_struct_sizes( __global uint *struct_sizes )
 {

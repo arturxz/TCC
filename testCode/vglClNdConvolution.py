@@ -95,6 +95,9 @@ class vgl:
 		ss = StructSizes()
 		ss = ss.get_struct_sizes()
 
+		print("Structure Sizes:")
+		print(ss)
+
 		# MAKING STRUCTURING ELEMENT
 		self.strEl = VglStrEl()
 		self.strEl.constructorFromTypeNdim(vc.VGL_STREL_CROSS(), 2)
@@ -124,10 +127,10 @@ class vgl:
 		print("StrEl size:", self.vglClStrEl.size)
 
 		print("########## IN BUFFER ##########")
-		print("StrEl data:\n",  np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.float32, count=256, offset=ss[1] ) )
+		print("StrEl data:\n",np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.float32, count=vc.VGL_ARR_CLSTREL_SIZE(), offset=ss[1] ) )
 		print("StrEl ndim:",  np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=1, offset=ss[2] ) )
-		print("StrEl shape:", np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=20, offset=ss[3] ) )
-		print("StrEl offset:",np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=20, offset=ss[4] ) )
+		print("StrEl shape:", np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=vc.VGL_ARR_SHAPE_SIZE(), offset=ss[3] ) )
+		print("StrEl offset:",np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=vc.VGL_ARR_SHAPE_SIZE(), offset=ss[4] ) )
 		print("StrEl size:",  np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=1, offset=ss[5] ) )
 
 		# CREATING DEVICE BUFFER TO HOLD STRUCT DATA
@@ -139,8 +142,8 @@ class vgl:
 		cl.enqueue_copy(self.queue, self.vglshape_buffer, vgl_shape_obj.tobytes(), is_blocking=True)
 
 	def copy_into_byte_array(self, value, byte_array, offset):
-		for it,Byte in enumerate( value.tobytes() ):
-			byte_array[it+offset] = Byte
+		for iterator, byte in enumerate( value.tobytes() ):
+			byte_array[iterator+offset] = byte
 		
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
@@ -165,4 +168,4 @@ ouPath = sys.argv[2]
 process = vgl()
 process.loadCL(CLPath)
 process.loadImage(inPath)
-process.execute(ouPath)
+#process.execute(ouPath)

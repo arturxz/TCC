@@ -25,34 +25,26 @@ __kernel void testprobe(__global unsigned char* img_input,
   if (coord == 0){
 	printf("########## IN KERNEL ##########\n");
 	printf("StrEl Data:\n");
-	for(i=0; i< 256; i++){
-		printf("%.2f ", window->data[i]);
+	for(i=0; i< VGL_ARR_CLSTREL_SIZE; i++){
+		printf("%.0f ", window->data[i]);
 		if(i > 0 && (i % 24) == 0 ){
 			printf("\n");
 		}
 	}
 	printf("\n");
-	
 	printf("-> StrEl ndim: %i\n", window->ndim);
-	
 	printf("StrEl Shape:\n");
 	unsigned int i = 0;
-	for(i=0; i< 20; i++){
-		printf("%i ", window->shape[i]);
-		if(i > 0 && (i % 10) == 0 ){
-			printf("\n");
-		}
+	for(i=0; i< VGL_ARR_SHAPE_SIZE; i++){
+		printf("%d ", window->shape[i]);
 	}
 	printf("\n");
 	printf("StrEl Offset:\n");
-	for(i=0; i< 20; i++){
-		printf("%i ", window->offset[i]);
-		if(i > 0 && (i % 10) == 0 ){
-			printf("\n");
-		}
+	for(i=0; i< VGL_ARR_SHAPE_SIZE; i++){
+		printf("%d ", window->offset[i]);
 	}
 	printf("\n");
-	printf("-> StrEl size: %i\n", window->size);
+	printf("-> StrEl size: %d\n", window->size);
   }
   img_output[coord] = (unsigned char)125;
 }
