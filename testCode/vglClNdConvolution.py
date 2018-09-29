@@ -97,12 +97,12 @@ class vgl:
 
 		# MAKING STRUCTURING ELEMENT
 		self.strEl = VglStrEl()
-		self.strEl.constructorFromTypeNdim(vc.VGL_STREL_MEAN(), 2) # gaussian blur of size 5
+		self.strEl.constructorFromTypeNdim(vc.VGL_STREL_CROSS(), 2)
 		self.vglClStrEl = self.strEl.asVglClStrEl()
 
 		vgl_strel_obj = np.zeros(ss[0], np.uint8)
 		vgl_shape_obj = np.zeros(ss[6], np.uint8)
-		
+
 		# COPYING DATA AS BYTES TO HOST BUFFER
 		self.copy_into_byte_array(self.vglClStrEl.data, vgl_strel_obj, ss[1])
 		self.copy_into_byte_array(self.vglClStrEl.ndim, vgl_strel_obj, ss[2])
@@ -116,13 +116,19 @@ class vgl:
 		self.copy_into_byte_array(image_cl_shape.offset, vgl_shape_obj, ss[9])
 		self.copy_into_byte_array(image_cl_shape.size, vgl_shape_obj, ss[10])
 
-		print("##########ORIGINAL##########")
-		print("StrEl shape:", self.vglClStrEl.shape)
-		print("StrEl data:", self.vglClStrEl.data)
+		print("########## IN PYTHON ##########")
+		print("StrEl data:\n", self.vglClStrEl.data)
 		print("StrEl ndim:", self.vglClStrEl.ndim)
+		print("StrEl shape:", self.vglClStrEl.shape)
+		print("StrEl offset:", self.vglClStrEl.offset)
 		print("StrEl size:", self.vglClStrEl.size)
-		print("Shape ndim:", image_cl_shape.ndim)
-		print("Shape ndim:", image_cl_shape.size)
+
+		print("########## IN BUFFER ##########")
+		print("StrEl data:\n",  np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.float32, count=256, offset=ss[1] ) )
+		print("StrEl ndim:",  np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=1, offset=ss[2] ) )
+		print("StrEl shape:", np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=20, offset=ss[3] ) )
+		print("StrEl offset:",np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=20, offset=ss[4] ) )
+		print("StrEl size:",  np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=1, offset=ss[5] ) )
 
 		# CREATING DEVICE BUFFER TO HOLD STRUCT DATA
 		self.vglstrel_buffer = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_strel_obj.nbytes)
@@ -140,7 +146,7 @@ class vgl:
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
 		
-		self.pgr.vglClNdConvolution(self.queue,
+		self.pgr.testprobe(self.queue,
 						   self.vglimage.get_host_image().shape,
 						   None, 
 						   self.vglimage.get_device_image(), 
@@ -152,7 +158,7 @@ class vgl:
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
 		self.vglimage.img_save(outputpath)
 
-CLPath = "../../CL_ND/vglClNdConvolution.cl"
+CLPath = "../../CL_ND/testprobe.cl"
 inPath = sys.argv[1]
 ouPath = sys.argv[2] 
 
