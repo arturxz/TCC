@@ -10,7 +10,6 @@ __kernel void get_struct_sizes( __global uint *struct_sizes )
 
     if (global_id == 0){
         base = (uint) &strel;
-        // DATA STARTS IN POSITION __
         struct_sizes[0] = (uint) sizeof(strel);
 		struct_sizes[1] = (uint) (&strel.data)-base;
 		struct_sizes[2] = (uint) (&strel.shape)-base;

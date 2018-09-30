@@ -24,9 +24,24 @@ __kernel void testprobe(__global unsigned char* img_input,
   unsigned int i = 0;
   if (coord == 0){
 	printf("########## IN KERNEL ##########\n");
+	// SHAPE DATA
+	printf("-> Shape ndim: %d\n", img_shape->ndim);	
+	printf("Shape Shape:\n");
+	for(i=0; i< VGL_ARR_SHAPE_SIZE; i++){
+		printf("%d ", img_shape->shape[i]);
+	}
+	printf("\n");
+	printf("Shape Offset:\n");
+	for(i=0; i< VGL_ARR_SHAPE_SIZE; i++){
+		printf("%d ", img_shape->offset[i]);
+	}
+	printf("\n");
+	printf("-> Shape size: %d\n", img_shape->size);	
+	
+	// STREL DATA
 	printf("StrEl Data:\n");
 	for(i=0; i< VGL_ARR_CLSTREL_SIZE; i++){
-		printf("%.0f ", window->data[i]);
+		printf("%.2f ", window->data[i]);
 		if(i > 0 && (i % 24) == 0 ){
 			printf("\n");
 		}

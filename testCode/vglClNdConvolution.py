@@ -63,8 +63,14 @@ class vgl:
 		#print("Build Options:\n", self.build_options)
 
 		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
-		for file in glob.glob(buildDir+"/*.h"):
-			self.pgr = cl.Program(self.ctx, open(file, "r"))
+		while( buildDir ):
+			for file in glob.glob(buildDir+"/*.h"):
+				print(file)
+				self.pgr = cl.Program(self.ctx, open(file, "r"))
+			
+			buildDir = self.getDir(buildDir)
+		#for file in glob.glob(buildDir+"/*.h"):
+		#	self.pgr = cl.Program(self.ctx, open(file, "r"))
 
 		if ((self.builded == False)):
 			self.pgr = cl.Program(self.ctx, self.kernel_file.read())
@@ -95,43 +101,51 @@ class vgl:
 		ss = StructSizes()
 		ss = ss.get_struct_sizes()
 
-		print("Structure Sizes:")
-		print(ss)
-
 		# MAKING STRUCTURING ELEMENT
 		self.strEl = VglStrEl()
 		self.strEl.constructorFromTypeNdim(vc.VGL_STREL_CROSS(), 2)
-		self.vglClStrEl = self.strEl.asVglClStrEl()
+		
+		image_cl_strel = self.strEl.asVglClStrEl()
+		image_cl_shape = self.vglimage.getVglShape().asVglClShape()
 
 		vgl_strel_obj = np.zeros(ss[0], np.uint8)
 		vgl_shape_obj = np.zeros(ss[6], np.uint8)
 
 		# COPYING DATA AS BYTES TO HOST BUFFER
-		self.copy_into_byte_array(self.vglClStrEl.data, vgl_strel_obj, ss[1])
-		self.copy_into_byte_array(self.vglClStrEl.ndim, vgl_strel_obj, ss[2])
-		self.copy_into_byte_array(self.vglClStrEl.shape, vgl_strel_obj, ss[3])
-		self.copy_into_byte_array(self.vglClStrEl.offset, vgl_strel_obj, ss[4])
-		self.copy_into_byte_array(self.vglClStrEl.size, vgl_strel_obj, ss[5])
+		self.copy_into_byte_array(image_cl_strel.data,  vgl_strel_obj, ss[1])
+		self.copy_into_byte_array(image_cl_strel.shape, vgl_strel_obj, ss[2])
+		self.copy_into_byte_array(image_cl_strel.offset,vgl_strel_obj, ss[3])
+		self.copy_into_byte_array(image_cl_strel.ndim,  vgl_strel_obj, ss[4])
+		self.copy_into_byte_array(image_cl_strel.size,  vgl_strel_obj, ss[5])
 
-		image_cl_shape = self.vglimage.getVglShape().asVglClShape()
-		self.copy_into_byte_array(image_cl_shape.ndim, vgl_shape_obj, ss[7])
+		self.copy_into_byte_array(image_cl_shape.ndim,  vgl_shape_obj, ss[7])
 		self.copy_into_byte_array(image_cl_shape.shape, vgl_shape_obj, ss[8])
-		self.copy_into_byte_array(image_cl_shape.offset, vgl_shape_obj, ss[9])
+		self.copy_into_byte_array(image_cl_shape.offset,vgl_shape_obj, ss[9])
 		self.copy_into_byte_array(image_cl_shape.size, vgl_shape_obj, ss[10])
 
 		print("########## IN PYTHON ##########")
-		print("StrEl data:\n", self.vglClStrEl.data)
-		print("StrEl ndim:", self.vglClStrEl.ndim)
-		print("StrEl shape:", self.vglClStrEl.shape)
-		print("StrEl offset:", self.vglClStrEl.offset)
-		print("StrEl size:", self.vglClStrEl.size)
+		print("Shape ndim:",  image_cl_shape.ndim)
+		print("Shape shape:", image_cl_shape.shape)
+		print("Shape offset:",image_cl_shape.offset)
+		print("Shape size:",  image_cl_shape.size)
+
+		print("StrEl data:\n", image_cl_strel.data)
+		print("StrEl ndim:", image_cl_strel.ndim)
+		print("StrEl shape:", image_cl_strel.shape)
+		print("StrEl offset:", image_cl_strel.offset)
+		print("StrEl size:", image_cl_strel.size)
 
 		print("########## IN BUFFER ##########")
-		print("StrEl data:\n",np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.float32, count=vc.VGL_ARR_CLSTREL_SIZE(), offset=ss[1] ) )
-		print("StrEl ndim:",  np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=1, offset=ss[2] ) )
-		print("StrEl shape:", np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=vc.VGL_ARR_SHAPE_SIZE(), offset=ss[3] ) )
-		print("StrEl offset:",np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=vc.VGL_ARR_SHAPE_SIZE(), offset=ss[4] ) )
-		print("StrEl size:",  np.frombuffer( vgl_strel_obj.tobytes(), dtype=np.int32, count=1, offset=ss[5] ) )
+		print("Shape ndim:",  np.frombuffer( vgl_shape_obj, dtype=np.int32, count=1, offset=ss[7] ) )
+		print("Shape shape:", np.frombuffer( vgl_shape_obj, dtype=np.int32, count=vc.VGL_ARR_SHAPE_SIZE(), offset=ss[8] ) )
+		print("Shape offset:",np.frombuffer( vgl_shape_obj, dtype=np.int32, count=vc.VGL_ARR_SHAPE_SIZE(), offset=ss[9] ) )
+		print("Shape size:",  np.frombuffer( vgl_shape_obj, dtype=np.int32, count=1, offset=ss[10] ) )
+
+		print("StrEl data:\n",np.frombuffer( vgl_strel_obj, dtype=np.float32, count=vc.VGL_ARR_CLSTREL_SIZE(), offset=ss[1] ) )
+		print("StrEl ndim:",  np.frombuffer( vgl_strel_obj, dtype=np.int32, count=1, offset=ss[4] ) )
+		print("StrEl shape:", np.frombuffer( vgl_strel_obj, dtype=np.int32, count=vc.VGL_ARR_SHAPE_SIZE(), offset=ss[2] ) )
+		print("StrEl offset:",np.frombuffer( vgl_strel_obj, dtype=np.int32, count=vc.VGL_ARR_SHAPE_SIZE(), offset=ss[3] ) )
+		print("StrEl size:",  np.frombuffer( vgl_strel_obj, dtype=np.int32, count=1, offset=ss[5] ) )
 
 		# CREATING DEVICE BUFFER TO HOLD STRUCT DATA
 		self.vglstrel_buffer = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_strel_obj.nbytes)
@@ -168,4 +182,4 @@ ouPath = sys.argv[2]
 process = vgl()
 process.loadCL(CLPath)
 process.loadImage(inPath)
-#process.execute(ouPath)
+process.execute(ouPath)

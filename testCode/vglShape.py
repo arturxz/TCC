@@ -3,10 +3,11 @@ import vglConst as vc
 
 class VglClShape(object):
 	def __init__(self, ndim=0, size=0):
-		self.ndim = np.int32(ndim)
 		self.shape = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.offset = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
+		self.ndim = np.int32(ndim)
 		self.size = np.int32(size)
+
 
 class VglShape(object):
 
