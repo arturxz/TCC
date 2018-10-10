@@ -24,6 +24,7 @@ class VglStrEl(object):
 		for i in range(0, size):
 			self.data[i] = data[i]
 
+	# EQUIVALENT TO THE FIRST CONSTRUCTOR ON vglStrEl
 	def constructorFromDataVglShape(self, data, vglShape):
 		self.VglCreateStrEl(data, vglShape)
 
@@ -32,12 +33,13 @@ class VglStrEl(object):
 		but "type" is a reserved name in Python.
 		Then, on this object, the name "Type" will replace "type".
 	"""
+	# EQUIVALENT TO THE SECOND CONSTRUCTOR ON vglStrEl
 	def constructorFromTypeNdim(self, Type, ndim):
 		shape = np.zeros(vc.VGL_MAX_DIM(), np.int32)
 		shape[0] = 1
 		shape[2] = 1
 
-		for i in range(1, ndim+1):
+		for i in range(1, ndim+1): # ndim+1 cuz in c++ is for i <= ndim
 			shape[i] = 3
 
 		vglShape = VglShape()
@@ -64,7 +66,11 @@ class VglStrEl(object):
 				index = vglShape.getIndexFromCoord(coord)
 				data[index] = np.float32(1.0)
 
-				coord[d] = np.int32(1)
+				coord[d] = np.int32(2)
+				index = vglShape.getIndexFromCoord(coord)
+				data[index] = np.float32(1.0)
+
+				coord[d] = 1
 
 		elif( Type == vc.VGL_STREL_GAUSS() ):
 			coord = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
@@ -77,29 +83,25 @@ class VglStrEl(object):
 
 				for d in range(1, ndim+1):
 					if( coord[d] == 1 ):
-						val *= np.float32(0.5)
+						val = val * np.float32(0.5)
 					else:
-						val *= np.float32(0.25)
+						val = val * np.float32(0.25)
 
 				data[i] = val
 
 		elif( Type == vc.VGL_STREL_MEAN() ):
-
 			for i in range(0, size):
 				data[i] = 1.0 / size
 
 		elif( Type == vc.VGL_STREL_CUBE() ):
-
 			for i in range(0, size):
 				data[i] = 1.0
 		else:
-
 			for i in range(0, size):
 				data[i] = 1.0
+			
 
 		self.constructorFromDataVglShape(data, vglShape)
-		del vglShape
-		del data
 
 	def getData(self):
 		return self.data
@@ -122,8 +124,8 @@ class VglStrEl(object):
 	def asVglClStrEl(self):
 		result = VglClStrEl()
 		shape = self.vglShape.asVglClShape()
+
 		size = self.getSize()
-		
 		if( size > vc.VGL_ARR_CLSTREL_SIZE() ):
 			print("Error: structuring element size > VGL_ARR_CLSTREL_SIZE. Change this value in vglClStrEl.h to a greater one.")
 

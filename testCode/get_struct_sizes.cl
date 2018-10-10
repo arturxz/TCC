@@ -1,5 +1,17 @@
-#include "vglClShape.h"
-#include "vglClStrEl.h"
+typedef struct VglClStrEl{ 
+    float data[VGL_ARR_CLSTREL_SIZE];
+    int ndim;
+    int shape[VGL_ARR_SHAPE_SIZE];
+    int offset[VGL_ARR_SHAPE_SIZE];
+    int size;
+} VglClStrEl;
+
+typedef struct VglClShape{ 
+    int ndim;
+    int shape[VGL_ARR_SHAPE_SIZE];
+    int offset[VGL_ARR_SHAPE_SIZE];
+    int size;
+} VglClShape;
 
 __kernel void get_struct_sizes( __global uint *struct_sizes )
 {
@@ -10,6 +22,7 @@ __kernel void get_struct_sizes( __global uint *struct_sizes )
 
     if (global_id == 0){
         base = (uint) &strel;
+        // DATA STARTS IN POSITION __
         struct_sizes[0] = (uint) sizeof(strel);
 		struct_sizes[1] = (uint) (&strel.data)-base;
 		struct_sizes[2] = (uint) (&strel.shape)-base;

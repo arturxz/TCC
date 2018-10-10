@@ -65,12 +65,9 @@ class vgl:
 		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
 		while( buildDir ):
 			for file in glob.glob(buildDir+"/*.h"):
-				print(file)
 				self.pgr = cl.Program(self.ctx, open(file, "r"))
 			
 			buildDir = self.getDir(buildDir)
-		#for file in glob.glob(buildDir+"/*.h"):
-		#	self.pgr = cl.Program(self.ctx, open(file, "r"))
 
 		if ((self.builded == False)):
 			self.pgr = cl.Program(self.ctx, self.kernel_file.read())
@@ -122,7 +119,8 @@ class vgl:
 		self.copy_into_byte_array(image_cl_shape.shape, vgl_shape_obj, ss[8])
 		self.copy_into_byte_array(image_cl_shape.offset,vgl_shape_obj, ss[9])
 		self.copy_into_byte_array(image_cl_shape.size, vgl_shape_obj, ss[10])
-
+		
+		"""
 		print("########## IN PYTHON ##########")
 		print("Shape ndim:",  image_cl_shape.ndim)
 		print("Shape shape:", image_cl_shape.shape)
@@ -146,6 +144,7 @@ class vgl:
 		print("StrEl shape:", np.frombuffer( vgl_strel_obj, dtype=np.int32, count=vc.VGL_ARR_SHAPE_SIZE(), offset=ss[2] ) )
 		print("StrEl offset:",np.frombuffer( vgl_strel_obj, dtype=np.int32, count=vc.VGL_ARR_SHAPE_SIZE(), offset=ss[3] ) )
 		print("StrEl size:",  np.frombuffer( vgl_strel_obj, dtype=np.int32, count=1, offset=ss[5] ) )
+		"""
 
 		# CREATING DEVICE BUFFER TO HOLD STRUCT DATA
 		self.vglstrel_buffer = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_strel_obj.nbytes)
@@ -163,19 +162,20 @@ class vgl:
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
 		
-		self.pgr.testprobe(self.queue,
-						   self.vglimage.get_host_image().shape,
-						   None, 
-						   self.vglimage.get_device_image(), 
-						   self.img_out_cl,
-						   self.vglshape_buffer,
-						   self.vglstrel_buffer).wait()
+		self.pgr.vglClNdConvolution(self.queue,
+									self.vglimage.get_host_image().shape,
+									None, 
+									self.vglimage.get_device_image(), 
+									self.img_out_cl,
+									self.vglshape_buffer,
+									self.vglstrel_buffer).wait()
 		
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
 		self.vglimage.img_save(outputpath)
 
-CLPath = "../../CL_ND/testprobe.cl"
+#CLPath = "../../CL_ND/testprobe.cl"
+CLPath = "../../CL_ND/vglClNdConvolution.cl"
 inPath = sys.argv[1]
 ouPath = sys.argv[2] 
 

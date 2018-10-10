@@ -85,7 +85,6 @@ class StructSizes:
 		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
 		while( buildDir ):
 			for file in glob.glob(buildDir+"/*.h"):
-				print(file)
 				self.pgr = cl.Program(self.ctx, open(file, "r"))
 			
 			buildDir = self.getDir(buildDir)
