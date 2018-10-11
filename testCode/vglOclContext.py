@@ -2,7 +2,7 @@ import pyopencl as cl
 import vglConst as vc
 import sys, glob, os
 
-class vglOclContext:
+class VglOclContext:
 	"""
 		THIS CLASS MANAGES THE PyOpenCL INICIAL INSTANCIATION AND
 		THE SYSTEM'S DEVICES AND ITS PROPERTIES (LIKE CONTEXT AND QUEUE).
@@ -24,8 +24,10 @@ class vglOclContext:
 		self.kernel_file = open(filepath, "r")
 		buildDir = self.getDir(filepath)
 
+		
 		self.build_options = ""
 		self.build_options = self.build_options + "-I "+buildDir
+		"""
 		self.build_options = self.build_options + " -D VGL_SHAPE_NCHANNELS={0}".format(vc.VGL_SHAPE_NCHANNELS())
 		self.build_options = self.build_options + " -D VGL_SHAPE_WIDTH={0}".format(vc.VGL_SHAPE_WIDTH())
 		self.build_options = self.build_options + " -D VGL_SHAPE_HEIGHT={0}".format(vc.VGL_SHAPE_HEIGHT())
@@ -37,13 +39,14 @@ class vglOclContext:
 		self.build_options = self.build_options + " -D VGL_STREL_CROSS={0}".format(vc.VGL_STREL_CROSS())
 		self.build_options = self.build_options + " -D VGL_STREL_GAUSS={0}".format(vc.VGL_STREL_GAUSS())
 		self.build_options = self.build_options + " -D VGL_STREL_MEAN={0}".format(vc.VGL_STREL_MEAN())
+		"""
 
 		#print("Build Options:\n", self.build_options)
 
 		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
 		while( buildDir ):
 			for file in glob.glob(buildDir+"/*.h"):
-				print(file)
+				#print(file)
 				self.pgr = cl.Program(self.ctx, open(file, "r"))
 			
 			buildDir = self.getDir(buildDir)
