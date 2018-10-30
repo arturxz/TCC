@@ -89,18 +89,20 @@ class vgl:
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
-		self.pgr.vglClNdCopy(self.queue,
-							self.vglimage.get_host_image().shape,
-							None,
-							self.vglimage.get_device_image(),
-							self.img_out_cl).wait()
+		self.pgr.vglClNdThreshold(self.queue,
+								  self.vglimage.get_host_image().shape,
+								  None,
+								  self.vglimage.get_device_image(),
+								  self.img_out_cl,
+								  np.uint8(90),
+								  np.uint8(200)).wait()
 		
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
 		self.vglimage.img_save(outputpath)
 
 
-CLPath = "../../CL_ND/vglClNdCopy.cl"
+CLPath = "../../CL_ND/vglClNdThreshold.cl"
 inPath = sys.argv[1]
 ouPath = sys.argv[2] 
 

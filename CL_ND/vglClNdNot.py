@@ -89,7 +89,7 @@ class vgl:
 	def execute(self, outputpath):
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
-		self.pgr.vglClNdCopy(self.queue,
+		self.pgr.vglClNdNot(self.queue,
 							self.vglimage.get_host_image().shape,
 							None,
 							self.vglimage.get_device_image(),
@@ -100,7 +100,7 @@ class vgl:
 		self.vglimage.img_save(outputpath)
 
 
-CLPath = "../../CL_ND/vglClNdCopy.cl"
+CLPath = "../../CL_ND/vglClNdNot.cl"
 inPath = sys.argv[1]
 ouPath = sys.argv[2] 
 
