@@ -3,10 +3,11 @@ import vglConst as vc
 
 class VglClShape(object):
 	def __init__(self, ndim=0, size=0):
-		self.ndim = np.int32(ndim)
 		self.shape = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.offset = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
+		self.ndim = np.int32(ndim)
 		self.size = np.int32(size)
+
 
 class VglShape(object):
 
@@ -116,7 +117,7 @@ class VglShape(object):
 	def getIndexFromCoord(self, coord):
 		result = 0
 
-		for d in range(0, ndim+1):
+		for d in range(0, self.getNdim()+1):
 			result += self.offset[d] * coord[d]
 
 		return result

@@ -246,14 +246,14 @@ class VglImage(object):
 		return img_copy
 	
 	def set_device_image(self, img):
-		if( isinstance(img, cl.Image) ):
+		if( isinstance(img, cl.Image) or isinstance(img, cl.Buffer) ):
 			self.img_device = img
 			
 			self.img_sync = False
 			self.last_changed_device = True
 			self.last_changed_host = False
 		else:
-			print("Invalid object. cl.Image objects only.")
+			print("Invalid object. cl.Image or cl.Buffer objects only.")
 	
 	def getVglShape(self):
 		return self.vglshape
