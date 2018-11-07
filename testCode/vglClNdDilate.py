@@ -23,6 +23,7 @@ class vgl:
 		self.queue = self.ocl_ctx.get_queue()
 		self.builded = False
 
+
 	# THIS FUNCTION WILL LOAD THE KERNEL FILE
 	# AND BUILD IT IF NECESSARY.
 	def loadCL(self, filepath):
@@ -96,20 +97,20 @@ class vgl:
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("Executing kernel")
 		
-		self.pgr.vglClNdConvolution(self.queue,
-									self.vglimage.get_host_image().shape,
-									None, 
-									self.vglimage.get_device_image(), 
-									self.img_out_cl,
-									self.vglshape_buffer,
-									self.vglstrel_buffer).wait()
+		self.pgr.vglClNdDilate(self.queue,
+							   self.vglimage.get_host_image().shape,
+							   None, 
+							   self.vglimage.get_device_image(), 
+							   self.img_out_cl,
+							   self.vglshape_buffer,
+							   self.vglstrel_buffer).wait()
 		
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
 		self.vglimage.img_save(outputpath)
 
 #CLPath = "../../CL_ND/testprobe.cl"
-CLPath = "../../CL_ND/vglClNdConvolution.cl"
+CLPath = "../../CL_ND/vglClNdDilate.cl"
 inPath = sys.argv[1]
 ouPath = sys.argv[2] 
 

@@ -1,19 +1,26 @@
-import pyopencl as cl
+# IMAGE MANIPULATION LIBRARYS
+from skimage import io
 import numpy as np
-import sys
-from vglImageTest import *
+
+# OPENCL LIBRARYS
+import pyopencl as cl
+
+# VGL LIBRARYS
+from vglImage import *
+from vglStrEl import *
+from structSizes import *
+from vglOclContext import *
+import vglConst as vc
 
 class vgl:
 	# THE vgl CONSTRUCTOR CREATES A NEW CONTEXT
 	# AND INITIATES THE QUEUE, ADDING QUE CONTEXT TO IT.
-	def __init__(self):
+	def __init__(self, filepath):
 		print("Starting OpenCL")
-		self.platform = cl.get_platforms()[0]
-		self.devs = self.platform.get_devices()
-		self.device = self.devs[0]
-		self.ctx = cl.Context([self.device])
-		#self.ctx = cl.create_some_context()
-		self.queue = cl.CommandQueue(self.ctx)
+		self.ocl_ctx = VglOclContext()
+		self.ocl_ctx.load_headers(filepath)
+		self.ctx = self.ocl_ctx.get_context()
+		self.queue = self.ocl_ctx.get_queue()
 		self.builded = False
 
 	# THIS FUNCTION WILL LOAD THE KERNEL FILE
@@ -23,12 +30,14 @@ class vgl:
 		self.kernel_file = open(filepath, "r")
 
 		if ((self.builded == False)):
+			print("::Building Kernel")
 			self.pgr = cl.Program(self.ctx, self.kernel_file.read())
-			self.pgr.build()
-			self.kernel_file.close()
+			self.pgr.build(options=self.ocl_ctx.get_build_options())
 			self.builded = True
 		else:
-			print("Kernel already builded. Going to next step...")
+			print("::Kernel already builded. Going to next step...")
+
+		self.kernel_file.close()
 
 	def loadImage(self, imgpath):
 		print("Opening image to be processed")
@@ -54,7 +63,7 @@ CLPath = "../../CL/vglCl3dBlurSq3.cl"
 inPath = sys.argv[1]
 ouPath = sys.argv[2] 
 
-process = vgl()
+process = vgl(CLPath)
 process.loadCL(CLPath)
 process.loadImage(inPath)
 process.execute(ouPath)
