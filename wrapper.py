@@ -127,24 +127,66 @@ class Wrapper:
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
 
-	# provavelmente precisa receber tambem o array pra efetuar a convolucao
-	def vglCl3dConvolution(self, filepath, imgIn, arr_window=None, window_x=5, window_y=5, window_z=5):
+	def vglCl3dConvolution(self, filepath, imgIn, arr_window, window_x, window_y, window_z):
 		self.loadCL(filepath)
 		self.loadImage3D(imgIn)
-
-		# array de testes para convolucao
-		arr_window = np.ones((5,5,5), np.float32) * (1/125)
-		arr_window_cl = cl.Buffer(self.ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=arr_window)
 
 		self.pgr.vglCl3dConvolution(self.queue,
 									self.img_out_cl.shape, 
 									None, 
 									self.vglimage.get_device_image(), 
 									self.img_out_cl,
-									arr_window_cl,
+									arr_window,
 									np.uint32(window_x),
 									np.uint32(window_y),
 									np.uint32(window_z))
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+	
+	def vglCl3dCopy(self, filepath, imgIn):
+		self.loadCL(filepath)
+		self.loadImage3D(imgIn)
+
+		self.pgr.vglCl3dCopy(self.queue, 
+							 self.img_out_cl.shape, 
+							 None, 
+							 self.vglimage.get_device_image(),
+							 self.img_out_cl)
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+
+	def vglCl3dDilate(self, filepath, imgIn, arr_window, window_x, window_y, window_z):
+		self.loadCL(filepath)
+		self.loadImage3D(imgIn)
+
+		self.pgr.vglCl3dDilate(self.queue,
+							   self.img_out_cl.shape, 
+							   None, 
+							   self.vglimage.get_device_image(), 
+							   self.img_out_cl,
+							   arr_window,
+							   np.uint32(window_x),
+							   np.uint32(window_y),
+							   np.uint32(window_z))
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+
+	def vglCl3dErode(self, filepath, imgIn, arr_window, window_x, window_y, window_z):
+		self.loadCL(filepath)
+		self.loadImage3D(imgIn)
+
+		self.pgr.vglCl3dErode(self.queue,
+							  self.img_out_cl.shape, 
+							  None, 
+							  self.vglimage.get_device_image(), 
+							  self.img_out_cl,
+							  arr_window,
+							  np.uint32(window_x),
+							  np.uint32(window_y),
+							  np.uint32(window_z))
 
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
@@ -180,20 +222,35 @@ class Wrapper:
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
 
 if __name__ == "__main__":
-	##
-	# PASTA CL
-	##
 
 	wrp = Wrapper()
 	"""
+	##
+	# PASTA CL
+	##
+	
 	# vglCl3dBlurSq3
 	wrp.vglCl3dBlurSq3("../CL/vglCl3dBlurSq3.cl", sys.argv[1])
 	wrp.saveImage(sys.argv[2])
-	"""
+	
 	# vglCl3dConvolution
-	wrp.vglCl3dConvolution("../CL/vglCl3dConvolution.cl", sys.argv[1])
+	arr_window = np.ones((5,5,5), np.float32) * (1/125)
+	arr_window_cl = cl.Buffer(wrp.ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=arr_window)
+	wrp.vglCl3dConvolution("../CL/vglCl3dConvolution.cl", sys.argv[1], arr_window_cl, 5, 5, 5)
+	wrp.saveImage(sys.argv[2])
+	
+	# vglCl3dCopy
+	wrp.vglCl3dCopy("../CL/vglCl3dCopy.cl", sys.argv[1])
 	wrp.saveImage(sys.argv[2])
 
+	# vglCl3dDilate
+	wrp.vglCl3dDilate("../CL/vglCl3dDilate.cl", sys.argv[1])
+	wrp.saveImage(sys.argv[2])
+
+	# vglCl3dErode
+	wrp.vglCl3dErode("../CL/vglCl3dErode.cl", sys.argv[1])
+	wrp.saveImage(sys.argv[2])
+	"""
 	"""
 	# vglClNdConvolution
 	wrp.vglClNdConvolution("../CL_ND/vglClNdConvolution.cl", sys.argv[1], vl.VGL_STREL_CROSS(), 2)
