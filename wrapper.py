@@ -10,10 +10,9 @@ import pyopencl as cl
 import vgl_lib as vl
 
 class Wrapper:
-	def __init__(self, filepath):
-		self.filepath = filepath
+	def __init__(self):
+		#self.filepath = filepath
 		self.ocl_ctx = vl.VglOclContext()
-		self.ocl_ctx.load_headers(filepath)
 		self.ctx = self.ocl_ctx.get_context()
 		self.queue = self.ocl_ctx.get_queue()
 		self.builded = False
@@ -24,6 +23,7 @@ class Wrapper:
 
 		if ((self.builded == False)):
 			print("::Building Kernel")
+			self.ocl_ctx.load_headers(filepath)
 			self.pgr = cl.Program(self.ctx, self.kernel_file.read())
 			self.pgr.build(options=self.ocl_ctx.get_build_options())
 			self.builded = True
@@ -115,8 +115,8 @@ class Wrapper:
 	"""
 		HERE FOLLOWS THE MODULE CALLS
 	"""
-	def vglClNdConvolution(self, imgIn, strElType, strElDim):
-		self.loadCL(self.filepath)
+	def vglClNdConvolution(self, filepath, imgIn, strElType, strElDim):
+		self.loadCL(filepath)
 		self.loadImageND(imgIn)
 		self.makeStructures(strElType, strElDim)
 
@@ -131,8 +131,8 @@ class Wrapper:
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
 	
-	def vglClNdCopy(self, imgIn):
-		self.loadCL(self.filepath)
+	def vglClNdCopy(self, filepath, imgIn):
+		self.loadCL(filepath)
 		self.loadImageND(imgIn)
 
 		self.pgr.vglClNdCopy(self.queue,
@@ -145,13 +145,16 @@ class Wrapper:
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
 
 if __name__ == "__main__":
-	"""
-	wrp = Wrapper("../CL_ND/vglClNdConvolution.cl")
+	
+	# vglClNdConvolution
+	wrp = Wrapper()
 
-	wrp.vglClNdConvolution(sys.argv[1], vl.VGL_STREL_CROSS(), 2)
+	wrp.vglClNdConvolution("../CL_ND/vglClNdConvolution.cl", sys.argv[1], vl.VGL_STREL_CROSS(), 2)
 	wrp.saveImage(sys.argv[2])
 	"""
-	wrp = Wrapper("../CL_ND/vglClNdCopy.cl")
+	# vglClNdCopy
+	wrp = Wrapper()
 
-	wrp.vglClNdCopy(sys.argv[1])
+	wrp.vglClNdCopy("../CL_ND/vglClNdCopy.cl", sys.argv[1])
 	wrp.saveImage(sys.argv[2])
+	"""
