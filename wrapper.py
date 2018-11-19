@@ -236,7 +236,66 @@ class Wrapper:
 		self.vglimage1.sync(self.ctx, self.queue)
 		self.vglimage2.set_device_image(self.img_out_cl)
 		self.vglimage2.sync(self.ctx, self.queue)
+
+	def vglCl3dNot(self, filepath, imgIn):
+		self.loadCL(filepath)
+		self.loadImage3D(imgIn)
+
+		self.pgr.vglCl3dNot(self.queue, 
+							self.img_out_cl.shape, 
+							None, 
+							self.vglimage.get_device_image(),
+							self.img_out_cl)
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+
+	def vglCl3dSub(self, filepath, imgIn1, imgIn2):
+		self.loadCL(filepath)
 		
+		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage1.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage1.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.vglimage2 = vl.VglImage(imgIn2, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage2.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage2.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.pgr.vglCl3dSub(self.queue, 
+							self.img_out_cl.shape, 
+							None, 
+							self.vglimage1.get_device_image(),
+							self.vglimage2.get_device_image(),
+							self.img_out_cl)
+
+		self.vglimage1.set_device_image(self.img_out_cl)
+		self.vglimage1.sync(self.ctx, self.queue)
+		self.vglimage2.set_device_image(self.img_out_cl)
+		self.vglimage2.sync(self.ctx, self.queue)
+
+	def vglCl3dSum(self, filepath, imgIn1, imgIn2):
+		self.loadCL(filepath)
+		
+		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage1.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage1.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.vglimage2 = vl.VglImage(imgIn2, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage2.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage2.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.pgr.vglCl3dSum(self.queue, 
+							self.img_out_cl.shape, 
+							None, 
+							self.vglimage1.get_device_image(),
+							self.vglimage2.get_device_image(),
+							self.img_out_cl)
+
+		self.vglimage1.set_device_image(self.img_out_cl)
+		self.vglimage1.sync(self.ctx, self.queue)
+		self.vglimage2.set_device_image(self.img_out_cl)
+		self.vglimage2.sync(self.ctx, self.queue)
+
 	def vglClNdConvolution(self, filepath, imgIn, strElType, strElDim):
 		self.loadCL(filepath)
 		self.loadImageND(imgIn)
@@ -303,7 +362,20 @@ if __name__ == "__main__":
 	# vglCl3dMin
 	wrp.vglCl3dMin("../CL/vglCl3dMin.cl", sys.argv[1], sys.argv[2])
 	wrp.saveImage(sys.argv[3])
+
+	# vglCl3dNot
+	wrp.vglCl3dNot("../CL/vglCl3dNot.cl", sys.argv[1])
+	wrp.saveImage(sys.argv[2])
+
+	# vglCl3dSub
+	wrp.vglCl3dSub("../CL/vglCl3dSub.cl", sys.argv[1], sys.argv[2])
+	wrp.saveImage(sys.argv[3])
+
+	# vglCl3dSum
+	wrp.vglCl3dSum("../CL/vglCl3dSum.cl", sys.argv[1], sys.argv[2])
+	wrp.saveImage(sys.argv[3])
 	"""
+
 	"""
 	# vglClNdConvolution
 	wrp.vglClNdConvolution("../CL_ND/vglClNdConvolution.cl", sys.argv[1], vl.VGL_STREL_CROSS(), 2)
