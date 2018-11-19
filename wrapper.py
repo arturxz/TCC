@@ -11,7 +11,6 @@ import vgl_lib as vl
 
 class Wrapper:
 	def __init__(self):
-		#self.filepath = filepath
 		self.ocl_ctx = vl.VglOclContext()
 		self.ctx = self.ocl_ctx.get_context()
 		self.queue = self.ocl_ctx.get_queue()
@@ -63,7 +62,7 @@ class Wrapper:
 	
 	"""
 		HERE FOLLOWS THE METHODS THAT STRUCTURE THE 
-		VGLSHAPE AND VGLSTREL BUFFERS TO SEND TO OPENCL.
+		VGLSHAPE AND VGLSTREL BUFFERS TO OPENCL.
 	"""
 	def makeStructures(self, strElType, strElDim):
 		print("Making Structures")
@@ -107,14 +106,50 @@ class Wrapper:
 			byte_array[iterator+offset] = byte
 
 	"""
-		HERE FOLLOWS THE IMAGE SAVING METHODS
+		HERE FOLLOWS THE IMAGE SAVING METHOD
 	"""
 	def saveImage(self, outputpath):
 		self.vglimage.img_save(outputpath)
 
 	"""
-		HERE FOLLOWS THE MODULE CALLS
+		HERE FOLLOWS THE KERNEL CALLS
 	"""
+	def vglCl3dBlurSq3(self, filepath, imgIn):
+		self.loadCL(filepath)
+		self.loadImage3D(imgIn)
+
+		self.pgr.vglCl3dBlurSq3(self.queue,
+								self.img_out_cl.shape, 
+								None, 
+								self.vglimage.get_device_image(),
+								self.img_out_cl)
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+
+	# provavelmente precisa receber tambem o array pra efetuar a convolucao
+	def vglCl3dConvolution(self, filepath, imgIn, arr_window=None, window_x=5, window_y=5, window_z=5):
+		self.loadCL(filepath)
+		self.loadImage3D(imgIn)
+
+		# array de testes para convolucao
+		arr_window = np.ones((5,5,5), np.float32) * (1/125)
+		arr_window_cl = cl.Buffer(self.ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=arr_window)
+
+		self.pgr.vglCl3dConvolution(self.queue,
+									self.img_out_cl.shape, 
+									None, 
+									self.vglimage.get_device_image(), 
+									self.img_out_cl,
+									arr_window_cl,
+									np.uint32(window_x),
+									np.uint32(window_y),
+									np.uint32(window_z))
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+
+
 	def vglClNdConvolution(self, filepath, imgIn, strElType, strElDim):
 		self.loadCL(filepath)
 		self.loadImageND(imgIn)
@@ -145,16 +180,26 @@ class Wrapper:
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
 
 if __name__ == "__main__":
-	
-	# vglClNdConvolution
-	wrp = Wrapper()
+	##
+	# PASTA CL
+	##
 
-	wrp.vglClNdConvolution("../CL_ND/vglClNdConvolution.cl", sys.argv[1], vl.VGL_STREL_CROSS(), 2)
+	wrp = Wrapper()
+	"""
+	# vglCl3dBlurSq3
+	wrp.vglCl3dBlurSq3("../CL/vglCl3dBlurSq3.cl", sys.argv[1])
 	wrp.saveImage(sys.argv[2])
 	"""
-	# vglClNdCopy
-	wrp = Wrapper()
+	# vglCl3dConvolution
+	wrp.vglCl3dConvolution("../CL/vglCl3dConvolution.cl", sys.argv[1])
+	wrp.saveImage(sys.argv[2])
 
+	"""
+	# vglClNdConvolution
+	wrp.vglClNdConvolution("../CL_ND/vglClNdConvolution.cl", sys.argv[1], vl.VGL_STREL_CROSS(), 2)
+	wrp.saveImage(sys.argv[2])
+	
+	# vglClNdCopy
 	wrp.vglClNdCopy("../CL_ND/vglClNdCopy.cl", sys.argv[1])
 	wrp.saveImage(sys.argv[2])
 	"""
