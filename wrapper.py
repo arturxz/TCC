@@ -191,7 +191,52 @@ class Wrapper:
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
 
+	def vglCl3dMax(self, filepath, imgIn1, imgIn2):
+		self.loadCL(filepath)
+		
+		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage1.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage1.get_similar_device_image_object(self.ctx, self.queue)
 
+		self.vglimage2 = vl.VglImage(imgIn2, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage2.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage2.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.pgr.vglCl3dMax(self.queue, 
+							self.img_out_cl.shape, 
+							None, 
+							self.vglimage1.get_device_image(),
+							self.vglimage2.get_device_image(),
+							self.img_out_cl)
+
+		self.vglimage1.set_device_image(self.img_out_cl)
+		self.vglimage1.sync(self.ctx, self.queue)
+		self.vglimage2.set_device_image(self.img_out_cl)
+		self.vglimage2.sync(self.ctx, self.queue)
+
+	def vglCl3dMin(self, filepath, imgIn1, imgIn2):
+		self.loadCL(filepath)
+		
+		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage1.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage1.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.vglimage2 = vl.VglImage(imgIn2, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage2.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage2.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.pgr.vglCl3dMin(self.queue, 
+							self.img_out_cl.shape, 
+							None, 
+							self.vglimage1.get_device_image(),
+							self.vglimage2.get_device_image(),
+							self.img_out_cl)
+
+		self.vglimage1.set_device_image(self.img_out_cl)
+		self.vglimage1.sync(self.ctx, self.queue)
+		self.vglimage2.set_device_image(self.img_out_cl)
+		self.vglimage2.sync(self.ctx, self.queue)
+		
 	def vglClNdConvolution(self, filepath, imgIn, strElType, strElDim):
 		self.loadCL(filepath)
 		self.loadImageND(imgIn)
@@ -250,6 +295,14 @@ if __name__ == "__main__":
 	# vglCl3dErode
 	wrp.vglCl3dErode("../CL/vglCl3dErode.cl", sys.argv[1])
 	wrp.saveImage(sys.argv[2])
+
+	# vglCl3dMax
+	wrp.vglCl3dMax("../CL/vglCl3dMax.cl", sys.argv[1], sys.argv[2])
+	wrp.saveImage(sys.argv[3])
+
+	# vglCl3dMin
+	wrp.vglCl3dMin("../CL/vglCl3dMin.cl", sys.argv[1], sys.argv[2])
+	wrp.saveImage(sys.argv[3])
 	"""
 	"""
 	# vglClNdConvolution
