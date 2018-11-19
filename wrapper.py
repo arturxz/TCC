@@ -122,7 +122,7 @@ class Wrapper:
 								self.img_out_cl.shape, 
 								None, 
 								self.vglimage.get_device_image(),
-								self.img_out_cl)
+								self.img_out_cl).wait()
 
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
@@ -139,7 +139,7 @@ class Wrapper:
 									arr_window,
 									np.uint32(window_x),
 									np.uint32(window_y),
-									np.uint32(window_z))
+									np.uint32(window_z)).wait()
 
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
@@ -152,7 +152,7 @@ class Wrapper:
 							 self.img_out_cl.shape, 
 							 None, 
 							 self.vglimage.get_device_image(),
-							 self.img_out_cl)
+							 self.img_out_cl).wait()
 
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
@@ -169,7 +169,7 @@ class Wrapper:
 							   arr_window,
 							   np.uint32(window_x),
 							   np.uint32(window_y),
-							   np.uint32(window_z))
+							   np.uint32(window_z)).wait()
 
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
@@ -186,7 +186,7 @@ class Wrapper:
 							  arr_window,
 							  np.uint32(window_x),
 							  np.uint32(window_y),
-							  np.uint32(window_z))
+							  np.uint32(window_z)).wait()
 
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
@@ -207,7 +207,7 @@ class Wrapper:
 							None, 
 							self.vglimage1.get_device_image(),
 							self.vglimage2.get_device_image(),
-							self.img_out_cl)
+							self.img_out_cl).wait()
 
 		self.vglimage1.set_device_image(self.img_out_cl)
 		self.vglimage1.sync(self.ctx, self.queue)
@@ -230,7 +230,7 @@ class Wrapper:
 							None, 
 							self.vglimage1.get_device_image(),
 							self.vglimage2.get_device_image(),
-							self.img_out_cl)
+							self.img_out_cl).wait()
 
 		self.vglimage1.set_device_image(self.img_out_cl)
 		self.vglimage1.sync(self.ctx, self.queue)
@@ -245,7 +245,7 @@ class Wrapper:
 							self.img_out_cl.shape, 
 							None, 
 							self.vglimage.get_device_image(),
-							self.img_out_cl)
+							self.img_out_cl).wait()
 
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
@@ -266,7 +266,7 @@ class Wrapper:
 							None, 
 							self.vglimage1.get_device_image(),
 							self.vglimage2.get_device_image(),
-							self.img_out_cl)
+							self.img_out_cl).wait()
 
 		self.vglimage1.set_device_image(self.img_out_cl)
 		self.vglimage1.sync(self.ctx, self.queue)
@@ -289,12 +289,27 @@ class Wrapper:
 							None, 
 							self.vglimage1.get_device_image(),
 							self.vglimage2.get_device_image(),
-							self.img_out_cl)
+							self.img_out_cl).wait()
 
 		self.vglimage1.set_device_image(self.img_out_cl)
 		self.vglimage1.sync(self.ctx, self.queue)
 		self.vglimage2.set_device_image(self.img_out_cl)
 		self.vglimage2.sync(self.ctx, self.queue)
+
+	def vglCl3dThreshold(self, filepath, imgIn, thresh=0.425, top=1):
+		self.loadCL(filepath)
+		self.loadImage3D(imgIn)
+
+		self.pgr.vglCl3dThreshold(self.queue, 
+								  self.img_out_cl.shape, 
+								  None, 
+								  self.vglimage.get_device_image(),
+								  self.img_out_cl,
+								  np.float32(thresh),
+								  np.float32(top)).wait()
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
 
 	def vglClNdConvolution(self, filepath, imgIn, strElType, strElDim):
 		self.loadCL(filepath)
@@ -374,6 +389,10 @@ if __name__ == "__main__":
 	# vglCl3dSum
 	wrp.vglCl3dSum("../CL/vglCl3dSum.cl", sys.argv[1], sys.argv[2])
 	wrp.saveImage(sys.argv[3])
+
+	# vglCl3dThreshold
+	wrp.vglCl3dThreshold("../CL/vglCl3dThreshold.cl", sys.argv[1])
+	wrp.saveImage(sys.argv[2])
 	"""
 
 	"""
