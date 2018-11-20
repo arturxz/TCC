@@ -47,6 +47,9 @@ class Wrapper:
 		print("Opening image to be processed")
 		
 		self.vglimage = vl.VglImage(imgpath, vl.VGL_IMAGE_2D_IMAGE())
+		if( self.vglimage.getVglShape().getNChannels() == 3 ):
+			self.vglimage.rgb_to_rgba()
+			
 		self.vglimage.vglImageUpload(self.ctx, self.queue)
 		self.img_out_cl = self.vglimage.get_similar_device_image_object(self.ctx, self.queue)
 	
@@ -311,6 +314,234 @@ class Wrapper:
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
 
+	def vglClBlurSq3(self, filepath, imgIn):
+		self.loadCL(filepath)
+		self.loadImage2D(imgIn)
+
+		self.pgr.vglClBlurSq3(self.queue,
+							  self.img_out_cl.shape,
+							  None, 
+							  self.vglimage.get_device_image(), 
+							  self.img_out_cl).wait()
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+		if( self.vglimage.getVglShape().getNChannels() == 4 ):
+			self.vglimage.rgba_to_rgb()
+
+	def vglClConvolution(self, filepath, imgIn, arr_window, window_x, window_y):
+		self.loadCL(filepath)
+		self.loadImage2D(imgIn)
+
+		self.pgr.vglClConvolution(self.queue,
+								  self.img_out_cl.shape, 
+								  None, 
+								  self.vglimage.get_device_image(), 
+								  self.img_out_cl,
+								  arr_window,
+								  np.uint32(window_x),
+								  np.uint32(window_y)).wait()
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+		if( self.vglimage.getVglShape().getNChannels() == 4 ):
+			self.vglimage.rgba_to_rgb()
+	
+	def vglClCopy(self, filepath, imgIn):
+		self.loadCL(filepath)
+		self.loadImage2D(imgIn)
+
+		self.pgr.vglClCopy(self.queue, 
+						   self.img_out_cl.shape, 
+						   None, 
+						   self.vglimage.get_device_image(),
+						   self.img_out_cl).wait()
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+		if( self.vglimage.getVglShape().getNChannels() == 4 ):
+			self.vglimage.rgba_to_rgb()
+
+	def vglClDilate(self, filepath, imgIn, arr_window, window_x, window_y):
+		self.loadCL(filepath)
+		self.loadImage2D(imgIn)
+
+		self.pgr.vglClDilate(self.queue,
+							 self.img_out_cl.shape, 
+							 None, 
+							 self.vglimage.get_device_image(), 
+							 self.img_out_cl,
+							 arr_window,
+							 np.uint32(window_x),
+							 np.uint32(window_y)).wait()
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+		if( self.vglimage.getVglShape().getNChannels() == 4 ):
+			self.vglimage.rgba_to_rgb()
+			
+	def vglClErode(self, filepath, imgIn, arr_window, window_x, window_y):
+		self.loadCL(filepath)
+		self.loadImage2D(imgIn)
+
+		self.pgr.vglClErode(self.queue,
+							self.img_out_cl.shape, 
+							None, 
+							self.vglimage.get_device_image(), 
+							self.img_out_cl,
+							arr_window,
+							np.uint32(window_x),
+							np.uint32(window_y)).wait()
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+		if( self.vglimage.getVglShape().getNChannels() == 4 ):
+			self.vglimage.rgba_to_rgb()
+			
+	def vglClMax(self, filepath, imgIn1, imgIn2):
+		self.loadCL(filepath)
+		
+		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage1.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage1.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.vglimage2 = vl.VglImage(imgIn2, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage2.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage2.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.pgr.vglClMax(self.queue, 
+						  self.img_out_cl.shape, 
+						  None, 
+						  self.vglimage1.get_device_image(),
+						  self.vglimage2.get_device_image(),
+						  self.img_out_cl).wait()
+
+		self.vglimage1.set_device_image(self.img_out_cl)
+		self.vglimage1.sync(self.ctx, self.queue)
+		if( self.vglimage1.getVglShape().getNChannels() == 4 ):
+			self.vglimage1.rgba_to_rgb()
+			
+		self.vglimage2.set_device_image(self.img_out_cl)
+		self.vglimage2.sync(self.ctx, self.queue)
+		if( self.vglimage2.getVglShape().getNChannels() == 4 ):
+			self.vglimage2.rgba_to_rgb()
+			
+	def vglClMin(self, filepath, imgIn1, imgIn2):
+		self.loadCL(filepath)
+		
+		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage1.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage1.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.vglimage2 = vl.VglImage(imgIn2, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage2.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage2.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.pgr.vglClMin(self.queue, 
+						  self.img_out_cl.shape, 
+						  None, 
+						  self.vglimage1.get_device_image(),
+						  self.vglimage2.get_device_image(),
+						  self.img_out_cl).wait()
+
+		self.vglimage1.set_device_image(self.img_out_cl)
+		self.vglimage1.sync(self.ctx, self.queue)
+		if( self.vglimage1.getVglShape().getNChannels() == 4 ):
+			self.vglimage1.rgba_to_rgb()
+			
+		self.vglimage2.set_device_image(self.img_out_cl)
+		self.vglimage2.sync(self.ctx, self.queue)
+		if( self.vglimage2.getVglShape().getNChannels() == 4 ):
+			self.vglimage2.rgba_to_rgb()
+
+	def vglClInvert(self, filepath, imgIn):
+		self.loadCL(filepath)
+		self.loadImage2D(imgIn)
+
+		self.pgr.vglClInvert(self.queue, 
+							 self.img_out_cl.shape, 
+							 None, 
+							 self.vglimage.get_device_image(),
+							 self.img_out_cl).wait()
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+		if( self.vglimage.getVglShape().getNChannels() == 4 ):
+			self.vglimage.rgba_to_rgb()
+
+	def vglClSub(self, filepath, imgIn1, imgIn2):
+		self.loadCL(filepath)
+		
+		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage1.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage1.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.vglimage2 = vl.VglImage(imgIn2, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage2.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage2.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.pgr.vglClSub(self.queue, 
+						  self.img_out_cl.shape, 
+						  None, 
+						  self.vglimage1.get_device_image(),
+						  self.vglimage2.get_device_image(),
+						  self.img_out_cl).wait()
+
+		self.vglimage1.set_device_image(self.img_out_cl)
+		self.vglimage1.sync(self.ctx, self.queue)
+		if( self.vglimage1.getVglShape().getNChannels() == 4 ):
+			self.vglimage1.rgba_to_rgb()
+			
+		self.vglimage2.set_device_image(self.img_out_cl)
+		self.vglimage2.sync(self.ctx, self.queue)
+		if( self.vglimage2.getVglShape().getNChannels() == 4 ):
+			self.vglimage2.rgba_to_rgb()
+			
+	def vglClSum(self, filepath, imgIn1, imgIn2):
+		self.loadCL(filepath)
+		
+		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage1.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage1.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.vglimage2 = vl.VglImage(imgIn2, vl.VGL_IMAGE_3D_IMAGE())
+		self.vglimage2.vglImageUpload(self.ctx, self.queue)
+		self.img_out_cl = self.vglimage2.get_similar_device_image_object(self.ctx, self.queue)
+
+		self.pgr.vglClSum(self.queue, 
+						  self.img_out_cl.shape, 
+						  None, 
+						  self.vglimage1.get_device_image(),
+						  self.vglimage2.get_device_image(),
+						  self.img_out_cl).wait()
+
+		self.vglimage1.set_device_image(self.img_out_cl)
+		self.vglimage1.sync(self.ctx, self.queue)
+		if( self.vglimage1.getVglShape().getNChannels() == 4 ):
+			self.vglimage1.rgba_to_rgb()
+			
+		self.vglimage2.set_device_image(self.img_out_cl)
+		self.vglimage2.sync(self.ctx, self.queue)
+		if( self.vglimage2.getVglShape().getNChannels() == 4 ):
+			self.vglimage2.rgba_to_rgb()
+			
+	def vglClThreshold(self, filepath, imgIn, thresh=0.425, top=1):
+		self.loadCL(filepath)
+		self.loadImage2D(imgIn)
+
+		self.pgr.vglClThreshold(self.queue, 
+								self.img_out_cl.shape, 
+								None, 
+								self.vglimage.get_device_image(),
+								self.img_out_cl,
+								np.float32(thresh),
+								np.float32(top)).wait()
+
+		self.vglimage.set_device_image(self.img_out_cl)
+		self.vglimage.sync(self.ctx, self.queue)
+		if( self.vglimage.getVglShape().getNChannels() == 4 ):
+			self.vglimage.rgba_to_rgb()
+
 	def vglClNdConvolution(self, filepath, imgIn, strElType, strElDim):
 		self.loadCL(filepath)
 		self.loadImageND(imgIn)
@@ -363,11 +594,11 @@ if __name__ == "__main__":
 	wrp.saveImage(sys.argv[2])
 
 	# vglCl3dDilate
-	wrp.vglCl3dDilate("../CL/vglCl3dDilate.cl", sys.argv[1])
+	wrp.vglCl3dDilate("../CL/vglCl3dDilate.cl", sys.argv[1], arr_window_cl, window_x, window_y, window_z)
 	wrp.saveImage(sys.argv[2])
 
 	# vglCl3dErode
-	wrp.vglCl3dErode("../CL/vglCl3dErode.cl", sys.argv[1])
+	wrp.vglCl3dErode("../CL/vglCl3dErode.cl", sys.argv[1], arr_window_cl, window_x, window_y, window_z)
 	wrp.saveImage(sys.argv[2])
 
 	# vglCl3dMax
@@ -393,7 +624,54 @@ if __name__ == "__main__":
 	# vglCl3dThreshold
 	wrp.vglCl3dThreshold("../CL/vglCl3dThreshold.cl", sys.argv[1])
 	wrp.saveImage(sys.argv[2])
+
+	# vglClBlurSq3
+	wrp.vglClBlurSq3("../CL/vglClBlurSq3.cl", sys.argv[1])
+	wrp.saveImage(sys.argv[2])
+
+	# vglClConvolution
+	arr_window = np.ones((10,10), np.float32) * (1/100)
+	arr_window_cl = cl.Buffer(wrp.ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=arr_window)
+	wrp.vglClConvolution("../CL/vglClConvolution.cl", sys.argv[1], arr_window_cl, 10, 10)
+	wrp.saveImage(sys.argv[2])
+
+	# vglClCopy
+	wrp.vglClCopy("../CL/vglClCopy.cl", sys.argv[1])
+	wrp.saveImage(sys.argv[2])
+
+	# vglClDilate
+	wrp.vglClDilate("../CL/vglClDilate.cl", sys.argv[1], arr_window, window_x, window_y)
+	wrp.saveImage(sys.argv[2])
+
+	# vglClErode
+	wrp.vglClErode("../CL/vglClErode.cl", sys.argv[1], arr_window, window_x, window_y)
+	wrp.saveImage(sys.argv[2])
+
+	# vglClMax
+	wrp.vglClMax("../CL/vglClMax.cl", sys.argv[1], sys.argv[2], arr_window, window_x, window_y)
+	wrp.saveImage(sys.argv[3])
+
+	# vglClMin
+	wrp.vglClMin("../CL/vglClMin.cl", sys.argv[1], sys.argv[2], arr_window, window_x, window_y)
+	wrp.saveImage(sys.argv[3])
+	
+	# vglClInvert
+	wrp.vglClInvert("../CL/vglClInvert.cl", sys.argv[1])
+	wrp.saveImage(sys.argv[2])
+
+	# vglClSub
+	wrp.vglClSub("../CL/vglClSub.cl", sys.argv[1], sys.argv[2])
+	wrp.saveImage(sys.argv[3])
+
+	# vglClSum
+	wrp.vglClSum("../CL/vglClSum.cl", sys.argv[1], sys.argv[2])
+	wrp.saveImage(sys.argv[3])
+
 	"""
+
+	# vglClThreshold
+	wrp.vglClThreshold("../CL/vglClThreshold.cl", sys.argv[1])
+	wrp.saveImage(sys.argv[2])
 
 	"""
 	# vglClNdConvolution
