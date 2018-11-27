@@ -11,21 +11,20 @@ import vgl_lib as vl
 
 class Wrapper:
 	def __init__(self):
-		self.ocl_ctx = vl.VglClContext()
-		self.cl = self.ocl_ctx.get_vglClContext_attributes()
-		self.ctx = self.ocl_ctx.get_context()
-		self.queue = self.ocl_ctx.get_queue()
-		self.builded = False
+		self.cl_ctx = vl.VglClContext()
+		self.ctx = self.cl_ctx.get_context()
+		self.queue = self.cl_ctx.get_queue()
+		self.pgr = None
 	
-	def loadCL(self, filepath):
+	def loadCL(self, filepath, kernelname):
 		print("Loading OpenCL Kernel")
 		self.kernel_file = open(filepath, "r")
 
-		if ((self.builded == False)):
+		if ((kernelname in False)):
 			print("::Building Kernel")
-			self.ocl_ctx.load_headers(filepath)
+			self.cl_ctx.load_headers(filepath)
 			self.pgr = pyopencl.Program(self.ctx, self.kernel_file.read())
-			self.pgr.build(options=self.ocl_ctx.get_build_options())
+			self.pgr.build(options=self.cl_ctx.get_build_options())
 			self.builded = True
 		else:
 			print("::Kernel already builded. Going to next step...")
@@ -315,8 +314,8 @@ class Wrapper:
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
 
-	def vglClBlurSq3(self, filepath, imgIn):
-		self.loadCL(filepath)
+	def vglClBlurSq3(self, imgIn):
+		self.loadCL("../CL/vglClBlurSq3.cl")
 		self.loadImage2D(imgIn)
 
 		self.pgr.vglClBlurSq3(self.queue,
@@ -625,11 +624,11 @@ if __name__ == "__main__":
 	# vglCl3dThreshold
 	wrp.vglCl3dThreshold("../CL/vglCl3dThreshold.cl", sys.argv[1])
 	wrp.saveImage(sys.argv[2])
-
+	"""
 	# vglClBlurSq3
-	wrp.vglClBlurSq3("../CL/vglClBlurSq3.cl", sys.argv[1])
+	wrp.vglClBlurSq3(sys.argv[1])
 	wrp.saveImage(sys.argv[2])
-
+	"""
 	# vglClConvolution
 	arr_window = np.ones((10,10), np.float32) * (1/100)
 	arr_window_cl = pyopencl.Buffer(wrp.ctx, pyopencl.mem_flags.READ_ONLY | pyopencl.mem_flags.COPY_HOST_PTR, hostbuf=arr_window)
@@ -672,7 +671,7 @@ if __name__ == "__main__":
 	wrp.vglClThreshold("../CL/vglClThreshold.cl", sys.argv[1])
 	wrp.saveImage(sys.argv[2])
 	"""
-	print(wrp.ocl_ctx.get_vglClContext_attributes())
+	
 	"""
 	# vglClNdConvolution
 	wrp.vglClNdConvolution("../CL_ND/vglClNdConvolution.cl", sys.argv[1], vl.VGL_STREL_CROSS(), 2)
