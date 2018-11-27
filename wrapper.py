@@ -4,14 +4,15 @@ import numpy as np
 import sys
 
 # OPENCL LIBRARYS
-import pyopencl as cl
+import pyopencl
 
 # VGL LIBRARYS
 import vgl_lib as vl
 
 class Wrapper:
 	def __init__(self):
-		self.ocl_ctx = vl.VglOclContext()
+		self.ocl_ctx = vl.VglClContext()
+		self.cl = self.ocl_ctx.get_vglClContext_attributes()
 		self.ctx = self.ocl_ctx.get_context()
 		self.queue = self.ocl_ctx.get_queue()
 		self.builded = False
@@ -23,7 +24,7 @@ class Wrapper:
 		if ((self.builded == False)):
 			print("::Building Kernel")
 			self.ocl_ctx.load_headers(filepath)
-			self.pgr = cl.Program(self.ctx, self.kernel_file.read())
+			self.pgr = pyopencl.Program(self.ctx, self.kernel_file.read())
 			self.pgr.build(options=self.ocl_ctx.get_build_options())
 			self.builded = True
 		else:
@@ -59,9 +60,9 @@ class Wrapper:
 		
 		self.vglimage = vl.VglImage(imgpath)
 		
-		mf = cl.mem_flags
+		mf = pyopencl.mem_flags
 		self.vglimage.vglNdImageUpload(self.ctx, self.queue)
-		self.img_out_cl = cl.Buffer(self.ctx, mf.WRITE_ONLY, self.vglimage.get_host_image().nbytes)
+		self.img_out_cl = pyopencl.Buffer(self.ctx, mf.WRITE_ONLY, self.vglimage.get_host_image().nbytes)
 	
 	"""
 		HERE FOLLOWS THE METHODS THAT STRUCTURE THE 
@@ -69,7 +70,7 @@ class Wrapper:
 	"""
 	def makeStructures(self, strElType, strElDim):
 		print("Making Structures")
-		mf = cl.mem_flags
+		mf = pyopencl.mem_flags
 
 		ss = vl.StructSizes()
 		ss = ss.get_struct_sizes()
@@ -97,12 +98,12 @@ class Wrapper:
 		self.copy_into_byte_array(image_cl_shape.size, vgl_shape_obj, ss[10])
 
 		# CREATING DEVICE BUFFER TO HOLD STRUCT DATA
-		self.vglstrel_buffer = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_strel_obj.nbytes)
-		self.vglshape_buffer = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_shape_obj.nbytes)
+		self.vglstrel_buffer = pyopencl.Buffer(self.ctx, mf.READ_ONLY, vgl_strel_obj.nbytes)
+		self.vglshape_buffer = pyopencl.Buffer(self.ctx, mf.READ_ONLY, vgl_shape_obj.nbytes)
 				
 		# COPYING DATA FROM HOST TO DEVICE
-		cl.enqueue_copy(self.queue, self.vglstrel_buffer, vgl_strel_obj.tobytes(), is_blocking=True)
-		cl.enqueue_copy(self.queue, self.vglshape_buffer, vgl_shape_obj.tobytes(), is_blocking=True)
+		pyopencl.enqueue_copy(self.queue, self.vglstrel_buffer, vgl_strel_obj.tobytes(), is_blocking=True)
+		pyopencl.enqueue_copy(self.queue, self.vglshape_buffer, vgl_shape_obj.tobytes(), is_blocking=True)
 
 	def copy_into_byte_array(self, value, byte_array, offset):
 		for iterator, byte in enumerate( value.tobytes() ):
@@ -122,7 +123,7 @@ class Wrapper:
 		self.loadImage3D(imgIn)
 
 		self.pgr.vglCl3dBlurSq3(self.queue,
-								self.img_out_cl.shape, 
+								self.img_out_cl,
 								None, 
 								self.vglimage.get_device_image(),
 								self.img_out_cl).wait()
@@ -585,7 +586,7 @@ if __name__ == "__main__":
 	
 	# vglCl3dConvolution
 	arr_window = np.ones((5,5,5), np.float32) * (1/125)
-	arr_window_cl = cl.Buffer(wrp.ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=arr_window)
+	arr_window_cl = pyopencl.Buffer(wrp.ctx, pyopencl.mem_flags.READ_ONLY | pyopencl.mem_flags.COPY_HOST_PTR, hostbuf=arr_window)
 	wrp.vglCl3dConvolution("../CL/vglCl3dConvolution.cl", sys.argv[1], arr_window_cl, 5, 5, 5)
 	wrp.saveImage(sys.argv[2])
 	
@@ -631,7 +632,7 @@ if __name__ == "__main__":
 
 	# vglClConvolution
 	arr_window = np.ones((10,10), np.float32) * (1/100)
-	arr_window_cl = cl.Buffer(wrp.ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=arr_window)
+	arr_window_cl = pyopencl.Buffer(wrp.ctx, pyopencl.mem_flags.READ_ONLY | pyopencl.mem_flags.COPY_HOST_PTR, hostbuf=arr_window)
 	wrp.vglClConvolution("../CL/vglClConvolution.cl", sys.argv[1], arr_window_cl, 10, 10)
 	wrp.saveImage(sys.argv[2])
 
@@ -667,12 +668,11 @@ if __name__ == "__main__":
 	wrp.vglClSum("../CL/vglClSum.cl", sys.argv[1], sys.argv[2])
 	wrp.saveImage(sys.argv[3])
 
-	"""
-
 	# vglClThreshold
 	wrp.vglClThreshold("../CL/vglClThreshold.cl", sys.argv[1])
 	wrp.saveImage(sys.argv[2])
-
+	"""
+	print(wrp.ocl_ctx.get_vglClContext_attributes())
 	"""
 	# vglClNdConvolution
 	wrp.vglClNdConvolution("../CL_ND/vglClNdConvolution.cl", sys.argv[1], vl.VGL_STREL_CROSS(), 2)
