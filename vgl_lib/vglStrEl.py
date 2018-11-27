@@ -1,23 +1,22 @@
 import numpy as np 
-import vglConst as vc
-from vglShape import VglShape
+import vgl_lib as vl
 
 class VglClStrEl(object):
 	def __init__(self, ndim=0, size=0):
-		self.data = np.zeros((vc.VGL_ARR_CLSTREL_SIZE()), np.float32)
+		self.data = np.zeros((vl.VGL_ARR_CLSTREL_SIZE()), np.float32)
 		self.ndim = np.int32(0)
-		self.shape = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
-		self.offset = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
+		self.shape = np.zeros((vl.VGL_ARR_SHAPE_SIZE()), np.int32)
+		self.offset = np.zeros((vl.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.size = np.int32(0)
 
 class VglStrEl(object):
 	def __init__(self):
-		self.vglShape = VglShape()
+		self.vglShape = vl.VglShape()
 		self.data = np.zeros((1), np.float32)
 
 	def VglCreateStrEl(self, data, vglShape):
 		size = vglShape.getSize()
-		self.vglShape = VglShape()
+		self.vglShape = vl.VglShape()
 		self.vglShape.constructorFromVglShape(vglShape)
 		self.data = np.zeros((size), np.float32)
 
@@ -35,22 +34,22 @@ class VglStrEl(object):
 	"""
 	# EQUIVALENT TO THE SECOND CONSTRUCTOR ON vglStrEl
 	def constructorFromTypeNdim(self, Type, ndim):
-		shape = np.zeros(vc.VGL_MAX_DIM(), np.int32)
+		shape = np.zeros(vl.VGL_MAX_DIM(), np.int32)
 		shape[0] = 1
 		shape[2] = 1
 
 		for i in range(1, ndim+1): # ndim+1 cuz in c++ is for i <= ndim
 			shape[i] = 3
 
-		vglShape = VglShape()
+		vglShape = vl.VglShape()
 		vglShape.constructorFromShapeNdimBps(shape, ndim)
 
 		size = vglShape.getSize()
 		data = np.zeros((size), np.float32)
 		index = 0
 
-		if( Type == vc.VGL_STREL_CROSS() ):
-			coord = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
+		if( Type == vl.VGL_STREL_CROSS() ):
+			coord = np.zeros((vl.VGL_ARR_SHAPE_SIZE()), np.int32)
 
 			for i in range(0, size):
 				data[i] = np.float32(0.0)
@@ -72,8 +71,8 @@ class VglStrEl(object):
 
 				coord[d] = 1
 
-		elif( Type == vc.VGL_STREL_GAUSS() ):
-			coord = np.zeros((vc.VGL_ARR_SHAPE_SIZE()), np.int32)
+		elif( Type == vl.VGL_STREL_GAUSS() ):
+			coord = np.zeros((vl.VGL_ARR_SHAPE_SIZE()), np.int32)
 			coord[0] = np.int32(0)
 			size = vglShape.getSize()
 
@@ -89,11 +88,11 @@ class VglStrEl(object):
 
 				data[i] = val
 
-		elif( Type == vc.VGL_STREL_MEAN() ):
+		elif( Type == vl.VGL_STREL_MEAN() ):
 			for i in range(0, size):
 				data[i] = 1.0 / size
 
-		elif( Type == vc.VGL_STREL_CUBE() ):
+		elif( Type == vl.VGL_STREL_CUBE() ):
 			for i in range(0, size):
 				data[i] = 1.0
 		else:
@@ -126,13 +125,13 @@ class VglStrEl(object):
 		shape = self.vglShape.asVglClShape()
 
 		size = self.getSize()
-		if( size > vc.VGL_ARR_CLSTREL_SIZE() ):
+		if( size > vl.VGL_ARR_CLSTREL_SIZE() ):
 			print("Error: structuring element size > VGL_ARR_CLSTREL_SIZE. Change this value in vglClStrEl.h to a greater one.")
 
 		result.ndim = np.int32(self.vglShape.getNdim())
 		result.size = np.int32(self.vglShape.getSize())
 		
-		for i in range(0, vc.VGL_MAX_DIM()+1):
+		for i in range(0, vl.VGL_MAX_DIM()+1):
 			result.shape[i] = np.int32(shape.shape[i])
 			result.offset[i] = np.int32(shape.offset[i])
 		
