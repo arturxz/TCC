@@ -106,30 +106,11 @@ class VglImage(object):
 
 		self.create_vglShape()
 
-	def rgb_to_rgba(self):
-		print("[RGB -> RGBA]")
-		img_host_rgba = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 4), self.img_host.dtype)
-
-		img_host_rgba[:,:,0] = self.img_host[:,:,0]
-		img_host_rgba[:,:,1] = self.img_host[:,:,1]
-		img_host_rgba[:,:,2] = self.img_host[:,:,2]
-		img_host_rgba[:,:,3] = 255
-
-		self.img_host = img_host_rgba
-		self.create_vglShape()
-
-	def rgba_to_rgb(self):
-		print("[RGBA -> RGB]")
-		if( (self.img_host[0,0,:].size < 4) | (self.img_host[0,0,:].size > 4) ):
-			print("IMAGE IS NOT RGBA")
-		else:
-			img_host_rgb = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 3), self.img_host.dtype)
-			img_host_rgb[:,:,0] = self.img_host[:,:,0]
-			img_host_rgb[:,:,1] = self.img_host[:,:,1]
-			img_host_rgb[:,:,2] = self.img_host[:,:,2]
-
-			self.img_host = img_host_rgb
-			self.create_vglShape()
+	def vglImage3To4Channels(self):
+		self.rgb_to_rgba(self)
+	
+	def vglImage4To3Channels(self):
+		self.rgba_to_rgb(self)
 
 	def vglImageUpload(self, ctx, queue):
 		# IMAGE VARS
@@ -210,6 +191,7 @@ class VglImage(object):
 		self.img_sync = False
 		self.last_changed_host = False
 		self.last_changed_device = True
+	
 	"""
 		EQUIVALENT TO vglImage.DownloadFaster
 		EQUIVALENT TO vglImage.Download
@@ -243,7 +225,38 @@ class VglImage(object):
 	def img_save(self, name):
 		print("Saving Picture in Hard Drive")
 		io.imsave(name, self.img_host)
-	
+
+	"""
+		EQUIVALENT TO vglImage.3To4Channels()
+	"""
+	def rgb_to_rgba(self):
+		print("[RGB -> RGBA]")
+		img_host_rgba = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 4), self.img_host.dtype)
+
+		img_host_rgba[:,:,0] = self.img_host[:,:,0]
+		img_host_rgba[:,:,1] = self.img_host[:,:,1]
+		img_host_rgba[:,:,2] = self.img_host[:,:,2]
+		img_host_rgba[:,:,3] = 255
+
+		self.img_host = img_host_rgba
+		self.create_vglShape()
+
+	"""
+		EQUIVALENT TO vglImage.3To4Channels()
+	"""
+	def rgba_to_rgb(self):
+		print("[RGBA -> RGB]")
+		if( (self.img_host[0,0,:].size < 4) | (self.img_host[0,0,:].size > 4) ):
+			print("IMAGE IS NOT RGBA")
+		else:
+			img_host_rgb = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 3), self.img_host.dtype)
+			img_host_rgb[:,:,0] = self.img_host[:,:,0]
+			img_host_rgb[:,:,1] = self.img_host[:,:,1]
+			img_host_rgb[:,:,2] = self.img_host[:,:,2]
+
+			self.img_host = img_host_rgb
+			self.create_vglShape()
+
 	def get_similar_device_image_object(self, ctx, queue):
 
 		if(self.imgDim == vl.VGL_IMAGE_2D_IMAGE()):
