@@ -107,10 +107,10 @@ class VglImage(object):
 		self.create_vglShape()
 
 	def vglImage3To4Channels(self):
-		self.rgb_to_rgba(self)
+		self.rgb_to_rgba()
 	
 	def vglImage4To3Channels(self):
-		self.rgba_to_rgb(self)
+		self.rgba_to_rgb()
 
 	def vglImageUpload(self, ctx, queue):
 		# IMAGE VARS
