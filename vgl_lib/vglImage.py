@@ -48,7 +48,7 @@ class VglImage(object):
 			print("Creating 3D Image!")
 
 		# OPENING IMAGE
-		self.set_image_host(imgPath)
+		self.vglLoadImage(imgPath)
 
 	def create_vglShape(self):
 		if(self.img_host is not None):
@@ -82,11 +82,19 @@ class VglImage(object):
 		else:
 			print("Impossible to create a vglImage object. host_image is None.")
 
-	def set_image_host(self, imgPath):
+	"""
+		EQUIVALENT TO vglImage.vglLoadImage
+		EQUIVALENT TO vglImage.vglLoad3dImage
+		EQUIVALENT TO vglImage.vglLoadNdImage
+
+		IN PYTHON, ALL THE IMAGES ARE OPENED 
+		AS A ND-ARRAY OBJECT.
+	"""
+	def vglLoadImage(self, imgPath):
 		try:
 			self.img_host = io.imread(imgPath)
 		except FileNotFoundError as fnf:
-			print("Image wasn't found. ")    
+			print("vglCreateImage: Error loading image from file:", imgPath)    
 			print(str(fnf))
 		except Exception as e:
 			print("Unrecognized error:")
@@ -202,7 +210,13 @@ class VglImage(object):
 		self.img_sync = False
 		self.last_changed_host = False
 		self.last_changed_device = True
-	
+	"""
+		EQUIVALENT TO vglImage.DownloadFaster
+		EQUIVALENT TO vglImage.Download
+		EQUIVALENT TO vglImage.DownloadFBO
+		EQUIVALENT TO vglImage.DownloadPPM
+		EQUIVALENT TO vglImage.DownloadPGM
+	"""
 	def vglNdImageDownload(self, ctx, queue):
 		print("NdArray image Download")
 
@@ -222,6 +236,10 @@ class VglImage(object):
 		else:
 			print("Already synced")
 
+	"""
+		EQUIVALENT TO DIFFERENT IMAGE SAVE
+		METHODS IN vglImage.cpp
+	"""
 	def img_save(self, name):
 		print("Saving Picture in Hard Drive")
 		io.imsave(name, self.img_host)
