@@ -1,6 +1,10 @@
 import numpy as np 
 import vgl_lib as vl
 
+"""
+	EQUIVALENT TO vglClStrEl struct
+	LOCATED IN vglClStrEl.h
+"""
 class VglClStrEl(object):
 	def __init__(self, ndim=0, size=0):
 		self.data = np.zeros((vl.VGL_ARR_CLSTREL_SIZE()), np.float32)
@@ -8,12 +12,21 @@ class VglClStrEl(object):
 		self.shape = np.zeros((vl.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.offset = np.zeros((vl.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.size = np.int32(0)
-
+"""
+	EQUIVALENT TO VglStrEl OBJECT
+	LOCATED IN vglStrEl.cpp
+"""
 class VglStrEl(object):
 	def __init__(self):
 		self.vglShape = vl.VglShape()
 		self.data = np.zeros((1), np.float32)
 
+	"""
+		EQUIVALENT TO vglStrEl.VglCreateStrEl()
+		RECEIVES TWO PARAMETERS:
+			data: ARRAY WITH CONVOLUTION WINDOWS ELEMENTS.
+			vglShape: vglShape OBJECT TO HELP MANIPULATE THE Structuring Element.
+	"""
 	def VglCreateStrEl(self, data, vglShape):
 		size = vglShape.getSize()
 		self.vglShape = vl.VglShape()
@@ -23,16 +36,26 @@ class VglStrEl(object):
 		for i in range(0, size):
 			self.data[i] = data[i]
 
-	# EQUIVALENT TO THE FIRST CONSTRUCTOR ON vglStrEl
+	"""
+		EQUIVALENT TO vglStrEl.VglCreateStrEl()
+		RECEIVES TWO PARAMETERS:
+			data: array with convolution window elements.
+			vglShape: shape, or dimension sizes, associated with array.
+	"""
 	def constructorFromDataVglShape(self, data, vglShape):
 		self.VglCreateStrEl(data, vglShape)
 
 	"""
-		In the .cl file, is used the name "type"
-		but "type" is a reserved name in Python.
-		Then, on this object, the name "Type" will replace "type".
+		EQUIVALENT TO THE vglStrEl CONSTRUCTOR
+		THAT RECEIVES TWO PARAMETERS:
+			type: (VGL_SHAPE_CUBE|VGL_SHAPE_CROSS|VGL_SHAPE_GAUSS)
+			ndim: number of dimensions.
+		
+		ATTENTION:
+			In the .cpp file, is used the name "type"
+			but "type" is a reserved name in Python.
+			Then, on this object, the name "Type" will replace "type".
 	"""
-	# EQUIVALENT TO THE SECOND CONSTRUCTOR ON vglStrEl
 	def constructorFromTypeNdim(self, Type, ndim):
 		shape = np.zeros(vl.VGL_MAX_DIM(), np.int32)
 		shape[0] = 1
@@ -102,6 +125,9 @@ class VglStrEl(object):
 
 		self.constructorFromDataVglShape(data, vglShape)
 
+	"""
+		DEFAULT GETTERS
+	"""
 	def getData(self):
 		return self.data
 
@@ -120,6 +146,9 @@ class VglStrEl(object):
 	def getOffset(self):
 		return self.vglShape.getOffset()
 
+	"""
+		EQUIVALENT TO THE vglStrEl.asVglStrEl() METHOD
+	"""
 	def asVglClStrEl(self):
 		result = VglClStrEl()
 		shape = self.vglShape.asVglClShape()
