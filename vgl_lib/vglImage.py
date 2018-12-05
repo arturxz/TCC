@@ -288,9 +288,9 @@ class VglImage(object):
 	def nd_image_sync(self, ctx, queue):
 		if( not self.img_sync ):
 			if( self.last_changed_device ):
-				self.vglImageNdDownload(ctx, queue)
+				self.vglNdImageDownload(ctx, queue)
 			elif( self.last_changed_host ):
-				self.vglImageNdUpload(ctx, queue)
+				self.vglNdImageUpload(ctx, queue)
 		else:
 			print("Already synced")
 
