@@ -1,6 +1,10 @@
 import numpy as np
 import vgl_lib as vl
 
+"""
+	EQUIVALENT TO vglClShape, 
+	LOCATED IN  vglClShape.h
+"""
 class VglClShape(object):
 	def __init__(self, ndim=0, size=0):
 		self.shape = np.zeros((vl.VGL_ARR_SHAPE_SIZE()), np.int32)
@@ -8,7 +12,9 @@ class VglClShape(object):
 		self.ndim = np.int32(ndim)
 		self.size = np.int32(size)
 
-
+"""
+	EQUIVALENT TO vglShape.cpp
+"""
 class VglShape(object):
 
 	"""
@@ -35,7 +41,6 @@ class VglShape(object):
 	"""
 	
 	def __init__(self):
-
 		# CREATING CLASS DATA
 		self.ndim = -1
 		self.shape = np.zeros((vl.VGL_MAX_DIM()+1), np.int32)
@@ -43,6 +48,12 @@ class VglShape(object):
 		self.size = -1
 		self.bps = 8
 
+	"""
+		EQUIVALENT TO vglShape.vglCreateShape()
+
+		TAKES SHAPE, NDIM AND BPS (DEFAULT TO 8)
+		AND BUILD THE vglShape STRUCTURE.
+	"""
 	def vglCreateShape(self, shape, ndim, bps=8):
 
 		self.ndim = ndim
@@ -75,12 +86,30 @@ class VglShape(object):
 				self.offset[i] = 0
 		self.size *= self.shape[maxi] * self.offset[maxi]
 
+	"""
+		EQUIVALENT TO THE GENERIC vglShape CONSTRUCTOR
+		THAT RECEIVES AN vglShape AS ARGUMENT AND CONSTRUCTS
+		A SHAPE FROM ANOTHER SHAPE.
+	"""
 	def constructorFromVglShape(self, vglShape):
 		self.vglCreateShape(vglShape.getShape(), vglShape.getNdim(), vglShape.getBps())
 
+	"""
+		EQUIVALENT TO A GENERIC vglShape CONSTRUCTOR
+		THAT RECEIVES THREE PARAMETERS:
+			shape: ARRAY WITH DIMENSIONS SIZES, WITH THE CHANNEL NUMBERS IN POSITION 0.
+    		ndim: NUMBER OF DIMENSIONS
+    		bps: BITS PER SAMPLE. DEFAULTS TO 8.
+	"""
 	def constructorFromShapeNdimBps(self, shape, ndim, bps=8):
 		self.vglCreateShape(shape, ndim, bps)
 
+	"""
+		EQUIVALENT TO THE 1D vglShape CONSTRUCTOR.
+		RECEIVES TWO PARAMETERS:
+		w: width
+		h: height
+	"""
 	def constructor1DShape(self, w, h):
 		shape = np.ones((vl.VGL_MAX_DIM()+1), np.int32)
 		ndim = 2
@@ -90,6 +119,13 @@ class VglShape(object):
 
 		self.vglCreateShape(shape, ndim)
 
+	"""
+		EQUIVALENT TO THE 2D vglShape CONSTRUCTOR.
+		RECEIVES THREE PARAMETERS:
+		nChannels: number of channels
+		w: width
+		h: height
+	"""
 	def constructor2DShape(self, nChannels, w, h):
 		shape = np.ones((vl.VGL_MAX_DIM()+1), np.int32)
 		ndim = 2
@@ -99,6 +135,14 @@ class VglShape(object):
 
 		self.vglCreateShape(shape, ndim)
 
+	"""
+		EQUIVALENT TO THE 3D vglShape CONSTRUCTOR.
+		RECEIVES FOUR PARAMETERS:
+		nChannels: number of channels
+		w: width
+		h: height
+		d3: numer of frames
+	"""
 	def constructor3DShape(self, nChannels, w, h, d3):
 		shape = np.ones((vl.VGL_MAX_DIM()+1), np.int32)
 		ndim = 3
@@ -141,6 +185,7 @@ class VglShape(object):
 
 	"""
 		DEFAULT GETTERS
+		EQUIVALENT TO vglShape GETTERS
 	"""
 	def getNdim(self):
 		return self.ndim
@@ -189,9 +234,15 @@ class VglShape(object):
 			nframes *= self.shape[i]
 		return nframes
 
-	def findBitsPerSample(depht):
+	"""
+		EQUIVALENT TO THE vglShape.findBitsPerSample(int depht)
+	"""
+	def findBitsPerSample(self, depht):
 		return depht & 255
 
+	"""
+		EQUIVALENT TO vglShape.findWidthStep(int bps, int width, int nChannels)
+	"""
 	def findWidthStep(self, bps, width, nChannels):
 		
 		if(bps == 1):
@@ -201,6 +252,9 @@ class VglShape(object):
 			exit(1)
 		return (bps / 8) * nChannels * width
 
+	"""
+		EQUIVALENT TO vglShape.asVglClShape()
+	"""
 	def asVglClShape(self):
 		
 		result = VglClShape()
