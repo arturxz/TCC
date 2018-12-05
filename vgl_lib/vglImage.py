@@ -49,7 +49,16 @@ class VglImage(object):
 
 		# OPENING IMAGE
 		self.vglLoadImage(imgPath)
+	
+	"""
+		THIS METHOD INITIATES THE vglShape OBJECT
+		TO THE IMAGE. IT LOOKS IF IS A 2D OR A 3D IMAGE
+		AND CONSTRUCT THE vglShape OBJECT.
 
+		IN EVERY CHANGE IN THE IMAGE, THIS METHOD MUST BE
+		CALLED, TO ASSURES THAT THE vglShape IS SYNCED WITH
+		THE ACTUAL IMAGE.
+	"""
 	def create_vglShape(self):
 		if(self.img_ram is not None):
 			print("The image was founded. Creating vglShape.")
@@ -87,8 +96,10 @@ class VglImage(object):
 		EQUIVALENT TO vglImage.vglLoad3dImage
 		EQUIVALENT TO vglImage.vglLoadNdImage
 
-		IN PYTHON, ALL THE IMAGES ARE OPENED 
-		AS A ND-ARRAY OBJECT.
+		THIS METHOD READS THE IMAGE PATH AND OPEN
+		IT AS A NUMPY NDARRAY. THROWS A ERROR MESSAGE
+		IF THE PATH IS INCORRECT. BUILD THE MAKE THE CALL
+		TO CONSTRUCT THE vglShape OBJECT. 
 	"""
 	def vglLoadImage(self, imgPath):
 		try:
