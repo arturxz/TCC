@@ -92,9 +92,11 @@ class VglImage(object):
 			print("Impossible to create a vglImage object. host_image is None.")
 
 	"""
-		EQUIVALENT TO vglImage.vglLoadImage
-		EQUIVALENT TO vglImage.vglLoad3dImage
-		EQUIVALENT TO vglImage.vglLoadNdImage
+		EQUIVALENT TO:
+			vglImage.vglLoadImage
+			vglImage.vglLoad3dImage
+			vglImage.vglLoadNdImage
+			vglImage.vglLoadPgm
 
 		THIS METHOD READS THE IMAGE PATH AND OPEN
 		IT AS A NUMPY NDARRAY. THROWS A ERROR MESSAGE
@@ -130,7 +132,11 @@ class VglImage(object):
 		self.rgba_to_rgb()
 
 	"""
-		EQUIVALENT TO vglImage.vglImageUpload()
+		EQUIVALENT TO vglImage.vglImageUpload() (OPENCL IMAGE OBJECT)
+
+		IT TAKES THE RAM-SIDE IMAGE, ALLOCATES THE
+		DEVICE-SIDE MEMORY, CONSTRUCTS THE IMAGE OBJECT
+		AND UPLOADS THE IMAGE OBJECT TO THE DEVICE.
 	"""
 	def vglImageUpload(self, ctx, queue):
 		# IMAGE VARS
@@ -162,6 +168,19 @@ class VglImage(object):
 		self.last_changed_host = False
 		self.last_changed_device = True
 
+	"""
+		TO OPENCL IMAGE OBJECT, IS QUIVALENT TO:
+			vglImage.vglImageDownloadFaster()
+			vglImage.vglImageDownload()
+			vglImage.vglImageDownloadFBO()
+			vglImage.vglImageDownloadPPM()
+			vglImage.vglImageDownloadPGM()
+
+		THIS METHOD TAKES THE DEVICE-SIDE OPENCL IMAGE AND
+		COPY IT BACK TO THE RAM-SIDE. IN THE END, THE METHOD
+		CALL THE vglShape CONSTRUCTOR, TO ATUALIZE THE vglShape
+		OBJECT.
+	"""
 	def vglImageDownload(self, ctx, queue):
 		# MAKE IMAGE DOWNLOAD HERE
 		print("Downloading Image from device.")
@@ -200,6 +219,13 @@ class VglImage(object):
 		self.last_changed_device = False
 		self.last_changed_host = True
 
+	"""
+		EQUIVALENT TO vglImage.vglImageUpload() (OPENCL BUFFER TO ND-IMAGE)
+
+		IT TAKES THE RAM-SIDE IMAGE, ALLOCATES THE
+		DEVICE-SIDE MEMORY, AND PASSES THE ND-ARRAY
+		TO THE DEVICE.
+	"""
 	def vglNdImageUpload(self, ctx, queue):
 		print("NdArray image Upload")
 		
@@ -211,13 +237,22 @@ class VglImage(object):
 		self.img_sync = False
 		self.last_changed_host = False
 		self.last_changed_device = True
-	
+
+	def getVglShape(self):
+		return self.vglshape
+		
 	"""
-		EQUIVALENT TO vglImage.DownloadFaster
-		EQUIVALENT TO vglImage.Download
-		EQUIVALENT TO vglImage.DownloadFBO
-		EQUIVALENT TO vglImage.DownloadPPM
-		EQUIVALENT TO vglImage.DownloadPGM
+		TO OPENCL BUFFER IMAGE, IS QUIVALENT TO:
+			vglImage.vglImageDownloadFaster()
+			vglImage.vglImageDownload()
+			vglImage.vglImageDownloadFBO()
+			vglImage.vglImageDownloadPPM()
+			vglImage.vglImageDownloadPGM()
+
+		THIS METHOD TAKES THE DEVICE-SIDE OPENCL BUFFER AND
+		COPY IT BACK TO THE RAM-SIDE. THEN, THE METHOD CALLS
+		THE vglShape CONSTRUCTOR, TO ATUALIZE THE vglShape
+		OBJECT.
 	"""
 	def vglNdImageDownload(self, ctx, queue):
 		print("NdArray image Download")
@@ -229,12 +264,33 @@ class VglImage(object):
 		self.last_changed_device = False
 		self.last_changed_host = True
 
+	"""
+		[OPENCL IMAGE ONLY]
+		THIS METHOD MUST BE CALLED EVERY CHANGE IN
+		THE IMAGE, TO ASSURED THAT THE RAM-SIDE AND
+		DEVICE-SIDE ARE SYNCED.
+	"""
 	def sync(self, ctx, queue):
 		if( not self.img_sync ):
 			if( self.last_changed_device ):
 				self.vglImageDownload(ctx, queue)
 			elif( self.last_changed_host ):
 				self.vglImageUpload(ctx, queue)
+		else:
+			print("Already synced")
+
+	"""
+		[OPENCL BUFFER IMAGE ONLY]
+		THIS METHOD MUST BE CALLED EVERY CHANGE IN
+		THE IMAGE, TO ASSURED THAT THE RAM-SIDE AND
+		DEVICE-SIDE ARE SYNCED.
+	"""
+	def nd_image_sync(self, ctx, queue):
+		if( not self.img_sync ):
+			if( self.last_changed_device ):
+				self.vglImageNdDownload(ctx, queue)
+			elif( self.last_changed_host ):
+				self.vglImageNdUpload(ctx, queue)
 		else:
 			print("Already synced")
 
@@ -304,9 +360,6 @@ class VglImage(object):
 			self.last_changed_host = False
 		else:
 			print("Invalid object. cl.Image or cl.Buffer objects only.")
-	
-	def getVglShape(self):
-		return self.vglshape
 	
 	def get_device_image(self):
 		return self.img_device
