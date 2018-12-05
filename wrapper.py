@@ -20,15 +20,20 @@ class Wrapper:
 		print("Loading OpenCL Kernel")
 		self.kernel_file = open(filepath, "r")
 
-		if ((kernelname in False)):
+		if(self.pgr is None):
 			print("::Building Kernel")
 			self.cl_ctx.load_headers(filepath)
 			self.pgr = pyopencl.Program(self.ctx, self.kernel_file.read())
 			self.pgr.build(options=self.cl_ctx.get_build_options())
 			self.builded = True
-		else:
+		elif( (kernelname in self.pgr.kernel_names) ):
 			print("::Kernel already builded. Going to next step...")
-
+		else:
+			print("::Building Kernel")
+			self.cl_ctx.load_headers(filepath)
+			self.pgr = pyopencl.Program(self.ctx, self.kernel_file.read())
+			self.pgr.build(options=self.cl_ctx.get_build_options())
+			self.builded = True
 		self.kernel_file.close()
 	
 	"""
@@ -61,7 +66,7 @@ class Wrapper:
 		
 		mf = pyopencl.mem_flags
 		self.vglimage.vglNdImageUpload(self.ctx, self.queue)
-		self.img_out_cl = pyopencl.Buffer(self.ctx, mf.WRITE_ONLY, self.vglimage.get_host_image().nbytes)
+		self.img_out_cl = pyopencl.Buffer(self.ctx, mf.WRITE_ONLY, self.vglimage.get_ram_image().nbytes)
 	
 	"""
 		HERE FOLLOWS THE METHODS THAT STRUCTURE THE 
@@ -118,7 +123,7 @@ class Wrapper:
 		HERE FOLLOWS THE KERNEL CALLS
 	"""
 	def vglCl3dBlurSq3(self, filepath, imgIn):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglCl3dBlurSq3")
 		self.loadImage3D(imgIn)
 
 		self.pgr.vglCl3dBlurSq3(self.queue,
@@ -131,7 +136,7 @@ class Wrapper:
 		self.vglimage.sync(self.ctx, self.queue)
 
 	def vglCl3dConvolution(self, filepath, imgIn, arr_window, window_x, window_y, window_z):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglCl3dConvolution")
 		self.loadImage3D(imgIn)
 
 		self.pgr.vglCl3dConvolution(self.queue,
@@ -148,7 +153,7 @@ class Wrapper:
 		self.vglimage.sync(self.ctx, self.queue)
 	
 	def vglCl3dCopy(self, filepath, imgIn):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglCl3dCopy")
 		self.loadImage3D(imgIn)
 
 		self.pgr.vglCl3dCopy(self.queue, 
@@ -161,7 +166,7 @@ class Wrapper:
 		self.vglimage.sync(self.ctx, self.queue)
 
 	def vglCl3dDilate(self, filepath, imgIn, arr_window, window_x, window_y, window_z):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglCl3dDilate")
 		self.loadImage3D(imgIn)
 
 		self.pgr.vglCl3dDilate(self.queue,
@@ -178,7 +183,7 @@ class Wrapper:
 		self.vglimage.sync(self.ctx, self.queue)
 
 	def vglCl3dErode(self, filepath, imgIn, arr_window, window_x, window_y, window_z):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglCl3dErode")
 		self.loadImage3D(imgIn)
 
 		self.pgr.vglCl3dErode(self.queue,
@@ -195,7 +200,7 @@ class Wrapper:
 		self.vglimage.sync(self.ctx, self.queue)
 
 	def vglCl3dMax(self, filepath, imgIn1, imgIn2):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglCl3dMax")
 		
 		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
 		self.vglimage1.vglImageUpload(self.ctx, self.queue)
@@ -218,7 +223,7 @@ class Wrapper:
 		self.vglimage2.sync(self.ctx, self.queue)
 
 	def vglCl3dMin(self, filepath, imgIn1, imgIn2):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglCl3dMin")
 		
 		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
 		self.vglimage1.vglImageUpload(self.ctx, self.queue)
@@ -241,7 +246,7 @@ class Wrapper:
 		self.vglimage2.sync(self.ctx, self.queue)
 
 	def vglCl3dNot(self, filepath, imgIn):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglCl3dNot")
 		self.loadImage3D(imgIn)
 
 		self.pgr.vglCl3dNot(self.queue, 
@@ -254,7 +259,7 @@ class Wrapper:
 		self.vglimage.sync(self.ctx, self.queue)
 
 	def vglCl3dSub(self, filepath, imgIn1, imgIn2):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglCl3dSub")
 		
 		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
 		self.vglimage1.vglImageUpload(self.ctx, self.queue)
@@ -277,7 +282,7 @@ class Wrapper:
 		self.vglimage2.sync(self.ctx, self.queue)
 
 	def vglCl3dSum(self, filepath, imgIn1, imgIn2):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglCl3dSum")
 		
 		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
 		self.vglimage1.vglImageUpload(self.ctx, self.queue)
@@ -300,7 +305,7 @@ class Wrapper:
 		self.vglimage2.sync(self.ctx, self.queue)
 
 	def vglCl3dThreshold(self, filepath, imgIn, thresh=0.425, top=1):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglCl3dThreshold")
 		self.loadImage3D(imgIn)
 
 		self.pgr.vglCl3dThreshold(self.queue, 
@@ -315,7 +320,7 @@ class Wrapper:
 		self.vglimage.sync(self.ctx, self.queue)
 
 	def vglClBlurSq3(self, imgIn):
-		self.loadCL("../CL/vglClBlurSq3.cl")
+		self.loadCL("../CL/vglClBlurSq3.cl", "vglClBlurSq3")
 		self.loadImage2D(imgIn)
 
 		self.pgr.vglClBlurSq3(self.queue,
@@ -330,7 +335,7 @@ class Wrapper:
 			self.vglimage.rgba_to_rgb()
 
 	def vglClConvolution(self, filepath, imgIn, arr_window, window_x, window_y):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClConvolution")
 		self.loadImage2D(imgIn)
 
 		self.pgr.vglClConvolution(self.queue,
@@ -348,7 +353,7 @@ class Wrapper:
 			self.vglimage.rgba_to_rgb()
 	
 	def vglClCopy(self, filepath, imgIn):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClCopy")
 		self.loadImage2D(imgIn)
 
 		self.pgr.vglClCopy(self.queue, 
@@ -363,7 +368,7 @@ class Wrapper:
 			self.vglimage.rgba_to_rgb()
 
 	def vglClDilate(self, filepath, imgIn, arr_window, window_x, window_y):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClDilate")
 		self.loadImage2D(imgIn)
 
 		self.pgr.vglClDilate(self.queue,
@@ -381,7 +386,7 @@ class Wrapper:
 			self.vglimage.rgba_to_rgb()
 			
 	def vglClErode(self, filepath, imgIn, arr_window, window_x, window_y):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClErode")
 		self.loadImage2D(imgIn)
 
 		self.pgr.vglClErode(self.queue,
@@ -399,7 +404,7 @@ class Wrapper:
 			self.vglimage.rgba_to_rgb()
 			
 	def vglClMax(self, filepath, imgIn1, imgIn2):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClMax")
 		
 		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
 		self.vglimage1.vglImageUpload(self.ctx, self.queue)
@@ -427,7 +432,7 @@ class Wrapper:
 			self.vglimage2.rgba_to_rgb()
 			
 	def vglClMin(self, filepath, imgIn1, imgIn2):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClMin")
 		
 		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
 		self.vglimage1.vglImageUpload(self.ctx, self.queue)
@@ -455,7 +460,7 @@ class Wrapper:
 			self.vglimage2.rgba_to_rgb()
 
 	def vglClInvert(self, filepath, imgIn):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClInvert")
 		self.loadImage2D(imgIn)
 
 		self.pgr.vglClInvert(self.queue, 
@@ -470,7 +475,7 @@ class Wrapper:
 			self.vglimage.rgba_to_rgb()
 
 	def vglClSub(self, filepath, imgIn1, imgIn2):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClSub")
 		
 		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
 		self.vglimage1.vglImageUpload(self.ctx, self.queue)
@@ -498,7 +503,7 @@ class Wrapper:
 			self.vglimage2.rgba_to_rgb()
 			
 	def vglClSum(self, filepath, imgIn1, imgIn2):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClSum")
 		
 		self.vglimage1 = vl.VglImage(imgIn1, vl.VGL_IMAGE_3D_IMAGE())
 		self.vglimage1.vglImageUpload(self.ctx, self.queue)
@@ -526,7 +531,7 @@ class Wrapper:
 			self.vglimage2.rgba_to_rgb()
 			
 	def vglClThreshold(self, filepath, imgIn, thresh=0.425, top=1):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClThreshold")
 		self.loadImage2D(imgIn)
 
 		self.pgr.vglClThreshold(self.queue, 
@@ -543,12 +548,12 @@ class Wrapper:
 			self.vglimage.rgba_to_rgb()
 
 	def vglClNdConvolution(self, filepath, imgIn, strElType, strElDim):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClNdConvolution")
 		self.loadImageND(imgIn)
 		self.makeStructures(strElType, strElDim)
 
 		self.pgr.vglClNdConvolution(self.queue,
-									self.vglimage.get_host_image().shape,
+									self.vglimage.get_ram_image().shape,
 									None, 
 									self.vglimage.get_device_image(), 
 									self.img_out_cl,
@@ -559,11 +564,11 @@ class Wrapper:
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
 	
 	def vglClNdCopy(self, filepath, imgIn):
-		self.loadCL(filepath)
+		self.loadCL(filepath, "vglClNdCopy")
 		self.loadImageND(imgIn)
 
 		self.pgr.vglClNdCopy(self.queue,
-							self.vglimage.get_host_image().shape,
+							self.vglimage.get_ram_image().shape,
 							None,
 							self.vglimage.get_device_image(),
 							self.img_out_cl).wait()
