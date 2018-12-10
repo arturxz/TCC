@@ -1,3 +1,5 @@
+import vgl_lib as vl
+
 def vglIsContextValid(x):
 	return ( (x >= 1) and (x <= 15) )
 	
@@ -5,7 +7,11 @@ def vglIsContextUnique(x):
 	return ( (x is 0) or (x is 1) or (x is 2) or (x is 4), (x is 8) )
 	
 def vglIsInContext(img, x):
-	return ( ( img.inContext & x ) or ( (img.inContext is 0) and (x is 0)  ) )
+	img_context = img.inContext & x
+	if( not (img_context is 0) ):
+		return img_context
+	elif( (img.inContext is 0) and (x is 0) ):
+		return 0
 
 """
 	EQUIVALENT TO vglContext.vglAddContext() METHOD.
@@ -48,7 +54,38 @@ def vglSetContext(img, context):
 	vglSetContext, vglAddContext
 """
 def vglCheckContext(img, context):
-	print('vglCheckContext')
+	if( not vglIsContextUnique( context ) ):
+		print("vglCheckContext: Error: context =", context, "is not unique or invalid")
+		return 0
+	
+	if( vglIsInContext(img, context) ):
+		print("vglCheckContext: image already in context", context)
+		return context
+	"""
+		HERE STARTS THE CASE-LIKE SEQUENCE FROM 
+		vglContext.vglCheckContext(VglImage img, int context)
+	"""
+	# IF THE CONTEXT IS IN RAM
+	if( context is vl.VGL_RAM_CONTEXT() ):
+		# AND IS A BLANK IMAGE, IT IS ON RAM. JUST SET IT IN CONTEXT.
+		if( vglIsInContext(img, vl.VGL_BLANK_CONTEXT() ) ):
+			vglAddContext(img, vl.VGL_RAM_CONTEXT())
+		# AND THE CONTEXT IS IN CL-DEVICE, DOWNLOAD IT BACK TO RAM.
+		elif( vglIsInContext(img, vl.VGL_CL_CONTEXT() ) ):
+			img.vglDownload()
+	# IF THE CONTEXT IS IN CL-DEVICE
+	elif( context is vl.VGL_CL_CONTEXT() ):
+		# AND IS A BLANK-IMAGE, IT IS ON RAM. UPLOAD IT TO CL-DEVICE!
+		if( vglIsInContext( img, vl.VGL_BLANK_CONTEXT() ) ):
+			img.vglUpload()
+		# AND THE CONTEXT IS IN RAM, UPLOAD IT TO CL-DEVICE!
+		elif( vglIsInContext( img, vl.VGL_RAM_CONTEXT() ) ):
+			img.vglUpload()
+	else:
+		print("vglCheckContext: Error: Trying to copy to invalid context =", context)
+		return 0
+	
+	return img.inContext
 
 """
 	CALL BEFORE WRITING TO IMAGE. CONTEXT MUST BE UNIQUE.

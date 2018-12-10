@@ -30,10 +30,17 @@ import vgl_lib as vl
 """
 
 class VglImage(object):
-	def __init__(self, imgPath, imgDim=None):
+	def __init__(self, imgPath, ndim=None):
 		# IF THE IMAGE TYPE IS NOT SPECIFIED, A 2D IMAGE WILL BE ASSUMED
 		# INICIALIZING DATA
-		self.imgDim = imgDim
+		self.inContext = 0
+		self.filename = imgPath
+		self.ndim = ndim
+		self.depht = 0
+		self.nChannels = 0
+		self.hasmipmap = 0
+
+		# PYTHON-EXCLUSIVE DATA
 		self.img_ram = None
 		self.img_device = None
 		self.img_sync = False
@@ -41,10 +48,10 @@ class VglImage(object):
 		self.last_changed_host = False
 		self.last_changed_device = False
 
-		if(self.imgDim is None):
-			self.imgDim = vl.VGL_IMAGE_2D_IMAGE()
+		if(self.ndim is None):
+			self.ndim = vl.VGL_IMAGE_2D_IMAGE()
 			print("Creating 2D Image!")
-		elif(self.imgDim is vl.VGL_IMAGE_3D_IMAGE()):
+		elif(self.ndim is vl.VGL_IMAGE_3D_IMAGE()):
 			print("Creating 3D Image!")
 
 		# OPENING IMAGE
@@ -64,7 +71,7 @@ class VglImage(object):
 			print("The image was founded. Creating vglShape.")
 
 			self.vglshape = vl.VglShape()
-			if( self.imgDim == vl.VGL_IMAGE_2D_IMAGE() ):
+			if( self.ndim == vl.VGL_IMAGE_2D_IMAGE() ):
 				print("2D Image")
 				if( len(self.img_ram.shape) == 2 ):
 					# SHADES OF GRAY IMAGE
@@ -74,7 +81,7 @@ class VglImage(object):
 					# MORE THAN ONE COLOR CHANNEL
 					print("VglImage RGB")
 					self.vglshape.constructor2DShape(self.img_ram.shape[2], self.img_ram.shape[1], self.img_ram.shape[0])
-			elif( self.imgDim == vl.VGL_IMAGE_3D_IMAGE() ):
+			elif( self.ndim == vl.VGL_IMAGE_3D_IMAGE() ):
 				print("3D Image")
 				if( len(self.img_ram.shape) == 3 ):
 					# SHADES OF GRAY IMAGE
@@ -335,12 +342,12 @@ class VglImage(object):
 
 	def get_similar_device_image_object(self, ctx, queue):
 
-		if(self.imgDim == vl.VGL_IMAGE_2D_IMAGE()):
+		if(self.ndim == vl.VGL_IMAGE_2D_IMAGE()):
 			shape  = ( self.vglshape.getWidth(), self.vglshape.getHeight() )
 			mf = cl.mem_flags
 			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
 			img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
-		elif(self.imgDim == vl.VGL_IMAGE_3D_IMAGE()):
+		elif(self.ndim == vl.VGL_IMAGE_3D_IMAGE()):
 			shape  = ( self.vglshape.getWidth(), self.vglshape.getHeight(), self.vglshape.getNFrames() )
 			mf = cl.mem_flags
 			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())

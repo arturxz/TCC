@@ -39,10 +39,10 @@ def VGL_STREL_MEAN():
 
 # IMAGE DIMENSIONS CONSTANTS
 def VGL_IMAGE_3D_IMAGE():
-	return 0
+	return 3
 
 def VGL_IMAGE_2D_IMAGE():
-	return 1
+	return 2
 
 # CONTEXT CONSTANTS
 def VGL_BLANK_CONTEXT():
