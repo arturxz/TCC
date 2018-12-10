@@ -11,7 +11,7 @@ import vgl_lib as vl
 
 class Wrapper:
 	def __init__(self):
-		self.cl_ctx = vl.VglClContext()
+		self.cl_ctx = vl.OpenclContext()
 		self.ctx = self.cl_ctx.get_context()
 		self.queue = self.cl_ctx.get_queue()
 		self.pgr = None

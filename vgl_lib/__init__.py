@@ -2,7 +2,7 @@
 
 from .structSizes 	import StructSizes
 from .vglImage 		import VglImage
-from .vglClContext	import VglClContext
+from .openclContext	import OpenclContext, VglClContext
 from .vglShape 		import VglShape
 from .vglStrEl 		import VglStrEl
 
