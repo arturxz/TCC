@@ -2,7 +2,7 @@
 	AS PYTHON DOESN'T HAVE CONSTANT DECLARATION, THE NEXT METHODS
 	RETURN THE VALUES WHO NEED CONSTANT BEHAVIOR.
 """
-
+# VGL CONSTANTS
 def VGL_SHAPE_NCHANNELS():
 	return 0
 
@@ -24,6 +24,7 @@ def VGL_ARR_SHAPE_SIZE():
 def VGL_ARR_CLSTREL_SIZE():
 	return 256
 
+# vglStrEl WINDOW MODES
 def VGL_STREL_CUBE():
 	return 1
 
@@ -36,8 +37,25 @@ def VGL_STREL_GAUSS():
 def VGL_STREL_MEAN():
 	return 4
 
+# IMAGE DIMENSIONS CONSTANTS
 def VGL_IMAGE_3D_IMAGE():
 	return 0
 
 def VGL_IMAGE_2D_IMAGE():
 	return 1
+
+# CONTEXT CONSTANTS
+def VGL_BLANK_CONTEXT():
+	return 0
+
+def VGL_RAM_CONTEXT():
+	return 1
+
+def VGL_GL_CONTEXT():
+	return 2
+
+def VGL_CUDA_CONTEXT():
+	return 4
+
+def VGL_CL_CONTEXT():
+	return 8
