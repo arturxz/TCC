@@ -49,12 +49,14 @@ class VglImage(object):
 		self.ndim = ndim
 		self.depht = 0
 		self.nChannels = 0
-		self.hasmipmap = 0
+		self.has_mipmap = 0
 
 		# PYTHON-EXCLUSIVE DATA
 		self.img_ram = None
 		self.img_device = None
-		self.img_sync = False
+		#self.img_sync = False
+		#self.last_changed_host = False
+		#self.last_changed_device = False
 
 		self.img_manipulation_mode = img_mode
 		if( self.img_manipulation_mode is None ):
@@ -62,9 +64,6 @@ class VglImage(object):
 		elif( not((self.img_manipulation_mode is vl.IMAGE_CL_OBJECT() )
 			   or (self.img_manipulation_mode is vl.IMAGE_ND_ARRAY() ) ) ):
 			print("ERROR! UNEXISTENT IMAGE MODE! YOU'LL NEED TO INSTANTIATE AGAIN!")
-
-		self.last_changed_host = False
-		self.last_changed_device = False
 
 		if(self.ndim is None):
 			self.ndim = vl.VGL_IMAGE_2D_IMAGE()
@@ -110,9 +109,9 @@ class VglImage(object):
 					print("VglImage RGB")
 					self.vglshape.constructor3DShape( self.img_ram.shape[3], self.img_ram.shape[2], self.img_ram.shape[1], self.img_ram.shape[0] )
 		
-			self.img_sync = False
-			self.last_changed_host = True
-			self.last_changed_device = False
+			#self.img_sync = False
+			#self.last_changed_host = True
+			#self.last_changed_device = False
 		else:
 			print("Impossible to create a vglImage object. host_image is None.")
 
@@ -138,9 +137,9 @@ class VglImage(object):
 			print("Unrecognized error:")
 			print(str(e))
 
-		self.img_sync = False
-		self.last_changed_host = True
-		self.last_changed_device = False
+		#self.img_sync = False
+		#self.last_changed_host = True
+		#self.last_changed_device = False
 
 		self.create_vglShape()
 	
@@ -209,9 +208,9 @@ class VglImage(object):
 		# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
 		cl.enqueue_copy(queue, self.img_device, self.img_ram, origin=origin, region=region, is_blocking=True)
 
-		self.img_sync = False
-		self.last_changed_host = False
-		self.last_changed_device = True
+		#self.img_sync = False
+		#self.last_changed_host = False
+		#self.last_changed_device = True
 
 	"""
 		TO OPENCL IMAGE OBJECT, IS QUIVALENT TO:
@@ -260,9 +259,9 @@ class VglImage(object):
 		self.img_ram = buffer
 		self.create_vglShape()
 
-		self.img_sync = False
-		self.last_changed_device = False
-		self.last_changed_host = True
+		#self.img_sync = False
+		#self.last_changed_device = False
+		#self.last_changed_host = True
 
 	"""
 		EQUIVALENT TO vglImage.vglImageUpload() (OPENCL BUFFER TO ND-IMAGE)
@@ -279,9 +278,9 @@ class VglImage(object):
 		self.img_device = cl.Buffer(ctx, mf.READ_ONLY, self.get_ram_image().nbytes)
 		cl.enqueue_copy(queue, self.img_device, self.get_ram_image().tobytes(), is_blocking=True)
 
-		self.img_sync = False
-		self.last_changed_host = False
-		self.last_changed_device = True
+		#self.img_sync = False
+		#self.last_changed_host = False
+		#self.last_changed_device = True
 
 	"""
 		TO OPENCL BUFFER IMAGE, IS QUIVALENT TO:
@@ -302,9 +301,9 @@ class VglImage(object):
 		cl.enqueue_copy(queue, self.img_ram, self.img_device)
 		self.create_vglShape()
 
-		self.img_sync = False
-		self.last_changed_device = False
-		self.last_changed_host = True
+		#self.img_sync = False
+		#self.last_changed_device = False
+		#self.last_changed_host = True
 
 	def getVglShape(self):
 		return self.vglshape
@@ -313,7 +312,7 @@ class VglImage(object):
 		THIS METHOD MUST BE CALLED EVERY CHANGE IN
 		THE IMAGE, TO ASSURED THAT THE RAM-SIDE AND
 		DEVICE-SIDE ARE SYNCED.
-	"""
+	
 	def sync(self, ctx, queue):
 		if( not self.img_sync ):
 			if( self.last_changed_device ):
@@ -322,6 +321,7 @@ class VglImage(object):
 				self.vglUpload(ctx, queue)
 		else:
 			print("Already synced")
+	"""
 
 	"""
 		EQUIVALENT TO DIFFERENT IMAGE SAVE

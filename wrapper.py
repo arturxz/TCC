@@ -54,9 +54,11 @@ class Wrapper:
 		self.vglimage = vl.VglImage(imgpath, vl.VGL_IMAGE_2D_IMAGE())
 		if( self.vglimage.getVglShape().getNChannels() == 3 ):
 			self.vglimage.rgb_to_rgba()
-			
+	
 		self.vglimage.vglUpload(self.ctx, self.queue)
 		self.img_out_cl = self.vglimage.get_similar_device_image_object(self.ctx, self.queue)
+
+		return self.vglimage
 	
 	# LOADING INTO A NDARRAY IMAGE
 	def loadImageND(self, imgpath):
@@ -116,8 +118,9 @@ class Wrapper:
 	"""
 		HERE FOLLOWS THE IMAGE SAVING METHOD
 	"""
-	def saveImage(self, outputpath):
-		self.vglimage.img_save(outputpath)
+	def saveImage(self, img, outputpath):
+		vl.vglCheckContext(img, vl.VGL_RAM_CONTEXT())
+		img.img_save(outputpath)
 
 	"""
 		HERE FOLLOWS THE KERNEL CALLS
@@ -319,10 +322,13 @@ class Wrapper:
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
 
-	def vglClBlurSq3(self, imgIn):
-		self.loadCL("../CL/vglClBlurSq3.cl", "vglClBlurSq3")
-		self.loadImage2D(imgIn)
+	def vglClBlurSq3(self, img_input, img_output):
 
+		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+
+		self.loadCL("../CL/vglClBlurSq3.cl", "vglClBlurSq3")
+		
 		self.pgr.vglClBlurSq3(self.queue,
 							  self.img_out_cl.shape,
 							  None, 
@@ -330,7 +336,6 @@ class Wrapper:
 							  self.img_out_cl).wait()
 
 		self.vglimage.set_device_image(self.img_out_cl)
-		self.vglimage.sync(self.ctx, self.queue)
 		if( self.vglimage.getVglShape().getNChannels() == 4 ):
 			self.vglimage.rgba_to_rgb()
 
@@ -579,6 +584,7 @@ class Wrapper:
 if __name__ == "__main__":
 
 	wrp = Wrapper()
+	
 	"""
 	##
 	# PASTA CL
@@ -631,8 +637,9 @@ if __name__ == "__main__":
 	wrp.saveImage(sys.argv[2])
 	"""
 	# vglClBlurSq3
-	wrp.vglClBlurSq3(sys.argv[1])
-	wrp.saveImage(sys.argv[2])
+	img = wrp.loadImage2D(sys.argv[1])
+	wrp.vglClBlurSq3(img.get_ram_image, img.get_device_image)
+	wrp.saveImage(img, sys.argv[2])
 	"""
 	# vglClConvolution
 	arr_window = np.ones((10,10), np.float32) * (1/100)
