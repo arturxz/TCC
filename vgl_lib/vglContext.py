@@ -8,9 +8,11 @@ def vglIsContextUnique(x):
 	
 def vglIsInContext(img, x):
 	img_context = img.inContext & x
-	if( not (img_context is 0) ):
-		return img_context
+	if( img_context > 0 ):
+		return 1
 	elif( (img.inContext is 0) and (x is 0) ):
+		return 1
+	else:
 		return 0
 
 """
