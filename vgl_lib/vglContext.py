@@ -99,4 +99,8 @@ def vglCheckContext(img, context):
 	ON THIS METHOD. FUTURE INCREMENTS CAN IMPROVE THAT.
 """
 def vglCheckContextForOutput(img, context):
+	if( not (img is None) ):
+		print("img is not null")
+		return 1
+		
 	return 0
