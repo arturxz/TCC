@@ -41,7 +41,7 @@ import vgl_lib as vl
 	ALL THE CONSTANTS CAN BE FOUND IN vglConst.py file.
 """
 class VglImage(object):
-	def __init__(self, imgPath, ndim=None, img_mode=vl.IMAGE_CL_OBJECT()):
+	def __init__(self, imgPath, ndim=None, img_mode=None ):
 		# IF THE IMAGE TYPE IS NOT SPECIFIED, A 2D IMAGE WILL BE ASSUMED
 		# INICIALIZING DATA
 		self.inContext = 0
@@ -55,11 +55,13 @@ class VglImage(object):
 		self.img_ram = None
 		self.img_device = None
 		self.img_sync = False
-		self.img_manipulation_mode = None
-		if( (img_mode is vl.IMAGE_CL_OBJECT()) or (img_mode is vl.IMAGE_ND_ARRAY()) ):
-			self.img_manipulation_mode = img_mode
-		else:
-			print("ERROR! UNEXISTENT IMAGE MODE!")
+
+		self.img_manipulation_mode = img_mode
+		if( self.img_manipulation_mode is None ):
+			self.img_manipulation_mode = vl.IMAGE_CL_OBJECT()
+		elif( not((self.img_manipulation_mode is vl.IMAGE_CL_OBJECT() )
+			   or (self.img_manipulation_mode is vl.IMAGE_ND_ARRAY() ) ) ):
+			print("ERROR! UNEXISTENT IMAGE MODE! YOU'LL NEED TO INSTANTIATE AGAIN!")
 
 		self.last_changed_host = False
 		self.last_changed_device = False
@@ -274,8 +276,8 @@ class VglImage(object):
 		
 		# CREATING DEVICE POINTER AND COPYING HOST TO DEVICE
 		mf = cl.mem_flags
-		self.img_device = cl.Buffer(ctx, mf.READ_ONLY, self.get_host_image().nbytes)
-		cl.enqueue_copy(queue, self.img_device, self.get_host_image().tobytes(), is_blocking=True)
+		self.img_device = cl.Buffer(ctx, mf.READ_ONLY, self.get_ram_image().nbytes)
+		cl.enqueue_copy(queue, self.img_device, self.get_ram_image().tobytes(), is_blocking=True)
 
 		self.img_sync = False
 		self.last_changed_host = False

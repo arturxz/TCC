@@ -44,7 +44,7 @@ class Wrapper:
 		print("Opening image to be processed")
 		
 		self.vglimage = vl.VglImage(imgpath, vl.VGL_IMAGE_3D_IMAGE())
-		self.vglimage.vglImageUpload(self.ctx, self.queue)
+		self.vglimage.vglUpload(self.ctx, self.queue)
 		self.img_out_cl = self.vglimage.get_similar_device_image_object(self.ctx, self.queue)
 	
 	# LOADING INTO A 2D IMAGE OBJECT
@@ -55,7 +55,7 @@ class Wrapper:
 		if( self.vglimage.getVglShape().getNChannels() == 3 ):
 			self.vglimage.rgb_to_rgba()
 			
-		self.vglimage.vglImageUpload(self.ctx, self.queue)
+		self.vglimage.vglUpload(self.ctx, self.queue)
 		self.img_out_cl = self.vglimage.get_similar_device_image_object(self.ctx, self.queue)
 	
 	# LOADING INTO A NDARRAY IMAGE
@@ -604,7 +604,7 @@ if __name__ == "__main__":
 
 	# vglCl3dErode
 	wrp.vglCl3dErode("../CL/vglCl3dErode.cl", sys.argv[1], arr_window_cl, window_x, window_y, window_z)
-	wrp.saveImage(sys.argv[2])
+	wrp.svglClBlurSq3aveImage(sys.argv[2])
 
 	# vglCl3dMax
 	wrp.vglCl3dMax("../CL/vglCl3dMax.cl", sys.argv[1], sys.argv[2])
