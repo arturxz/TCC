@@ -26,11 +26,22 @@ import vgl_lib as vl
 		2D images must have 0 in the z-axis
 	cl_region
 		Is where to end the copying of the image.
-		2D images must have 1 in the z-axis 
+		2D images must have 1 in the z-axis
 """
-
+"""
+	PYTHON'S VGLIMAGE IS SLIGHTLY DIFFERENT  FROM ITS EQUIVALENT.
+	ndim DEFAULTS TO 2D DIMENTION IMAGE
+	
+	img_mode IS HOW THE IMAGE WILL BE TREATED. IF WILL USE THE
+			 ND-ARRAY IMAGE AND PASS THE IMAGE DATA TO THE DEVICE
+			 AS A BUFFER OF DATA OR IF WILL CREATE A OPENCL IMAGE
+			 OBJECT TO PASS ALL THE NEEDED DATA. IT DEFAULTS TO
+			 THE SECOND ONE (OPENCL IMAGE OBJECT).
+	
+	ALL THE CONSTANTS CAN BE FOUND IN vglConst.py file.
+"""
 class VglImage(object):
-	def __init__(self, imgPath, ndim=None):
+	def __init__(self, imgPath, ndim=None, img_mode=vl.IMAGE_CL_OBJECT()):
 		# IF THE IMAGE TYPE IS NOT SPECIFIED, A 2D IMAGE WILL BE ASSUMED
 		# INICIALIZING DATA
 		self.inContext = 0
@@ -44,6 +55,11 @@ class VglImage(object):
 		self.img_ram = None
 		self.img_device = None
 		self.img_sync = False
+		self.img_manipulation_mode = None
+		if( (img_mode is vl.IMAGE_CL_OBJECT()) or (img_mode is vl.IMAGE_ND_ARRAY()) ):
+			self.img_manipulation_mode = img_mode
+		else:
+			print("ERROR! UNEXISTENT IMAGE MODE!")
 
 		self.last_changed_host = False
 		self.last_changed_device = False
@@ -137,6 +153,26 @@ class VglImage(object):
 	"""
 	def vglImage4To3Channels(self):
 		self.rgba_to_rgb()
+	
+	"""
+		EQUIVALENT TO vglImage.vglUpload()
+		TREATING ACCORDING TO img_manipulation_mode.
+	"""
+	def vglUpload(self, ctx, queue):
+		if( self.img_manipulation_mode is vl.IMAGE_CL_OBJECT() ):
+			self.vglClImageUpload(ctx, queue)
+		elif( self.img_manipulation_mode is vl.IMAGE_ND_ARRAY() ):
+			self.vglClNdImageUpload(ctx, queue)
+
+	"""
+		EQUIVALENT TO vglImage.vglDownload()
+		TREATING ACCORDING TO img_manipulation_mode.
+	"""
+	def vglDownload(self, ctx, queue):
+		if( self.img_manipulation_mode is vl.IMAGE_CL_OBJECT() ):
+			self.vglClImageDownload(ctx, queue)
+		elif( self.img_manipulation_mode is vl.IMAGE_ND_ARRAY() ):
+			self.vglClNdImageDownload(ctx, queue)
 
 	"""
 		EQUIVALENT TO vglImage.vglImageUpload() (OPENCL IMAGE OBJECT)
@@ -145,7 +181,7 @@ class VglImage(object):
 		DEVICE-SIDE MEMORY, CONSTRUCTS THE IMAGE OBJECT
 		AND UPLOADS THE IMAGE OBJECT TO THE DEVICE.
 	"""
-	def vglImageUpload(self, ctx, queue):
+	def vglClImageUpload(self, ctx, queue):
 		# IMAGE VARS
 		print("Uploading image to device.")
 		if( self.getVglShape().getNFrames() == 1 ):
@@ -188,7 +224,7 @@ class VglImage(object):
 		CALL THE vglShape CONSTRUCTOR, TO ATUALIZE THE vglShape
 		OBJECT.
 	"""
-	def vglImageDownload(self, ctx, queue):
+	def vglClImageDownload(self, ctx, queue):
 		# MAKE IMAGE DOWNLOAD HERE
 		print("Downloading Image from device.")
 
@@ -233,7 +269,7 @@ class VglImage(object):
 		DEVICE-SIDE MEMORY, AND PASSES THE ND-ARRAY
 		TO THE DEVICE.
 	"""
-	def vglNdImageUpload(self, ctx, queue):
+	def vglClNdImageUpload(self, ctx, queue):
 		print("NdArray image Upload")
 		
 		# CREATING DEVICE POINTER AND COPYING HOST TO DEVICE
@@ -245,9 +281,6 @@ class VglImage(object):
 		self.last_changed_host = False
 		self.last_changed_device = True
 
-	def getVglShape(self):
-		return self.vglshape
-		
 	"""
 		TO OPENCL BUFFER IMAGE, IS QUIVALENT TO:
 			vglImage.vglImageDownloadFaster()
@@ -261,7 +294,7 @@ class VglImage(object):
 		THE vglShape CONSTRUCTOR, TO ATUALIZE THE vglShape
 		OBJECT.
 	"""
-	def vglNdImageDownload(self, ctx, queue):
+	def vglClNdImageDownload(self, ctx, queue):
 		print("NdArray image Download")
 
 		cl.enqueue_copy(queue, self.img_ram, self.img_device)
@@ -271,8 +304,10 @@ class VglImage(object):
 		self.last_changed_device = False
 		self.last_changed_host = True
 
+	def getVglShape(self):
+		return self.vglshape
+		
 	"""
-		[OPENCL IMAGE ONLY]
 		THIS METHOD MUST BE CALLED EVERY CHANGE IN
 		THE IMAGE, TO ASSURED THAT THE RAM-SIDE AND
 		DEVICE-SIDE ARE SYNCED.
@@ -280,24 +315,9 @@ class VglImage(object):
 	def sync(self, ctx, queue):
 		if( not self.img_sync ):
 			if( self.last_changed_device ):
-				self.vglImageDownload(ctx, queue)
+				self.vglDownload(ctx, queue)
 			elif( self.last_changed_host ):
-				self.vglImageUpload(ctx, queue)
-		else:
-			print("Already synced")
-
-	"""
-		[OPENCL BUFFER IMAGE ONLY]
-		THIS METHOD MUST BE CALLED EVERY CHANGE IN
-		THE IMAGE, TO ASSURED THAT THE RAM-SIDE AND
-		DEVICE-SIDE ARE SYNCED.
-	"""
-	def nd_image_sync(self, ctx, queue):
-		if( not self.img_sync ):
-			if( self.last_changed_device ):
-				self.vglNdImageDownload(ctx, queue)
-			elif( self.last_changed_host ):
-				self.vglNdImageUpload(ctx, queue)
+				self.vglUpload(ctx, queue)
 		else:
 			print("Already synced")
 

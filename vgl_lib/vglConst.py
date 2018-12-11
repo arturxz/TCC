@@ -59,3 +59,10 @@ def VGL_CUDA_CONTEXT():
 
 def VGL_CL_CONTEXT():
 	return 8
+
+# PYTHON-SPECIFIC IMAGE MANIPULATION MODE
+def IMAGE_CL_OBJECT():
+	return 0
+
+def IMAGE_ND_ARRAY():
+	return 1
