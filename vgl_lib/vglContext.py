@@ -5,7 +5,14 @@ def vglIsContextValid(x):
 	
 def vglIsContextUnique(x):
 	return ( (x is 0) or (x is 1) or (x is 2) or (x is 4), (x is 8) )
-	
+
+"""
+	PYTHON LOGIC OPERATIONS PRECEDENCY WORKS SLIGHTELY DIFERENTLY
+	FROM C++. TO ASSURE THAT PYTHON-VERSION OF vglIsInContext WILL 
+	ALWAYS RETURN THE SAME RESULT AS CPP-VERSION, THE FUNCTION WAS
+	REWRITED. IN testCode/test_vglIsInContext.c A TEST COMPARING THE
+	EQUIVALENCY OF THE TWO VERSIONS WAS WRITED.
+"""
 def vglIsInContext(img, x):
 	img_context = img.inContext & x
 	if( img_context > 0 ):
