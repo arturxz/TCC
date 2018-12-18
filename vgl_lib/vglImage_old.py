@@ -28,7 +28,6 @@ import vgl_lib as vl
 		Is where to end the copying of the image.
 		2D images must have 1 in the z-axis
 """
-
 """
 	PYTHON'S VGLIMAGE IS SLIGHTLY DIFFERENT  FROM ITS EQUIVALENT.
 	ndim DEFAULTS TO 2D DIMENTION IMAGE
@@ -42,7 +41,7 @@ import vgl_lib as vl
 	ALL THE CONSTANTS CAN BE FOUND IN vglConst.py file.
 """
 class VglImage(object):
-	def __init__(self, imgPath="", ndim=None, img_mode=None ):
+	def __init__(self, imgPath, ndim=None, img_mode=None ):
 		# IF THE IMAGE TYPE IS NOT SPECIFIED, A 2D IMAGE WILL BE ASSUMED
 		# INICIALIZING DATA
 		self.inContext = 0
@@ -73,7 +72,7 @@ class VglImage(object):
 			print("Creating 3D Image!")
 
 		# OPENING IMAGE
-		self.vglLoadImage()
+		self.vglLoadImage(imgPath)
 	
 	"""
 		THIS METHOD INITIATES THE vglShape OBJECT
@@ -114,7 +113,7 @@ class VglImage(object):
 			#self.last_changed_host = True
 			#self.last_changed_device = False
 		else:
-			print("Impossible to create a vglImage object. ram_image is None.")
+			print("Impossible to create a vglImage object. host_image is None.")
 
 	"""
 		EQUIVALENT TO:
@@ -128,17 +127,11 @@ class VglImage(object):
 		IF THE PATH IS INCORRECT. BUILD THE MAKE THE CALL
 		TO CONSTRUCT THE vglShape OBJECT. 
 	"""
-	def vglLoadImage(self):
+	def vglLoadImage(self, imgPath):
 		try:
-			if( self.filename is "" ):
-				self.inContext = 0
-				self.img_ram = np.zeros((1, 1), np.uint8)
-				print("Making a BLANK_IMAGE")
-			else:
-				self.img_ram = io.imread(self.filename)
-				vl.vglAddContext(self, vl.VGL_RAM_CONTEXT())
+			self.img_ram = io.imread(imgPath)
 		except FileNotFoundError as fnf:
-			print("vglCreateImage: Error loading image from file:", self.filename)    
+			print("vglCreateImage: Error loading image from file:", imgPath)    
 			print(str(fnf))
 		except Exception as e:
 			print("Unrecognized error:")
@@ -171,8 +164,6 @@ class VglImage(object):
 			self.vglClImageUpload(ctx, queue)
 		elif( self.img_manipulation_mode is vl.IMAGE_ND_ARRAY() ):
 			self.vglClNdImageUpload(ctx, queue)
-		
-		vl.vglSetContext(self, vl.VGL_CL_CONTEXT())
 
 	"""
 		EQUIVALENT TO vglImage.vglDownload()
@@ -184,7 +175,6 @@ class VglImage(object):
 		elif( self.img_manipulation_mode is vl.IMAGE_ND_ARRAY() ):
 			self.vglClNdImageDownload(ctx, queue)
 
-		vl.vglSetContext(self, vl.VGL_RAM_CONTEXT())
 	"""
 		EQUIVALENT TO vglImage.vglImageUpload() (OPENCL IMAGE OBJECT)
 

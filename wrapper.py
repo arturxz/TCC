@@ -119,7 +119,15 @@ class Wrapper:
 		HERE FOLLOWS THE IMAGE SAVING METHOD
 	"""
 	def saveImage(self, img, outputpath):
+		ext = outputpath.split(".")
+		ext.reverse()
+
 		vl.vglCheckContext(img, vl.VGL_RAM_CONTEXT())
+
+		if( ext.pop(0).lower() == 'jpg' ):
+			if( img.getVglShape().getNChannels() == 4 ):
+				img.rgba_to_rgb()
+	
 		img.img_save(outputpath)
 
 	"""
@@ -330,14 +338,12 @@ class Wrapper:
 		self.loadCL("../CL/vglClBlurSq3.cl", "vglClBlurSq3")
 		
 		self.pgr.vglClBlurSq3(self.queue,
-							  self.img_out_cl.shape,
-							  None, 
-							  self.vglimage.get_device_image(), 
-							  self.img_out_cl).wait()
+							  img_output.get_device_image().shape,
+							  None,
+							  img_input.get_device_image(), 
+							  img_output.get_device_image()).wait()
 
-		self.vglimage.set_device_image(self.img_out_cl)
-		if( self.vglimage.getVglShape().getNChannels() == 4 ):
-			self.vglimage.rgba_to_rgb()
+		img_input.set_device_image(img_output.get_device_image())
 
 	def vglClConvolution(self, filepath, imgIn, arr_window, window_x, window_y):
 		self.loadCL(filepath, "vglClConvolution")
@@ -637,9 +643,18 @@ if __name__ == "__main__":
 	wrp.saveImage(sys.argv[2])
 	"""
 	# vglClBlurSq3
-	img = wrp.loadImage2D(sys.argv[1])
-	wrp.vglClBlurSq3(img.get_ram_image, img.get_device_image)
-	wrp.saveImage(img, sys.argv[2])
+	img_input = wrp.loadImage2D(sys.argv[1])
+	img_input.vglUpload(wrp.ctx, wrp.queue)
+
+	img_output = wrp.loadImage2D("")
+	img_output.set_device_image(img_input.get_similar_device_image_object(wrp.ctx, wrp.queue))
+
+	wrp.vglClBlurSq3(img_input, img_output)
+	
+	#img_input.set_device_image(img_output.get_device_image())
+	img_input.vglDownload(wrp.ctx, wrp.queue)
+	wrp.saveImage(img_input, sys.argv[2])
+	
 	"""
 	# vglClConvolution
 	arr_window = np.ones((10,10), np.float32) * (1/100)
