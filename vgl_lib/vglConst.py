@@ -18,7 +18,7 @@ def VGL_WIN_Y0():
 def VGL_WIN_Y1():
 	return 1
 
-def VGL_WIN_YX():
+def VGL_WIN_DY():
 	return VGL_WIN_Y1() - VGL_WIN_Y0()
 
 def VGL_MIN_WINDOW_SPLIT():

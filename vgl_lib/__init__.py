@@ -7,7 +7,42 @@ from .vglShape 		import VglShape
 from .vglStrEl 		import VglStrEl
 
 # OPENCL CONTEXT METHODS IMPORT
-from .vglContext import vglIsContextValid, vglIsContextUnique, vglIsInContext, vglAddContext, vglSetContext, vglCheckContext, vglCheckContextForOutput
+from .vglContext import vglIsContextValid
+from .vglContext import vglIsContextUnique
+from .vglContext import vglIsInContext
+from .vglContext import vglAddContext
+from .vglContext import vglSetContext
+from .vglContext import vglCheckContext
+from .vglContext import vglCheckContextForOutput
 
 # CONSTANT RETURNS
-from .vglConst import VGL_SHAPE_NCHANNELS, VGL_SHAPE_WIDTH, VGL_SHAPE_HEIGHT, VGL_SHAPE_LENGTH, VGL_MAX_DIM, VGL_ARR_SHAPE_SIZE, VGL_ARR_CLSTREL_SIZE, VGL_STREL_CUBE, VGL_STREL_CROSS, VGL_STREL_GAUSS, VGL_STREL_MEAN, VGL_IMAGE_3D_IMAGE, VGL_IMAGE_2D_IMAGE, VGL_BLANK_CONTEXT, VGL_RAM_CONTEXT, VGL_GL_CONTEXT, VGL_CUDA_CONTEXT, VGL_CL_CONTEXT, IMAGE_CL_OBJECT, IMAGE_ND_ARRAY
+from .vglConst import VGL_WIN_X0
+from .vglConst import VGL_WIN_X1
+from .vglConst import VGL_WIN_DX
+from .vglConst import VGL_WIN_Y0
+from .vglConst import VGL_WIN_Y1
+from .vglConst import VGL_WIN_DY
+from .vglConst import VGL_MIN_WINDOW_SPLIT
+from .vglConst import VGL_DEFAULT_WINDOW_SPLIT
+from .vglConst import VGL_MAX_WINDOW_SPLIT
+from .vglConst import VGL_MAX_WINDOWS
+from .vglConst import VGL_SHAPE_NCHANNELS 
+from .vglConst import VGL_SHAPE_WIDTH 
+from .vglConst import VGL_SHAPE_HEIGHT
+from .vglConst import VGL_SHAPE_LENGTH
+from .vglConst import VGL_MAX_DIM
+from .vglConst import VGL_ARR_SHAPE_SIZE
+from .vglConst import VGL_ARR_CLSTREL_SIZE
+from .vglConst import VGL_STREL_CUBE
+from .vglConst import VGL_STREL_CROSS
+from .vglConst import VGL_STREL_GAUSS
+from .vglConst import VGL_STREL_MEAN
+from .vglConst import VGL_IMAGE_3D_IMAGE
+from .vglConst import VGL_IMAGE_2D_IMAGE
+from .vglConst import VGL_BLANK_CONTEXT
+from .vglConst import VGL_RAM_CONTEXT
+from .vglConst import VGL_GL_CONTEXT
+from .vglConst import VGL_CUDA_CONTEXT
+from .vglConst import VGL_CL_CONTEXT
+from .vglConst import IMAGE_CL_OBJECT
+from .vglConst import IMAGE_ND_ARRAY
