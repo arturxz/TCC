@@ -2,6 +2,37 @@
 	AS PYTHON DOESN'T HAVE CONSTANT DECLARATION, THE NEXT METHODS
 	RETURN THE VALUES WHO NEED CONSTANT BEHAVIOR.
 """
+# VGL_WIN DEFINES [pack64 branch]
+def VGL_WIN_X0():
+	return -1
+
+def VGL_WIN_X1():
+	return 1
+
+def VGL_WIN_DX():
+	return VGL_WIN_X1() - VGL_WIN_X0()
+
+def VGL_WIN_Y0():
+	return -1
+
+def VGL_WIN_Y1():
+	return 1
+
+def VGL_WIN_YX():
+	return VGL_WIN_Y1() - VGL_WIN_Y0()
+
+def VGL_MIN_WINDOW_SPLIT():
+	return 1
+
+def VGL_DEFAULT_WINDOW_SPLIT():
+	return 2
+
+def VGL_MAX_WINDOW_SPLIT():
+	return 4
+
+def VGL_MAX_WINDOWS():
+	return VGL_MAX_WINDOW_SPLIT() * VGL_MAX_WINDOW_SPLIT()
+
 # VGL CONSTANTS
 def VGL_SHAPE_NCHANNELS():
 	return 0
