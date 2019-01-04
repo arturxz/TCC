@@ -9,7 +9,7 @@ class VglClContext:
 		self.context = cn
 		self.commandQueue = cq
 
-class OpenclContext:
+class opencl_context:
 	"""
 		THIS CLASS MANAGES THE PyOpenCL INICIAL INSTANCIATION AND
 		THE SYSTEM'S DEVICES AND ITS PROPERTIES (LIKE CONTEXT AND QUEUE).

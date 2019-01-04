@@ -1,10 +1,10 @@
 # __init__.py
 
-from .structSizes 	import StructSizes
-from .vglImage 		import VglImage
-from .openclContext	import OpenclContext, VglClContext
-from .vglShape 		import VglShape
-from .vglStrEl 		import VglStrEl
+from .struct_sizes 		import struct_sizes
+from .vglImage 			import VglImage
+from .opencl_context	import opencl_context, VglClContext
+from .vglShape 			import VglShape
+from .vglStrEl 			import VglStrEl
 
 # OPENCL CONTEXT METHODS IMPORT
 from .vglContext import vglIsContextValid

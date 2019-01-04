@@ -11,7 +11,7 @@ import vgl_lib as vl
 
 class Wrapper:
 	def __init__(self):
-		self.cl_ctx = vl.OpenclContext()
+		self.cl_ctx = vl.opencl_context()
 		self.ctx = self.cl_ctx.get_context()
 		self.queue = self.cl_ctx.get_queue()
 		self.pgr = None
@@ -651,7 +651,6 @@ if __name__ == "__main__":
 
 	wrp.vglClBlurSq3(img_input, img_output)
 	
-	#img_input.set_device_image(img_output.get_device_image())
 	img_input.vglDownload(wrp.ctx, wrp.queue)
 	wrp.saveImage(img_input, sys.argv[2])
 	

@@ -30,7 +30,7 @@ import sys, glob, os
 		2D images must have 1 in the z-axis 
 """
 
-class StructSizes:
+class struct_sizes:
 	# THE vgl CONSTRUCTOR CREATES A NEW CONTEXT
 	# AND INITIATES THE QUEUE, ADDING QUE CONTEXT TO IT.
 
