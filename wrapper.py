@@ -130,9 +130,31 @@ class Wrapper:
 	
 		img.img_save(outputpath)
 
+	def vglClBlurSq3(self, img_input, img_output):
+		import pyopencl as cl
+
+		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+
+		self.loadCL("../CL/vglClBlurSq3.cl", "vglClBlurSq3")
+		"""
+		self.pgr.vglClBlurSq3(self.queue,
+							  img_output.get_device_image().shape,
+							  None,
+							  img_input.get_device_image(), 
+							  img_output.get_device_image()).wait()
+		"""
+		kernel_run = self.pgr.vglClBlurSq3
+		#kernel_run.set_args(img_input.get_device_image(), img_output.get_device_image())
+		kernel_run.set_arg(0, img_input.get_device_image())
+		kernel_run.set_arg(1, img_output.get_device_image())
+		ev = cl.enqueue_nd_range_kernel(self.queue, kernel_run, img_output.get_device_image().shape, None)
+		
+		img_input.set_device_image(img_output.get_device_image())
+
 	"""
 		HERE FOLLOWS THE KERNEL CALLS
-	"""
+	
 	def vglCl3dBlurSq3(self, filepath, imgIn):
 		self.loadCL(filepath, "vglCl3dBlurSq3")
 		self.loadImage3D(imgIn)
@@ -329,22 +351,6 @@ class Wrapper:
 
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.sync(self.ctx, self.queue)
-
-	def vglClBlurSq3(self, img_input, img_output):
-
-		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-
-		self.loadCL("../CL/vglClBlurSq3.cl", "vglClBlurSq3")
-		
-		self.pgr.vglClBlurSq3(self.queue,
-							  img_output.get_device_image().shape,
-							  None,
-							  img_input.get_device_image(), 
-							  img_output.get_device_image()).wait()
-
-		img_input.set_device_image(img_output.get_device_image())
-
 	def vglClConvolution(self, filepath, imgIn, arr_window, window_x, window_y):
 		self.loadCL(filepath, "vglClConvolution")
 		self.loadImage2D(imgIn)
@@ -586,7 +592,7 @@ class Wrapper:
 		
 		self.vglimage.set_device_image(self.img_out_cl)
 		self.vglimage.vglNdImageDownload(self.ctx, self.queue)
-
+	"""
 if __name__ == "__main__":
 
 	wrp = Wrapper()
