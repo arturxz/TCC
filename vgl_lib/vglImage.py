@@ -185,6 +185,7 @@ class VglImage(object):
 			self.vglClNdImageDownload(ctx, queue)
 
 		vl.vglSetContext(self, vl.VGL_RAM_CONTEXT())
+		
 	"""
 		EQUIVALENT TO vglImage.vglImageUpload() (OPENCL IMAGE OBJECT)
 
