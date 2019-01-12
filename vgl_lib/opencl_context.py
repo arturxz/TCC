@@ -2,6 +2,14 @@ import pyopencl as cl
 import vgl_lib as vl
 import sys, glob, os
 
+"""
+	THIS CLASS IS EQUIVALENT TO VglClContext
+	STRUCT FOUNDED ON vglClImage.h
+
+	HERE, IT IS USED JUST TO PASS THE PLATFORM ID,
+	THE DEVICE ID, THE CONTEXT AND THE QUEUE OF THE
+	DEVICE IN THE WAY IT IS FOUNDED ON C/C++ VERSION 
+"""
 class VglClContext:
 	def __init__(self, pl, dv, cn, cq):
 		self.platformId = pl
@@ -40,24 +48,7 @@ class opencl_context:
 		self.kernel_file = open(filepath, "r")
 		buildDir = self.getDir(filepath)
 
-		
-		self.build_options = ""
-		self.build_options = self.build_options + "-I "+buildDir
-		"""
-		self.build_options = self.build_options + " -D VGL_SHAPE_NCHANNELS={0}".format(vl.VGL_SHAPE_NCHANNELS())
-		self.build_options = self.build_options + " -D VGL_SHAPE_WIDTH={0}".format(vl.VGL_SHAPE_WIDTH())
-		self.build_options = self.build_options + " -D VGL_SHAPE_HEIGHT={0}".format(vl.VGL_SHAPE_HEIGHT())
-		self.build_options = self.build_options + " -D VGL_SHAPE_LENGTH={0}".format(vl.VGL_SHAPE_LENGTH())
-		self.build_options = self.build_options + " -D VGL_MAX_DIM={0}".format(vl.VGL_MAX_DIM())
-		self.build_options = self.build_options + " -D VGL_ARR_SHAPE_SIZE={0}".format(vl.VGL_ARR_SHAPE_SIZE())
-		self.build_options = self.build_options + " -D VGL_ARR_CLSTREL_SIZE={0}".format(vl.VGL_ARR_CLSTREL_SIZE())
-		self.build_options = self.build_options + " -D VGL_STREL_CUBE={0}".format(vl.VGL_STREL_CUBE())
-		self.build_options = self.build_options + " -D VGL_STREL_CROSS={0}".format(vl.VGL_STREL_CROSS())
-		self.build_options = self.build_options + " -D VGL_STREL_GAUSS={0}".format(vl.VGL_STREL_GAUSS())
-		self.build_options = self.build_options + " -D VGL_STREL_MEAN={0}".format(vl.VGL_STREL_MEAN())
-		"""
-
-		#print("Build Options:\n", self.build_options)
+		self.build_options =  self.build_options + "-I "+buildDir
 
 		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
 		while( buildDir ):
