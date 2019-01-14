@@ -51,6 +51,7 @@ class VglImage(object):
 		self.depht = 0
 		self.nChannels = 0
 		self.has_mipmap = 0
+		self.clForceAsBuf = img_mode
 
 		# PYTHON-EXCLUSIVE DATA
 		self.img_ram = None
@@ -59,11 +60,10 @@ class VglImage(object):
 		#self.last_changed_host = False
 		#self.last_changed_device = False
 
-		self.img_manipulation_mode = img_mode
-		if( self.img_manipulation_mode is None ):
-			self.img_manipulation_mode = vl.IMAGE_CL_OBJECT()
-		elif( not((self.img_manipulation_mode is vl.IMAGE_CL_OBJECT() )
-			   or (self.img_manipulation_mode is vl.IMAGE_ND_ARRAY() ) ) ):
+		if( self.clForceAsBuf is None ):
+			self.clForceAsBuf = vl.IMAGE_CL_OBJECT()
+		elif( not((self.clForceAsBuf is vl.IMAGE_CL_OBJECT() )
+			   or (self.clForceAsBuf is vl.IMAGE_ND_ARRAY() ) ) ):
 			print("ERROR! UNEXISTENT IMAGE MODE! YOU'LL NEED TO INSTANTIATE AGAIN!")
 
 		if(self.ndim is None):
@@ -164,12 +164,12 @@ class VglImage(object):
 	
 	"""
 		EQUIVALENT TO vglImage.vglUpload()
-		TREATING ACCORDING TO img_manipulation_mode.
+		TREATING ACCORDING TO clForceAsBuf.
 	"""
 	def vglUpload(self, ctx, queue):
-		if( self.img_manipulation_mode is vl.IMAGE_CL_OBJECT() ):
+		if( self.clForceAsBuf is vl.IMAGE_CL_OBJECT() ):
 			self.vglClImageUpload(ctx, queue)
-		elif( self.img_manipulation_mode is vl.IMAGE_ND_ARRAY() ):
+		elif( self.clForceAsBuf is vl.IMAGE_ND_ARRAY() ):
 			self.vglClNdImageUpload(ctx, queue)
 		
 		vl.vglSetContext(self, vl.VGL_CL_CONTEXT())
@@ -179,9 +179,9 @@ class VglImage(object):
 		TREATING ACCORDING TO img_manipulation_mode.
 	"""
 	def vglDownload(self, ctx, queue):
-		if( self.img_manipulation_mode is vl.IMAGE_CL_OBJECT() ):
+		if( self.clForceAsBuf is vl.IMAGE_CL_OBJECT() ):
 			self.vglClImageDownload(ctx, queue)
-		elif( self.img_manipulation_mode is vl.IMAGE_ND_ARRAY() ):
+		elif( self.clForceAsBuf is vl.IMAGE_ND_ARRAY() ):
 			self.vglClNdImageDownload(ctx, queue)
 
 		vl.vglSetContext(self, vl.VGL_RAM_CONTEXT())
