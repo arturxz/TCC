@@ -176,7 +176,7 @@ class VglImage(object):
 
 	"""
 		EQUIVALENT TO vglImage.vglDownload()
-		TREATING ACCORDING TO img_manipulation_mode.
+		TREATING ACCORDING TO clForceAsBuf.
 	"""
 	def vglDownload(self, ctx, queue):
 		if( self.clForceAsBuf is vl.IMAGE_CL_OBJECT() ):
