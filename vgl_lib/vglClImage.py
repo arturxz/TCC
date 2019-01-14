@@ -16,6 +16,7 @@ ocl = None
 	vglClImage.vglClInit().
 """
 def vglClInit():
+	global ocl
 	ocl = vl.opencl_context().get_vglClContext_attributes()
 
 """
