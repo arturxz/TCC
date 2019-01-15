@@ -167,14 +167,14 @@ def vglImage3To4Channels(img):
 """
 def vglImage4To3Channels(img):
 	rgba_to_rgb(img)
-		
-	"""
-		EQUIVALENT TO DIFFERENT IMAGE SAVE
-		METHODS IN vglImage.cpp
-	"""
-	def img_save(self, name):
-		print("Saving Picture in Hard Drive")
-		io.imsave(name, self.ipl)
+
+"""
+	EQUIVALENT TO DIFFERENT IMAGE SAVE
+	METHODS IN vglImage.cpp
+"""
+def img_save(name, img):
+	print("Saving Picture in Hard Drive")
+	io.imsave(name, img.ipl)
 
 	"""
 		EQUIVALENT TO vglImage.3To4Channels()
