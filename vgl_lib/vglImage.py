@@ -141,10 +141,6 @@ class VglImage(object):
 			print("Unrecognized error:")
 			print(str(e))
 
-		#self.img_sync = False
-		#self.last_changed_host = True
-		#self.last_changed_device = False
-
 		self.create_vglShape()
 	
 	"""
@@ -159,178 +155,9 @@ class VglImage(object):
 	def vglImage4To3Channels(self):
 		self.rgba_to_rgb()
 	
-	"""
-		EQUIVALENT TO vglImage.vglUpload()
-		TREATING ACCORDING TO clForceAsBuf.
-	"""
-	def vglUpload(self, ctx, queue):
-		if( self.clForceAsBuf is vl.IMAGE_CL_OBJECT() ):
-			self.vglClImageUpload(ctx, queue)
-		elif( self.clForceAsBuf is vl.IMAGE_ND_ARRAY() ):
-			self.vglClNdImageUpload(ctx, queue)
-		
-		vl.vglSetContext(self, vl.VGL_CL_CONTEXT())
-
-	"""
-		EQUIVALENT TO vglImage.vglDownload()
-		TREATING ACCORDING TO clForceAsBuf.
-	"""
-	def vglDownload(self, ctx, queue):
-		if( self.clForceAsBuf is vl.IMAGE_CL_OBJECT() ):
-			self.vglClImageDownload(ctx, queue)
-		elif( self.clForceAsBuf is vl.IMAGE_ND_ARRAY() ):
-			self.vglClNdImageDownload(ctx, queue)
-
-		vl.vglSetContext(self, vl.VGL_RAM_CONTEXT())
-		
-	"""
-		EQUIVALENT TO vglImage.vglImageUpload() (OPENCL IMAGE OBJECT)
-
-		IT TAKES THE RAM-SIDE IMAGE, ALLOCATES THE
-		DEVICE-SIDE MEMORY, CONSTRUCTS THE IMAGE OBJECT
-		AND UPLOADS THE IMAGE OBJECT TO THE DEVICE.
-	"""
-	def vglClImageUpload(self, ctx, queue):
-		# IMAGE VARS
-		print("Uploading image to device.")
-		if( self.getVglShape().getNFrames() == 1 ):
-			origin = ( 0, 0, 0 )
-			region = ( self.getVglShape().getWidth(), self.getVglShape().getHeight(), 1 )
-			shape  = ( self.getVglShape().getWidth(), self.getVglShape().getHeight() )
-
-			mf = cl.mem_flags
-			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
-			self.oclPtr = cl.Image(ctx, mf.READ_ONLY, imgFormat, shape)
-		elif( self.getVglShape().getNFrames() > 1 ):
-			origin = ( 0, 0, 0 )
-			region = ( self.getVglShape().getWidth(), self.getVglShape().getHeight(), self.getVglShape().getNFrames() )
-			shape = ( self.getVglShape().getWidth(), self.getVglShape().getHeight(), self.getVglShape().getNFrames() )
-
-			mf = cl.mem_flags
-			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
-			self.oclPtr = cl.Image(ctx, mf.READ_ONLY, imgFormat, shape)
-		else:
-			print("VglImage NFrames wrong. NFrames returns:", self.getVglShape().getNFrames() )
-			return
-
-		# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
-		cl.enqueue_copy(queue, self.oclPtr, self.ipl, origin=origin, region=region, is_blocking=True)
-
-		#self.img_sync = False
-		#self.last_changed_host = False
-		#self.last_changed_device = True
-
-	"""
-		TO OPENCL IMAGE OBJECT, IS QUIVALENT TO:
-			vglImage.vglImageDownloadFaster()
-			vglImage.vglImageDownload()
-			vglImage.vglImageDownloadFBO()
-			vglImage.vglImageDownloadPPM()
-			vglImage.vglImageDownloadPGM()
-
-		THIS METHOD TAKES THE DEVICE-SIDE OPENCL IMAGE AND
-		COPY IT BACK TO THE RAM-SIDE. IN THE END, THE METHOD
-		CALL THE vglShape CONSTRUCTOR, TO ATUALIZE THE vglShape
-		OBJECT.
-	"""
-	def vglClImageDownload(self, ctx, queue):
-		# MAKE IMAGE DOWNLOAD HERE
-		print("Downloading Image from device.")
-
-		if( self.getVglShape().getNFrames() == 1 ):
-			origin = ( 0, 0, 0 )
-			region = ( self.getVglShape().getWidth(), self.getVglShape().getHeight(), 1 )
-			totalSize = self.getVglShape().getHeight() * self.getVglShape().getWidth() * self.getVglShape().getNChannels()
-
-			buffer = np.zeros(totalSize, self.ipl.dtype)
-			cl.enqueue_copy(queue, buffer, self.oclPtr, origin=origin, region=region, is_blocking=True)
-
-			if( self.getVglShape().getNChannels() == 1 ):
-				buffer = np.frombuffer( buffer, self.ipl.dtype ).reshape( self.getVglShape().getHeight(), self.getVglShape().getWidth() )
-			elif( (self.getVglShape().getNChannels() == 3) or (self.getVglShape().getNChannels() == 4) ):
-				buffer = np.frombuffer( buffer, self.ipl.dtype ).reshape( self.getVglShape().getHeight(), self.getVglShape().getWidth(), self.getVglShape().getNChannels() )
-		elif( self.getVglShape().getNFrames() > 1 ):
-			pitch = (0, 0)
-			origin = ( 0, 0, 0 )
-			region = ( self.getVglShape().getWidth(), self.getVglShape().getHeight(), self.getVglShape().getNFrames() )
-			totalSize = self.getVglShape().getHeight() * self.getVglShape().getWidth() * self.getVglShape().getNFrames()
-
-			buffer = np.zeros(totalSize, self.ipl.dtype)
-			cl.enqueue_copy(queue, buffer, self.oclPtr, origin=origin, region=region, is_blocking=True)
-
-
-			if( self.getVglShape().getNChannels() == 1 ):
-				buffer = np.frombuffer( buffer, self.ipl.dtype ).reshape( self.getVglShape().getNFrames(), self.getVglShape().getHeight(), self.getVglShape().getWidth() )
-			elif( (self.getVglShape().getNChannels() == 3) or (self.getVglShape().getNChannels() == 4) ):
-				buffer = np.frombuffer( buffer, self.ipl.dtype ).reshape( self.getVglShape().getNFrames(), self.getVglShape().getHeight(), self.getVglShape().getWidth(), self.getVglShape().getNChannels() )
-
-		self.ipl = buffer
-		self.create_vglShape()
-
-		#self.img_sync = False
-		#self.last_changed_device = False
-		#self.last_changed_host = True
-
-	"""
-		EQUIVALENT TO vglImage.vglImageUpload() (OPENCL BUFFER TO ND-IMAGE)
-
-		IT TAKES THE RAM-SIDE IMAGE, ALLOCATES THE
-		DEVICE-SIDE MEMORY, AND PASSES THE ND-ARRAY
-		TO THE DEVICE.
-	"""
-	def vglClNdImageUpload(self, ctx, queue):
-		print("NdArray image Upload")
-		
-		# CREATING DEVICE POINTER AND COPYING HOST TO DEVICE
-		mf = cl.mem_flags
-		self.oclPtr = cl.Buffer(ctx, mf.READ_ONLY, self.get_ram_image().nbytes)
-		cl.enqueue_copy(queue, self.oclPtr, self.get_ram_image().tobytes(), is_blocking=True)
-
-		#self.img_sync = False
-		#self.last_changed_host = False
-		#self.last_changed_device = True
-
-	"""
-		TO OPENCL BUFFER IMAGE, IS QUIVALENT TO:
-			vglImage.vglImageDownloadFaster()
-			vglImage.vglImageDownload()
-			vglImage.vglImageDownloadFBO()
-			vglImage.vglImageDownloadPPM()
-			vglImage.vglImageDownloadPGM()
-
-		THIS METHOD TAKES THE DEVICE-SIDE OPENCL BUFFER AND
-		COPY IT BACK TO THE RAM-SIDE. THEN, THE METHOD CALLS
-		THE vglShape CONSTRUCTOR, TO ATUALIZE THE vglShape
-		OBJECT.
-	"""
-	def vglClNdImageDownload(self, ctx, queue):
-		print("NdArray image Download")
-
-		cl.enqueue_copy(queue, self.ipl, self.oclPtr)
-		self.create_vglShape()
-
-		#self.img_sync = False
-		#self.last_changed_device = False
-		#self.last_changed_host = True
-
 	def getVglShape(self):
 		return self.vglshape
 		
-	"""
-		THIS METHOD MUST BE CALLED EVERY CHANGE IN
-		THE IMAGE, TO ASSURED THAT THE RAM-SIDE AND
-		DEVICE-SIDE ARE SYNCED.
-	
-	def sync(self, ctx, queue):
-		if( not self.img_sync ):
-			if( self.last_changed_device ):
-				self.vglDownload(ctx, queue)
-			elif( self.last_changed_host ):
-				self.vglUpload(ctx, queue)
-		else:
-			print("Already synced")
-	"""
-
 	"""
 		EQUIVALENT TO DIFFERENT IMAGE SAVE
 		METHODS IN vglImage.cpp
@@ -370,60 +197,32 @@ class VglImage(object):
 			self.ipl = ipl_rgb
 			self.create_vglShape()
 
-	def get_similar_device_image_object(self, ctx, queue):
+	def get_similar_oclPtr_object(self, ctx, queue):
 
 		if(self.ndim == vl.VGL_IMAGE_2D_IMAGE()):
 			shape  = ( self.vglshape.getWidth(), self.vglshape.getHeight() )
 			mf = cl.mem_flags
-			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
+			imgFormat = cl.ImageFormat(vl.cl_channel_order(self), vl.cl_channel_type(self))
 			img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
 		elif(self.ndim == vl.VGL_IMAGE_3D_IMAGE()):
 			shape  = ( self.vglshape.getWidth(), self.vglshape.getHeight(), self.vglshape.getNFrames() )
 			mf = cl.mem_flags
-			imgFormat = cl.ImageFormat(self.get_toDevice_channel_order(), self.get_toDevice_dtype())
+			imgFormat = cl.ImageFormat(vl.cl_channel_order(self), vl.cl_channel_type(self))
 			img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
 
-		#print("--> Orig:", self.get_device_image().width, self.get_device_image().height, self.get_device_image().depth)
-		#print("--> Copy:", img_copy.width, img_copy.height, img_copy.depth)
+		print("--> Orig:", self.get_oclPtr().width, self.get_oclPtr().height, self.get_oclPtr().depth)
+		print("--> Copy:", img_copy.width, img_copy.height, img_copy.depth)
 
 		return img_copy
 	
-	def set_device_image(self, img):
+	def set_oclPtr(self, img):
 		if( isinstance(img, cl.Image) or isinstance(img, cl.Buffer) ):
 			self.oclPtr = img
-			
-			self.img_sync = False
-			self.last_changed_device = True
-			self.last_changed_host = False
 		else:
 			print("Invalid object. cl.Image or cl.Buffer objects only.")
 	
-	def get_device_image(self):
+	def get_oclPtr(self):
 		return self.oclPtr
 	
-	def get_ram_image(self):
+	def get_ipl(self):
 		return self.ipl
-	
-	def get_toDevice_dtype(self):
-		oclPtr_dtype = None
-		if( self.ipl.dtype == np.uint8 ):
-			oclPtr_dtype = cl.channel_type.UNORM_INT8
-			print("8bit Channel Size!")
-		elif( self.ipl.dtype == np.uint16 ):
-			oclPtr_dtype = cl.channel_type.UNORM_INT16
-			print("16bit Channel Size!")
-
-		return oclPtr_dtype
-	
-	def get_toDevice_channel_order(self):
-		oclPtr_channel_order = None
-		if( self.getVglShape().getNChannels() == 1 ):
-			oclPtr_channel_order = cl.channel_order.LUMINANCE
-		elif( self.getVglShape().getNChannels() == 2 ):
-			oclPtr_channel_order = cl.channel_order.RG
-		elif( self.getVglShape().getNChannels() == 3 ):
-			oclPtr_channel_order = cl.channel_order.RGB
-		elif( self.getVglShape().getNChannels() == 4 ):
-			oclPtr_channel_order = cl.channel_order.RGBA
-		
-		return oclPtr_channel_order

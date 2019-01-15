@@ -14,13 +14,26 @@ from typing import Union
 """
 ocl: Union[vl.VglClContext] = None
 
+def getOcl():
+	return ocl
+
+def setOcl(ctx):
+	global ocl
+	if( isinstance(ctx, vl.VglClContext) ):
+		ocl = ctx
+	else:
+		print("Error! not VglClContext object!")
+
+
 """
 	EQUIVALENT TO vglClInit METHOD, FOUND ON
 	vglClImage.vglClInit().
 """
 def vglClInit():
 	global ocl
-	ocl = vl.opencl_context().get_vglClContext_attributes()
+	global ocl_context
+	ocl_context = vl.opencl_context()
+	ocl = ocl_context.get_vglClContext_attributes()
 
 """
 	EQUIVALENT TO vglClImage.vglClUpload()
@@ -28,9 +41,9 @@ def vglClInit():
 """
 def vglClUpload(img):
 	if( img.clForceAsBuf == vl.IMAGE_CL_OBJECT() ):
-		img.vglClImageUpload(img)
+		vglClImageUpload(img)
 	elif( img.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
-		img.vglClNdImageUpload(img)
+		vglClNdImageUpload(img)
 		
 		vl.vglAddContext(img, vl.VGL_CL_CONTEXT())
 
@@ -40,9 +53,9 @@ def vglClUpload(img):
 """
 def vglClDownload(img):
 	if( img.clForceAsBuf is vl.IMAGE_CL_OBJECT() ):
-		img.vglClImageDownload(img)
+		vglClImageDownload(img)
 	elif( img.clForceAsBuf is vl.IMAGE_ND_ARRAY() ):
-		img.vglClNdImageDownload(img)
+		vglClNdImageDownload(img)
 
 	vl.vglAddContext(img, vl.VGL_RAM_CONTEXT())
 
@@ -62,22 +75,22 @@ def vglClImageUpload(img):
 		shape  = ( img.getVglShape().getWidth(), img.getVglShape().getHeight() )
 
 		mf = cl.mem_flags
-		imgFormat = cl.ImageFormat(img.get_toDevice_channel_order(), img.get_toDevice_dtype())
-		img.img_device = cl.Image(ocl.context, mf.READ_ONLY, imgFormat, shape)
+		imgFormat = cl.ImageFormat(cl_channel_order(img), cl_channel_type(img))
+		img.oclPtr = cl.Image(ocl.context, mf.READ_ONLY, imgFormat, shape)
 	elif( img.getVglShape().getNFrames() > 1 ):
 		origin = ( 0, 0, 0 )
 		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), img.getVglShape().getNFrames() )
 		shape = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), img.getVglShape().getNFrames() )
 
 		mf = cl.mem_flags
-		imgFormat = cl.ImageFormat(img.get_toDevice_channel_order(), img.get_toDevice_dtype())
-		img.img_device = cl.Image(ocl.context, mf.READ_ONLY, imgFormat, shape)
+		imgFormat = cl.ImageFormat(cl_channel_order(img), cl_channel_type(img))
+		img.oclPtr = cl.Image(ocl.context, mf.READ_ONLY, imgFormat, shape)
 	else:
 		print("VglImage NFrames wrong. NFrames returns:", img.getVglShape().getNFrames() )
 		return
 
 	# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
-	cl.enqueue_copy(ocl.commandQueue, img.img_device, img.img_ram, origin=origin, region=region, is_blocking=True)
+	cl.enqueue_copy(ocl.commandQueue, img.get_oclPtr(), img.get_ipl(), origin=origin, region=region, is_blocking=True)
 
 """
 	THIS METHOD TAKES THE DEVICE-SIDE OPENCL IMAGE AND
@@ -96,29 +109,29 @@ def vglClImageDownload(img):
 		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), 1 )
 		totalSize = img.getVglShape().getHeight() * img.getVglShape().getWidth() * img.getVglShape().getNChannels()
 
-		buffer = np.zeros(totalSize, img.img_ram.dtype)
-		cl.enqueue_copy(ocl.commandQueue, buffer, img.img_device, origin=origin, region=region, is_blocking=True)
+		buffer = np.zeros(totalSize, img.get_ipl().dtype)
+		cl.enqueue_copy(ocl.commandQueue, buffer, img.get_oclPtr(), origin=origin, region=region, is_blocking=True)
 
 		if( img.getVglShape().getNChannels() == 1 ):
-			buffer = np.frombuffer( buffer, img.img_ram.dtype ).reshape( img.getVglShape().getHeight(), img.getVglShape().getWidth() )
+			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getHeight(), img.getVglShape().getWidth() )
 		elif( (img.getVglShape().getNChannels() == 3) or (img.getVglShape().getNChannels() == 4) ):
-			buffer = np.frombuffer( buffer, img.img_ram.dtype ).reshape( img.getVglShape().getHeight(), img.getVglShape().getWidth(), img.getVglShape().getNChannels() )
+			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getHeight(), img.getVglShape().getWidth(), img.getVglShape().getNChannels() )
 	elif( img.getVglShape().getNFrames() > 1 ):
 		pitch = (0, 0)
 		origin = ( 0, 0, 0 )
 		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), img.getVglShape().getNFrames() )
 		totalSize = img.getVglShape().getHeight() * img.getVglShape().getWidth() * img.getVglShape().getNFrames()
 
-		buffer = np.zeros(totalSize, img.img_ram.dtype)
-		cl.enqueue_copy(ocl.commandQueue, buffer, img.img_device, origin=origin, region=region, is_blocking=True)
+		buffer = np.zeros(totalSize, img.get_ipl().dtype)
+		cl.enqueue_copy(ocl.commandQueue, buffer, img.get_oclPtr(), origin=origin, region=region, is_blocking=True)
 
 
 		if( img.getVglShape().getNChannels() == 1 ):
-			buffer = np.frombuffer( buffer, img.img_ram.dtype ).reshape( img.getVglShape().getNFrames(), img.getVglShape().getHeight(), img.getVglShape().getWidth() )
+			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getNFrames(), img.getVglShape().getHeight(), img.getVglShape().getWidth() )
 		elif( (img.getVglShape().getNChannels() == 3) or (img.getVglShape().getNChannels() == 4) ):
-			buffer = np.frombuffer( buffer, img.img_ram.dtype ).reshape( img.getVglShape().getNFrames(), img.getVglShape().getHeight(), img.getVglShape().getWidth(), img.getVglShape().getNChannels() )
+			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getNFrames(), img.getVglShape().getHeight(), img.getVglShape().getWidth(), img.getVglShape().getNChannels() )
 
-	img.img_ram = buffer
+	img.ipl = buffer
 	img.create_vglShape()
 
 """
@@ -132,8 +145,8 @@ def vglClNdImageUpload(img):
 	print("NdArray image Upload")
 		
 	# CREATING DEVICE POINTER AND COPYING HOST TO DEVICE
-	img.img_device = cl.Buffer(ocl.context, mf.READ_ONLY, img.get_ram_image().nbytes)
-	cl.enqueue_copy(ocl.commandQueue, img.img_device, img.get_ram_image().tobytes(), is_blocking=True)
+	img.oclPtr = cl.Buffer(ocl.context, mf.READ_ONLY, img.get_ipl().nbytes)
+	cl.enqueue_copy(ocl.commandQueue, img.get_oclPtr(), img.get_ipl().tobytes(), is_blocking=True)
 
 
 """
@@ -146,5 +159,29 @@ def vglClNdImageDownload(img):
 	global ocl
 	print("NdArray image Download")
 
-	cl.enqueue_copy(ocl.commandQueue, img.img_ram, img.img_device)
+	cl.enqueue_copy(ocl.commandQueue, img.get_ipl(), img.get_oclPtr())
 	img.create_vglShape()
+
+def cl_channel_type(img):
+	oclPtr_dtype = None
+	if( img.ipl.dtype == np.uint8 ):
+		oclPtr_dtype = cl.channel_type.UNORM_INT8
+		print("8bit Channel Size!")
+	elif( img.ipl.dtype == np.uint16 ):
+		oclPtr_dtype = cl.channel_type.UNORM_INT16
+		print("16bit Channel Size!")
+
+	return oclPtr_dtype
+	
+def cl_channel_order(img):
+	oclPtr_channel_order = None
+	if( img.getVglShape().getNChannels() == 1 ):
+		oclPtr_channel_order = cl.channel_order.LUMINANCE
+	elif( img.getVglShape().getNChannels() == 2 ):
+		oclPtr_channel_order = cl.channel_order.RG
+	elif( img.getVglShape().getNChannels() == 3 ):
+		oclPtr_channel_order = cl.channel_order.RGB
+	elif( img.getVglShape().getNChannels() == 4 ):
+		oclPtr_channel_order = cl.channel_order.RGBA
+	
+	return oclPtr_channel_order

@@ -81,15 +81,15 @@ def vglCheckContext(img, context):
 			vglAddContext(img, vl.VGL_RAM_CONTEXT())
 		# AND THE CONTEXT IS IN CL-DEVICE, DOWNLOAD IT BACK TO RAM.
 		elif( vglIsInContext(img, vl.VGL_CL_CONTEXT() ) ):
-			img.vglDownload()
+			vl.vglClDownload(img)
 	# IF THE CONTEXT IS IN CL-DEVICE
 	elif( context is vl.VGL_CL_CONTEXT() ):
 		# AND IS A BLANK-IMAGE, IT IS ON RAM. UPLOAD IT TO CL-DEVICE!
 		if( vglIsInContext( img, vl.VGL_BLANK_CONTEXT() ) ):
-			img.vglUpload()
+			vl.vglClUpload(img)
 		# AND THE CONTEXT IS IN RAM, UPLOAD IT TO CL-DEVICE!
 		elif( vglIsInContext( img, vl.VGL_RAM_CONTEXT() ) ):
-			img.vglUpload()
+			vl.vglClUpload(img)
 	else:
 		print("vglCheckContext: Error: Trying to copy to invalid context =", context)
 		return 0

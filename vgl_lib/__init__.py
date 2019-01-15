@@ -1,10 +1,19 @@
 # __init__.py
 
 from .struct_sizes 		import struct_sizes
-from .vglImage 			import VglImage
 from .opencl_context	import opencl_context, VglClContext
 from .vglShape 			import VglShape
 from .vglStrEl 			import VglStrEl
+from .vglImage 			import VglImage
+
+# VGLCLIMAGE METHODS
+from .vglClImage import vglClInit
+from .vglClImage import vglClUpload
+from .vglClImage import vglClDownload
+from .vglClImage import cl_channel_type
+from .vglClImage import cl_channel_order
+from .vglClImage import getOcl
+from .vglClImage import setOcl
 
 # OPENCL CONTEXT METHODS IMPORT
 from .vglContext import vglIsContextValid
