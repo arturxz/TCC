@@ -82,6 +82,30 @@ class VglImage(object):
 	
 	def getVglShape(self):
 		return self.vglShape
+
+	def set_oclPtr(self, img):
+		if( self.clForceAsBuf == vl.IMAGE_CL_OBJECT() ):
+			if( isinstance(img, cl.Image) ):
+				self.oclPtr = img
+			else:
+				print("Error! This image must have a OpenCL Image object as oclPtr.")
+				exit()
+
+		elif( self.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
+			if( isinstance(img, cl.Buffer) ):
+				self.oclPtr = img
+			else:
+				print("Error! This image must have a OpenCL Buffer object as oclPtr.")
+				exit()
+		else:
+			print("Invalid object. oclPtr must be cl.Image or cl.Buffer objects, according to clForceAsBuf.")
+		
+	def get_oclPtr(self):
+		return self.oclPtr
+		
+	def get_ipl(self):
+		return self.ipl
+
 	
 """
 	THIS METHOD INITIATES THE vglShape OBJECT
@@ -225,14 +249,3 @@ def get_similar_oclPtr_object(img, ctx, queue):
 
 	return img_copy
 	
-	def set_oclPtr(self, img):
-		if( isinstance(img, cl.Image) or isinstance(img, cl.Buffer) ):
-			self.oclPtr = img
-		else:
-			print("Invalid object. cl.Image or cl.Buffer objects only.")
-	
-	def get_oclPtr(self):
-		return self.oclPtr
-	
-	def get_ipl(self):
-		return self.ipl
