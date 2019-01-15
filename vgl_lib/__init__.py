@@ -4,7 +4,17 @@ from .struct_sizes 		import struct_sizes
 from .opencl_context	import opencl_context, VglClContext
 from .vglShape 			import VglShape
 from .vglStrEl 			import VglStrEl
-from .vglImage 			import VglImage
+
+# VGLIMAGE METHODS
+from .vglImage import VglImage
+from .vglImage import create_vglShape
+from .vglImage import vglLoadImage
+from .vglImage import vglImage3To4Channels
+from .vglImage import vglImage4To3Channels
+from .vglImage import img_save
+from .vglImage import rgb_to_rgba
+from .vglImage import rgba_to_rgb
+from .vglImage import get_similar_oclPtr_object
 
 # VGLCLIMAGE METHODS
 from .vglClImage import vglClInit

@@ -196,7 +196,7 @@ def vglImage4To3Channels(img):
 	EQUIVALENT TO DIFFERENT IMAGE SAVE
 	METHODS IN vglImage.cpp
 """
-def img_save(name, img):
+def img_save(img, name):
 	print("Saving Picture in Hard Drive")
 	io.imsave(name, img.ipl)
 
@@ -205,7 +205,7 @@ def img_save(name, img):
 """
 def rgb_to_rgba(img):
 	print("[RGB -> RGBA]")
-	ipl_rgba = np.empty((img.vglshape.getHeight(), img.vglshape.getWidth(), 4), img.ipl.dtype)
+	ipl_rgba = np.empty((img.vglShape.getHeight(), img.vglShape.getWidth(), 4), img.ipl.dtype)
 
 	ipl_rgba[:,:,0] = img.ipl[:,:,0]
 	ipl_rgba[:,:,1] = img.ipl[:,:,1]
@@ -218,28 +218,28 @@ def rgb_to_rgba(img):
 """
 	EQUIVALENT TO vglImage.3To4Channels()
 """
-def rgba_to_rgb(self):
+def rgba_to_rgb(img):
 	print("[RGBA -> RGB]")
-	if( (self.ipl[0,0,:].size < 4) | (self.ipl[0,0,:].size > 4) ):
+	if( (img.ipl[0,0,:].size < 4) | (img.ipl[0,0,:].size > 4) ):
 		print("IMAGE IS NOT RGBA")
 	else:
-		ipl_rgb = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 3), self.ipl.dtype)
-		ipl_rgb[:,:,0] = self.ipl[:,:,0]
-		ipl_rgb[:,:,1] = self.ipl[:,:,1]
-		ipl_rgb[:,:,2] = self.ipl[:,:,2]
+		ipl_rgb = np.empty((img.vglShape.getHeight(), img.vglShape.getWidth(), 3), img.ipl.dtype)
+		ipl_rgb[:,:,0] = img.ipl[:,:,0]
+		ipl_rgb[:,:,1] = img.ipl[:,:,1]
+		ipl_rgb[:,:,2] = img.ipl[:,:,2]
 
-		self.ipl = ipl_rgb
-		self.create_vglShape()
+		img.ipl = ipl_rgb
+		vl.create_vglShape(img)
 
 def get_similar_oclPtr_object(img, ctx, queue):
 
 	if(img.ndim == vl.VGL_IMAGE_2D_IMAGE()):
-		shape  = ( img.vglshape.getWidth(), img.vglshape.getHeight() )
+		shape  = ( img.vglShape.getWidth(), img.vglShape.getHeight() )
 		mf = cl.mem_flags
 		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
 		img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
 	elif(img.ndim == vl.VGL_IMAGE_3D_IMAGE()):
-		shape  = ( img.vglshape.getWidth(), img.vglshape.getHeight(), img.vglshape.getNFrames() )
+		shape  = ( img.vglShape.getWidth(), img.vglShape.getHeight(), img.vglShape.getNFrames() )
 		mf = cl.mem_flags
 		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
 		img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)

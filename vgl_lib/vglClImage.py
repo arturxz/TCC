@@ -132,7 +132,7 @@ def vglClImageDownload(img):
 			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getNFrames(), img.getVglShape().getHeight(), img.getVglShape().getWidth(), img.getVglShape().getNChannels() )
 
 	img.ipl = buffer
-	img.create_vglShape()
+	vl.create_vglShape(img)
 
 """
 	IT TAKES THE RAM-SIDE IMAGE, ALLOCATES THE
