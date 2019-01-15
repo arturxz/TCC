@@ -181,7 +181,7 @@ def img_save(name, img):
 """
 def rgb_to_rgba(img):
 	print("[RGB -> RGBA]")
-	ipl_rgba = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 4), self.ipl.dtype)
+	ipl_rgba = np.empty((img.vglshape.getHeight(), img.vglshape.getWidth(), 4), img.ipl.dtype)
 
 	ipl_rgba[:,:,0] = img.ipl[:,:,0]
 	ipl_rgba[:,:,1] = img.ipl[:,:,1]
@@ -191,39 +191,39 @@ def rgb_to_rgba(img):
 	img.ipl = ipl_rgba
 	create_vglShape(img)
 
-	"""
-		EQUIVALENT TO vglImage.3To4Channels()
-	"""
-	def rgba_to_rgb(self):
-		print("[RGBA -> RGB]")
-		if( (self.ipl[0,0,:].size < 4) | (self.ipl[0,0,:].size > 4) ):
-			print("IMAGE IS NOT RGBA")
-		else:
-			ipl_rgb = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 3), self.ipl.dtype)
-			ipl_rgb[:,:,0] = self.ipl[:,:,0]
-			ipl_rgb[:,:,1] = self.ipl[:,:,1]
-			ipl_rgb[:,:,2] = self.ipl[:,:,2]
+"""
+	EQUIVALENT TO vglImage.3To4Channels()
+"""
+def rgba_to_rgb(self):
+	print("[RGBA -> RGB]")
+	if( (self.ipl[0,0,:].size < 4) | (self.ipl[0,0,:].size > 4) ):
+		print("IMAGE IS NOT RGBA")
+	else:
+		ipl_rgb = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 3), self.ipl.dtype)
+		ipl_rgb[:,:,0] = self.ipl[:,:,0]
+		ipl_rgb[:,:,1] = self.ipl[:,:,1]
+		ipl_rgb[:,:,2] = self.ipl[:,:,2]
 
-			self.ipl = ipl_rgb
-			self.create_vglShape()
+		self.ipl = ipl_rgb
+		self.create_vglShape()
 
-	def get_similar_oclPtr_object(self, ctx, queue):
+def get_similar_oclPtr_object(img, ctx, queue):
 
-		if(self.ndim == vl.VGL_IMAGE_2D_IMAGE()):
-			shape  = ( self.vglshape.getWidth(), self.vglshape.getHeight() )
-			mf = cl.mem_flags
-			imgFormat = cl.ImageFormat(vl.cl_channel_order(self), vl.cl_channel_type(self))
-			img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
-		elif(self.ndim == vl.VGL_IMAGE_3D_IMAGE()):
-			shape  = ( self.vglshape.getWidth(), self.vglshape.getHeight(), self.vglshape.getNFrames() )
-			mf = cl.mem_flags
-			imgFormat = cl.ImageFormat(vl.cl_channel_order(self), vl.cl_channel_type(self))
-			img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
+	if(img.ndim == vl.VGL_IMAGE_2D_IMAGE()):
+		shape  = ( img.vglshape.getWidth(), img.vglshape.getHeight() )
+		mf = cl.mem_flags
+		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
+		img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
+	elif(img.ndim == vl.VGL_IMAGE_3D_IMAGE()):
+		shape  = ( img.vglshape.getWidth(), img.vglshape.getHeight(), img.vglshape.getNFrames() )
+		mf = cl.mem_flags
+		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
+		img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
 
-		print("--> Orig:", self.get_oclPtr().width, self.get_oclPtr().height, self.get_oclPtr().depth)
-		print("--> Copy:", img_copy.width, img_copy.height, img_copy.depth)
+	print("--> Orig:", img.get_oclPtr().width, img.get_oclPtr().height, img.get_oclPtr().depth)
+	print("--> Copy:", img_copy.width, img_copy.height, img_copy.depth)
 
-		return img_copy
+	return img_copy
 	
 	def set_oclPtr(self, img):
 		if( isinstance(img, cl.Image) or isinstance(img, cl.Buffer) ):
