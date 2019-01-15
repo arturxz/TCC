@@ -80,6 +80,9 @@ class VglImage(object):
 		elif(self.ndim is vl.VGL_IMAGE_3D_IMAGE()):
 			print("Creating 3D Image!")
 	
+	def getVglShape(self):
+		return self.vglShape
+	
 """
 	THIS METHOD INITIATES THE vglShape OBJECT
 	TO THE IMAGE. IT LOOKS IF IS A 2D OR A 3D IMAGE
@@ -159,14 +162,11 @@ def vglLoadImage(img, filename=""):
 def vglImage3To4Channels(img):
 	rgb_to_rgba(img)
 
-	"""
-		EQUIVALENT TO vglImage.vglImage4To3Channels()
-	"""
-	def vglImage4To3Channels(self):
-		self.rgba_to_rgb()
-	
-	def getVglShape(self):
-		return self.vglshape
+"""
+	EQUIVALENT TO vglImage.vglImage4To3Channels()
+"""
+def vglImage4To3Channels(img):
+	rgba_to_rgb(img)
 		
 	"""
 		EQUIVALENT TO DIFFERENT IMAGE SAVE
