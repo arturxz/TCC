@@ -48,7 +48,7 @@ class opencl_context:
 		self.kernel_file = open(filepath, "r")
 		buildDir = self.getDir(filepath)
 
-		self.build_options =  self.build_options + "-I "+buildDir
+		self.build_options = "-I "+buildDir
 
 		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
 		while( buildDir ):
