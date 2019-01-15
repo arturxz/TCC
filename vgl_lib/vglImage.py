@@ -6,6 +6,9 @@ import sys
 # VISIONGL IMPORTS
 import vgl_lib as vl
 
+# TO INFER TYPE TO THE VARIABLE
+from typing import Union
+
 """
 	img:
 		is the input image
@@ -30,32 +33,38 @@ import vgl_lib as vl
 """
 
 """
-	PYTHON'S VGLIMAGE IS SLIGHTLY DIFFERENT  FROM ITS EQUIVALENT.
-	ndim DEFAULTS TO 2D DIMENTION IMAGE
-	
-	img_mode IS HOW THE IMAGE WILL BE TREATED. IF WILL USE THE
-			 ND-ARRAY IMAGE AND PASS THE IMAGE DATA TO THE DEVICE
-			 AS A BUFFER OF DATA OR IF WILL CREATE A OPENCL IMAGE
-			 OBJECT TO PASS ALL THE NEEDED DATA. IT DEFAULTS TO
-			 THE SECOND ONE (OPENCL IMAGE OBJECT).
-	
+	VglImage is equivalent to vglImage object.
+	isBuffer is a inicialization option that sets the
+	clForceAsBuf. If it is not set in the image creation,
+	is assumed that is a OpenCL Image object.
+
+	ndim sets the number of dimensions of the image. If it
+	is not set un the image creation, is assumed that is a
+	2D image.
+
 	ALL THE CONSTANTS CAN BE FOUND IN vglConst.py file.
+
+	What python-version VglImage don't have right now?
+		GLuint fbo equivalent; (GL not implemented)
+		GLuint tex equivalent; (GL not implemented)
+		void* cudaPtr equivalent; (CUDA not implemented)
+		GLuint cudaPbo equivalent; (CUDA not implemented)
 """
 class VglImage(object):
-	def __init__(self, imgPath="", ndim=None, img_mode=None ):
+	def __init__(self, imgPath="", ndim=None, isBuffer=None ):
 		# IF THE IMAGE TYPE IS NOT SPECIFIED, A 2D IMAGE WILL BE ASSUMED
 		# INICIALIZING DATA
-		self.inContext = 0
-		self.filename = imgPath
+		self.ipl = None
 		self.ndim = ndim
+		self.shape = np.zeros((2*vl.VGL_MAX_DIM()), np.uint8)
+		self.vglShape: Union[vl.vglShape] = None
 		self.depht = 0
 		self.nChannels = 0
 		self.has_mipmap = 0
-		self.clForceAsBuf = img_mode
-
-		# PYTHON-EXCLUSIVE DATA
-		self.ipl = None
-		self.oclPtr = None
+		self.oclPtr: Union[cl.Image, cl.Buffer] = None
+		self.clForceAsBuf = isBuffer
+		self.inContext = 0
+		self.filename = imgPath
 
 		if( self.clForceAsBuf is None ):
 			self.clForceAsBuf = vl.IMAGE_CL_OBJECT()
@@ -65,89 +74,90 @@ class VglImage(object):
 
 		if(self.ndim is None):
 			self.ndim = vl.VGL_IMAGE_2D_IMAGE()
+			print("Assuming 2D Image!")
+		elif(self.ndim is vl.VGL_IMAGE_2D_IMAGE()):
 			print("Creating 2D Image!")
 		elif(self.ndim is vl.VGL_IMAGE_3D_IMAGE()):
 			print("Creating 3D Image!")
-
-		# OPENING IMAGE
-		self.vglLoadImage()
 	
-	"""
-		THIS METHOD INITIATES THE vglShape OBJECT
-		TO THE IMAGE. IT LOOKS IF IS A 2D OR A 3D IMAGE
-		AND CONSTRUCT THE vglShape OBJECT.
+"""
+	THIS METHOD INITIATES THE vglShape OBJECT
+	TO THE IMAGE. IT LOOKS IF IS A 2D OR A 3D IMAGE
+	AND CONSTRUCT THE vglShape OBJECT.
 
-		IN EVERY CHANGE IN THE IMAGE, THIS METHOD MUST BE
-		CALLED, TO ASSURES THAT THE vglShape IS SYNCED WITH
-		THE ACTUAL IMAGE.
-	"""
-	def create_vglShape(self):
-		if(self.ipl is not None):
-			print("The image was founded. Creating vglShape.")
+	IN EVERY CHANGE IN THE IMAGE, THIS METHOD MUST BE
+	CALLED, TO ASSURES THAT THE vglShape IS SYNCED WITH
+	THE ACTUAL IMAGE.
+"""
+def create_vglShape(img):
+	if(img.ipl is not None):
+		print("The image is valid. Creating vglShape.")
 
-			self.vglshape = vl.VglShape()
-			if( self.ndim == vl.VGL_IMAGE_2D_IMAGE() ):
-				print("2D Image")
-				if( len(self.ipl.shape) == 2 ):
-					# SHADES OF GRAY IMAGE
-					print("VglImage LUMINANCE")
-					self.vglshape.constructor2DShape(1, self.ipl.shape[1], self.ipl.shape[0])
-				elif(len(self.ipl.shape) == 3):
-					# MORE THAN ONE COLOR CHANNEL
-					print("VglImage RGB")
-					self.vglshape.constructor2DShape(self.ipl.shape[2], self.ipl.shape[1], self.ipl.shape[0])
-			elif( self.ndim == vl.VGL_IMAGE_3D_IMAGE() ):
-				print("3D Image")
-				if( len(self.ipl.shape) == 3 ):
-					# SHADES OF GRAY IMAGE
-					print("VglImage LUMINANCE")
-					self.vglshape.constructor3DShape( 1, self.ipl.shape[2], self.ipl.shape[1], self.ipl.shape[0] )
-				elif(len(self.ipl.shape) == 4):
-					# MORE THAN ONE COLOR CHANNEL
-					print("VglImage RGB")
-					self.vglshape.constructor3DShape( self.ipl.shape[3], self.ipl.shape[2], self.ipl.shape[1], self.ipl.shape[0] )
-		
-			#self.img_sync = False
-			#self.last_changed_host = True
-			#self.last_changed_device = False
+		img.vglShape = vl.VglShape()
+		if( img.ndim == vl.VGL_IMAGE_2D_IMAGE() ):
+			print("2D Image")
+			if( len(img.ipl.shape) == 2 ):
+				# SHADES OF GRAY IMAGE
+				print("VglImage LUMINANCE")
+				img.vglShape.constructor2DShape(1, img.ipl.shape[1], img.ipl.shape[0])
+			elif(len(img.ipl.shape) == 3):
+				# MORE THAN ONE COLOR CHANNEL
+				print("VglImage RGB")
+				img.vglShape.constructor2DShape(img.ipl.shape[2], img.ipl.shape[1], img.ipl.shape[0])
+		elif( img.ndim == vl.VGL_IMAGE_3D_IMAGE() ):
+			print("3D Image")
+			if( len(img.ipl.shape) == 3 ):
+				# SHADES OF GRAY IMAGE
+				print("VglImage LUMINANCE")
+				img.vglShape.constructor3DShape( 1, img.ipl.shape[2], img.ipl.shape[1], img.ipl.shape[0] )
+			elif(len(img.ipl.shape) == 4):
+				# MORE THAN ONE COLOR CHANNEL
+				print("VglImage RGB")
+				img.vglShape.constructor3DShape( img.ipl.shape[3], img.ipl.shape[2], img.ipl.shape[1], img.ipl.shape[0] )
 		else:
 			print("Impossible to create a vglImage object. ram_image is None.")
+	else:
+		print("The image wasn't loaded. Please, load the image.")
 
-	"""
-		EQUIVALENT TO:
-			vglImage.vglLoadImage
-			vglImage.vglLoad3dImage
-			vglImage.vglLoadNdImage
-			vglImage.vglLoadPgm
+"""
+	EQUIVALENT TO:
+		vglImage.vglLoadImage
+		vglImage.vglLoad3dImage
+		vglImage.vglLoadNdImage
+		vglImage.vglLoadPgm
 
-		THIS METHOD READS THE IMAGE PATH AND OPEN
-		IT AS A NUMPY NDARRAY. THROWS A ERROR MESSAGE
-		IF THE PATH IS INCORRECT. BUILD THE MAKE THE CALL
-		TO CONSTRUCT THE vglShape OBJECT. 
-	"""
-	def vglLoadImage(self):
-		try:
-			if( self.filename is "" ):
-				self.inContext = 0
-				self.ipl = np.zeros((1, 1), np.uint8)
-				print("Making a BLANK_IMAGE")
-			else:
-				self.ipl = io.imread(self.filename)
-				vl.vglAddContext(self, vl.VGL_RAM_CONTEXT())
-		except FileNotFoundError as fnf:
-			print("vglCreateImage: Error loading image from file:", self.filename)    
-			print(str(fnf))
-		except Exception as e:
-			print("Unrecognized error:")
-			print(str(e))
+	THIS METHOD READS THE IMAGE PATH AND OPEN
+	IT AS A NUMPY NDARRAY. THROWS A ERROR MESSAGE
+	IF THE PATH IS INCORRECT. BUILD THE MAKE THE CALL
+	TO CONSTRUCT THE vglShape OBJECT. 
+"""
+def vglLoadImage(img, filename=""):
+	try:
+		if( img.filename is "" ):
+			img.filename = filename
+			img.ipl = np.zeros((1, 1), np.uint8)
+			vl.vglSetContext(img, vl.VGL_BLANK_CONTEXT())
+			print("VGL_BLANK_CONTEXT whith shape(1, 1) made")
+		else:
+			img.ipl = io.imread(img.filename)
+			vl.vglAddContext(img, vl.VGL_RAM_CONTEXT())
+			print("Image loaded! VGL_RAM_CONTEXT.")
+	except FileNotFoundError as fnf:
+		print("vglCreateImage: Error loading image from file:", img.filename)    
+		print(str(fnf))
+		exit()
+	except Exception as e:
+		print("Unrecognized error:")
+		print(str(e))
+		exit()
 
-		self.create_vglShape()
+	create_vglShape(img)
 	
-	"""
-		EQUIVALENT TO vglImage.vglImage3To4Channels()
-	"""
-	def vglImage3To4Channels(self):
-		self.rgb_to_rgba()
+"""
+	EQUIVALENT TO vglImage.vglImage3To4Channels()
+"""
+def vglImage3To4Channels(img):
+	rgb_to_rgba(img)
 
 	"""
 		EQUIVALENT TO vglImage.vglImage4To3Channels()
