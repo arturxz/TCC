@@ -176,20 +176,20 @@ def img_save(name, img):
 	print("Saving Picture in Hard Drive")
 	io.imsave(name, img.ipl)
 
-	"""
-		EQUIVALENT TO vglImage.3To4Channels()
-	"""
-	def rgb_to_rgba(self):
-		print("[RGB -> RGBA]")
-		ipl_rgba = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 4), self.ipl.dtype)
+"""
+	EQUIVALENT TO vglImage.3To4Channels()
+"""
+def rgb_to_rgba(img):
+	print("[RGB -> RGBA]")
+	ipl_rgba = np.empty((self.vglshape.getHeight(), self.vglshape.getWidth(), 4), self.ipl.dtype)
 
-		ipl_rgba[:,:,0] = self.ipl[:,:,0]
-		ipl_rgba[:,:,1] = self.ipl[:,:,1]
-		ipl_rgba[:,:,2] = self.ipl[:,:,2]
-		ipl_rgba[:,:,3] = 255
+	ipl_rgba[:,:,0] = img.ipl[:,:,0]
+	ipl_rgba[:,:,1] = img.ipl[:,:,1]
+	ipl_rgba[:,:,2] = img.ipl[:,:,2]
+	ipl_rgba[:,:,3] = 255
 
-		self.ipl = ipl_rgba
-		self.create_vglShape()
+	img.ipl = ipl_rgba
+	create_vglShape(img)
 
 	"""
 		EQUIVALENT TO vglImage.3To4Channels()
