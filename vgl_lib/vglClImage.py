@@ -24,7 +24,6 @@ def setOcl(ctx):
 	else:
 		print("Error! not VglClContext object!")
 
-
 """
 	EQUIVALENT TO vglClInit METHOD, FOUND ON
 	vglClImage.vglClInit().
@@ -40,24 +39,33 @@ def vglClInit():
 	TREATING ACCORDING TO clForceAsBuf.
 """
 def vglClUpload(img):
-	if( img.clForceAsBuf == vl.IMAGE_CL_OBJECT() ):
-		vglClImageUpload(img)
-	elif( img.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
-		vglClNdImageUpload(img)
+
+	if( vl.vglIsInContext(img, vl.VGL_RAM_CONTEXT()) or vl.vglIsInContext(img, vl.VGL_BLANK_CONTEXT()) ):
+		if( img.clForceAsBuf == vl.IMAGE_CL_OBJECT() ):
+			vglClImageUpload(img)
+		elif( img.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
+			vglClNdImageUpload(img)
 		
 		vl.vglAddContext(img, vl.VGL_CL_CONTEXT())
+	else:
+		print("vglClUpload: Error: image context is not in VGL_RAM_CONTEXT or VGL_BLANK_CONTEXT.")
+		exit()
 
 """
 	EQUIVALENT TO vglClImage.vglClDownload()
 	TREATING ACCORDING TO clForceAsBuf.
 """
 def vglClDownload(img):
-	if( img.clForceAsBuf is vl.IMAGE_CL_OBJECT() ):
-		vglClImageDownload(img)
-	elif( img.clForceAsBuf is vl.IMAGE_ND_ARRAY() ):
-		vglClNdImageDownload(img)
+	if( vl.vglIsInContext(img, vl.VGL_CL_CONTEXT()) ):
+		if( img.clForceAsBuf == vl.IMAGE_CL_OBJECT() ):
+			vglClImageDownload(img)
+		elif( img.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
+			vglClNdImageDownload(img)
 
-	vl.vglAddContext(img, vl.VGL_RAM_CONTEXT())
+		vl.vglAddContext(img, vl.VGL_RAM_CONTEXT())
+	else:
+		print("vglClDownload: Error: image context is not in VGL_CL_CONTEXT.")
+		exit()
 
 """
 	IT TAKES THE RAM-SIDE IMAGE, ALLOCATES THE
