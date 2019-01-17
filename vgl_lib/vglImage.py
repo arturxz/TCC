@@ -79,7 +79,7 @@ class VglImage(object):
 			print("Creating 2D Image!")
 		elif(self.ndim is vl.VGL_IMAGE_3D_IMAGE()):
 			print("Creating 3D Image!")
-	
+
 	def getVglShape(self):
 		return self.vglShape
 
@@ -106,7 +106,60 @@ class VglImage(object):
 	def get_ipl(self):
 		return self.ipl
 
+"""
+	EQUIVALENT TO vglImage.vglImage3To4Channels()
+"""
+def vglImage3To4Channels(img):
+	rgb_to_rgba(img)
+
+"""
+	EQUIVALENT TO vglImage.vglImage4To3Channels()
+"""
+def vglImage4To3Channels(img):
+	rgba_to_rgb(img)
+
+"""
+	EQUIVALENT TO:
+		vglImage.vglLoadImage
+		vglImage.vglLoad3dImage
+		vglImage.vglLoadNdImage
+		vglImage.vglLoadPgm
+
+	THIS METHOD READS THE IMAGE PATH AND OPEN
+	IT AS A NUMPY NDARRAY. THROWS A ERROR MESSAGE
+	IF THE PATH IS INCORRECT. BUILD THE MAKE THE CALL
+	TO CONSTRUCT THE vglShape OBJECT. 
+"""
+def vglLoadImage(img, filename=""):
+	try:
+		if( img.filename == "" ):
+			img.filename = filename
+			img.ipl = np.zeros((1, 1), np.uint8)
+			vl.vglSetContext(img, vl.VGL_BLANK_CONTEXT())
+			print("VGL_BLANK_CONTEXT whith shape(1, 1) made")
+		else:
+			img.ipl = io.imread(img.filename)
+			vl.vglAddContext(img, vl.VGL_RAM_CONTEXT())
+			print("Image loaded! VGL_RAM_CONTEXT.")
+	except FileNotFoundError as fnf:
+		print("vglCreateImage: Error loading image from file:", img.filename)    
+		print(str(fnf))
+		exit()
+	except Exception as e:
+		print("Unrecognized error:")
+		print(str(e))
+		exit()
+
+	create_vglShape(img)
 	
+"""
+	EQUIVALENT TO DIFFERENT IMAGE SAVE
+	METHODS IN vglImage.cpp
+"""
+def vglSaveImage(filename, img):
+	print("Saving Picture in Hard Drive")
+	io.imsave(filename, img.ipl)
+
 """
 	THIS METHOD INITIATES THE vglShape OBJECT
 	TO THE IMAGE. IT LOOKS IF IS A 2D OR A 3D IMAGE
@@ -147,60 +200,6 @@ def create_vglShape(img):
 		print("The image wasn't loaded. Please, load the image.")
 
 """
-	EQUIVALENT TO:
-		vglImage.vglLoadImage
-		vglImage.vglLoad3dImage
-		vglImage.vglLoadNdImage
-		vglImage.vglLoadPgm
-
-	THIS METHOD READS THE IMAGE PATH AND OPEN
-	IT AS A NUMPY NDARRAY. THROWS A ERROR MESSAGE
-	IF THE PATH IS INCORRECT. BUILD THE MAKE THE CALL
-	TO CONSTRUCT THE vglShape OBJECT. 
-"""
-def vglLoadImage(img, filename=""):
-	try:
-		if( img.filename is "" ):
-			img.filename = filename
-			img.ipl = np.zeros((1, 1), np.uint8)
-			vl.vglSetContext(img, vl.VGL_BLANK_CONTEXT())
-			print("VGL_BLANK_CONTEXT whith shape(1, 1) made")
-		else:
-			img.ipl = io.imread(img.filename)
-			vl.vglAddContext(img, vl.VGL_RAM_CONTEXT())
-			print("Image loaded! VGL_RAM_CONTEXT.")
-	except FileNotFoundError as fnf:
-		print("vglCreateImage: Error loading image from file:", img.filename)    
-		print(str(fnf))
-		exit()
-	except Exception as e:
-		print("Unrecognized error:")
-		print(str(e))
-		exit()
-
-	create_vglShape(img)
-	
-"""
-	EQUIVALENT TO vglImage.vglImage3To4Channels()
-"""
-def vglImage3To4Channels(img):
-	rgb_to_rgba(img)
-
-"""
-	EQUIVALENT TO vglImage.vglImage4To3Channels()
-"""
-def vglImage4To3Channels(img):
-	rgba_to_rgb(img)
-
-"""
-	EQUIVALENT TO DIFFERENT IMAGE SAVE
-	METHODS IN vglImage.cpp
-"""
-def img_save(img, name):
-	print("Saving Picture in Hard Drive")
-	io.imsave(name, img.ipl)
-
-"""
 	EQUIVALENT TO vglImage.3To4Channels()
 """
 def rgb_to_rgba(img):
@@ -221,7 +220,7 @@ def rgb_to_rgba(img):
 def rgba_to_rgb(img):
 	print("[RGBA -> RGB]")
 	if( (img.ipl[0,0,:].size < 4) | (img.ipl[0,0,:].size > 4) ):
-		print("IMAGE IS NOT RGBA")
+		print("rgba_to_rgb: Error: IMAGE IS NOT RGBA.")
 	else:
 		ipl_rgb = np.empty((img.vglShape.getHeight(), img.vglShape.getWidth(), 3), img.ipl.dtype)
 		ipl_rgb[:,:,0] = img.ipl[:,:,0]
@@ -230,22 +229,4 @@ def rgba_to_rgb(img):
 
 		img.ipl = ipl_rgb
 		vl.create_vglShape(img)
-
-def get_similar_oclPtr_object(img, ctx, queue):
-
-	if(img.ndim == vl.VGL_IMAGE_2D_IMAGE()):
-		shape  = ( img.vglShape.getWidth(), img.vglShape.getHeight() )
-		mf = cl.mem_flags
-		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
-		img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
-	elif(img.ndim == vl.VGL_IMAGE_3D_IMAGE()):
-		shape  = ( img.vglShape.getWidth(), img.vglShape.getHeight(), img.vglShape.getNFrames() )
-		mf = cl.mem_flags
-		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
-		img_copy = cl.Image(ctx, mf.WRITE_ONLY, imgFormat, shape)
-
-	print("--> Orig:", img.get_oclPtr().width, img.get_oclPtr().height, img.get_oclPtr().depth)
-	print("--> Copy:", img_copy.width, img_copy.height, img_copy.depth)
-
-	return img_copy
-	
+		

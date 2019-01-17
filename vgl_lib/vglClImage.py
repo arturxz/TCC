@@ -125,7 +125,7 @@ def vglClImageDownload(img):
 		elif( (img.getVglShape().getNChannels() == 3) or (img.getVglShape().getNChannels() == 4) ):
 			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getHeight(), img.getVglShape().getWidth(), img.getVglShape().getNChannels() )
 	elif( img.getVglShape().getNFrames() > 1 ):
-		pitch = (0, 0)
+		#pitch = (0, 0)
 		origin = ( 0, 0, 0 )
 		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), img.getVglShape().getNFrames() )
 		totalSize = img.getVglShape().getHeight() * img.getVglShape().getWidth() * img.getVglShape().getNFrames()
@@ -193,3 +193,21 @@ def cl_channel_order(img):
 		oclPtr_channel_order = cl.channel_order.RGBA
 	
 	return oclPtr_channel_order
+
+def get_similar_oclPtr_object(img):
+	global ocl
+	mf = cl.mem_flags
+	imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
+	return cl.Image(ocl.context, mf.WRITE_ONLY, imgFormat, img.get_oclPtr().shape )
+
+def create_blank_image_as(img):
+	image = vl.VglImage(img.filename, img.ndim, img.clForceAsBuf)
+	image.ipl		= np.asarray(img.ipl, img.ipl.dtype)
+	image.shape		= img.shape
+	image.vglShape	= img.vglShape
+	image.depht		= img.depht
+	image.nChannels	= img.nChannels
+	image.has_mipmap= img.has_mipmap
+	image.inContext	= img.inContext
+
+	return image
