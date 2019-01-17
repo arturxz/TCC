@@ -131,16 +131,16 @@ def vglImage4To3Channels(img):
 	TO CONSTRUCT THE vglShape OBJECT. 
 """
 def vglLoadImage(img, filename=""):
-	try:
-		if( img.filename == "" ):
-			img.filename = filename
-			img.ipl = np.zeros((1, 1), np.uint8)
-			vl.vglSetContext(img, vl.VGL_BLANK_CONTEXT())
-			print("VGL_BLANK_CONTEXT whith shape(1, 1) made")
+	if( img.filename == "" ):
+		if( filename == "" ):
+			print("Error: Image file path not defined! Empty string received!")
+			exit()
 		else:
-			img.ipl = io.imread(img.filename)
-			vl.vglAddContext(img, vl.VGL_RAM_CONTEXT())
-			print("Image loaded! VGL_RAM_CONTEXT.")
+			img.filename = filename
+	try:
+		img.ipl = io.imread(img.filename)
+		vl.vglAddContext(img, vl.VGL_RAM_CONTEXT())
+		print("Image loaded! VGL_RAM_CONTEXT.")
 	except FileNotFoundError as fnf:
 		print("vglCreateImage: Error loading image from file:", img.filename)    
 		print(str(fnf))
