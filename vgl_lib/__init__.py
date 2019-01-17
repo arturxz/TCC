@@ -7,14 +7,13 @@ from .vglStrEl 			import VglStrEl
 
 # VGLIMAGE METHODS
 from .vglImage import VglImage
-from .vglImage import create_vglShape
 from .vglImage import vglLoadImage
 from .vglImage import vglImage3To4Channels
 from .vglImage import vglImage4To3Channels
-from .vglImage import img_save
+from .vglImage import vglSaveImage
+from .vglImage import create_vglShape
 from .vglImage import rgb_to_rgba
 from .vglImage import rgba_to_rgb
-from .vglImage import get_similar_oclPtr_object
 
 # VGLCLIMAGE METHODS
 from .vglClImage import vglClInit
@@ -24,6 +23,8 @@ from .vglClImage import cl_channel_type
 from .vglClImage import cl_channel_order
 from .vglClImage import getOcl
 from .vglClImage import setOcl
+from .vglClImage import get_similar_oclPtr_object
+from .vglClImage import create_blank_image_as
 
 # OPENCL CONTEXT METHODS IMPORT
 from .vglContext import vglIsContextValid
