@@ -208,6 +208,6 @@ def create_blank_image_as(img):
 	image.depht		= img.depht
 	image.nChannels	= img.nChannels
 	image.has_mipmap= img.has_mipmap
-	image.inContext	= img.inContext
+	image.inContext	= vl.VGL_BLANK_CONTEXT()
 
 	return image
