@@ -21,8 +21,9 @@ from .vglClImage import vglClUpload
 from .vglClImage import vglClDownload
 from .vglClImage import cl_channel_type
 from .vglClImage import cl_channel_order
-from .vglClImage import getOcl
-from .vglClImage import setOcl
+from .vglClImage import get_ocl
+from .vglClImage import set_ocl
+from .vglClImage import get_ocl_context
 from .vglClImage import get_similar_oclPtr_object
 from .vglClImage import create_blank_image_as
 
