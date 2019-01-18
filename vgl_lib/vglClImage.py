@@ -13,6 +13,7 @@ from typing import Union
 	VARIABLE EQUIVALENT TO cl IN vglClImage.
 """
 ocl: Union[vl.VglClContext] = None
+ocl_context: Union[vl.opencl_context] = None
 
 def getOcl():
 	return ocl
