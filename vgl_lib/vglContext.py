@@ -41,7 +41,7 @@ def vglIsInContext(img, x):
 def vglAddContext(img, context):
 	if( not vglIsContextUnique(context) ):
 		print("vglAddContext: Error: context =", context, "is not unique or invalid")
-		return 0
+		return vl.VGL_ERROR()
 	
 	img.inContext = img.inContext | context
 	return img.inContext
@@ -55,15 +55,21 @@ def vglAddContext(img, context):
 def vglSetContext(img, context):
 	if( not vglIsContextUnique(context) and (context is not 0) ):
 		print("vglSetContext: Error: context =", context, "is not unique")
-		return 0
+		return vl.VGL_ERROR()
 	
 	img.inContext = context
 	return img.inContext
 
 """
 	CALL BEFORE USING IMAGE.
-	CONTEXT MUST BE UNIQUE.
+	context ARGUMENT MUST BE UNIQUE.
 	RETURN 0 IF ERROR OCCURS AND RESULTING CONTEXT IF SUCCESS
+
+	VGL_ERROR WAS CREATED IN ORDER TO DIFFERENTIATE
+	WHEN vglCheckContext(img, context) RETURNED 0 (ERROR) 
+	OR VGL_BLANK_CONTEXT THAT WAS ALSO 0. THEN, IN THE
+	METHOD vglCheckContext(), WHEN context IS NOT UNIQUE
+	OR A ERROR OCCURS, IS RETURNED VGL_ERROR.
 	
 	Shaders (vglCopy, vglDilateSq3, vglCudaInvertOnPlace etc)
 	CALL ->
@@ -76,7 +82,7 @@ def vglSetContext(img, context):
 def vglCheckContext(img, context):
 	if( not vglIsContextUnique( context ) ):
 		print("vglCheckContext: Error: context =", context, "is not unique or invalid")
-		return 0
+		return vl.VGL_ERROR()
 	
 	if( vglIsInContext(img, context) ):
 		print("vglCheckContext: image already in context", context)
@@ -103,7 +109,7 @@ def vglCheckContext(img, context):
 			vl.vglClUpload(img)
 	else:
 		print("vglCheckContext: Error: Trying to copy to invalid context =", context)
-		return 0
+		return vl.VGL_ERROR()
 	
 	return img.inContext
 
