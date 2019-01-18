@@ -15,10 +15,13 @@ from typing import Union
 ocl: Union[vl.VglClContext] = None
 ocl_context: Union[vl.opencl_context] = None
 
-def getOcl():
+def get_ocl():
 	return ocl
 
-def setOcl(ctx):
+def get_ocl_context():
+	return ocl_context
+
+def set_ocl(ctx):
 	global ocl
 	if( isinstance(ctx, vl.VglClContext) ):
 		ocl = ctx
