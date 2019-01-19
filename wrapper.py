@@ -246,7 +246,8 @@ if __name__ == "__main__":
 	#wrp.vglClBlurSq3(img_input, img_output)
 	#wrp.vglClConvolution(img_input, img_output, convolution_window_cl, np.uint32(5), np.uint32(5))
 	#wrp.vglClCopy(img_input, img_output)
-	wrp.vglClConvolution(img_input_morph, img_output_morph, convolution_window_morph, np.uint32(3), np.uint32(3))
+	#wrp.vglClDilate(img_input_morph, img_output_morph, convolution_window_morph, np.uint32(3), np.uint32(3))
+	#wrp.vglClErode(img_input_morph, img_output_morph, convolution_window_morph, np.uint32(3), np.uint32(3))
 	
 	vl.vglClDownload(img_output_morph)
 	#vl.vglClDownload(img_output)
