@@ -6,6 +6,9 @@ import vgl_lib as vl
 
 # TO INFER TYPE TO THE VARIABLE
 from typing import Union
+
+#TO WORK WITH MAIN
+import numpy as np
 import sys
 
 class cl2py_CL:
@@ -59,6 +62,47 @@ class cl2py_CL:
 			print(ev)
 
 			vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+	
+	def vglClConvolution(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+		
+		if( vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+			exit()
+		elif( vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+			exit()
+		elif( not isinstance(convolution_window, cl.Buffer) ):
+			print("vglClConvolution: Error: convolution_window is not cl.Buffer object.")
+			exit()
+		elif( not isinstance(window_size_x, np.uint32) ):
+			print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
+			try:
+				window_size_x = np.uint32(window_size_x)
+			except Exception as e:
+				print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
+				print(str(e))
+				exit()
+		elif( not isinstance(window_size_y, np.uint32) ):
+			print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+			try:
+				window_size_y = np.uint32(window_size_y)
+			except Exception as e:
+				print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+				print(str(e))
+				exit()
+		else:
+			self.load_kernel("../CL/vglClConvolution.cl", "vglClConvolution")
+			kernel_run = self._program.vglClConvolution
+
+			kernel_run.set_arg(0, img_input.get_oclPtr())
+			kernel_run.set_arg(1, img_output.get_oclPtr())
+			kernel_run.set_arg(2, convolution_window)
+			kernel_run.set_arg(3, window_size_x)
+			kernel_run.set_arg(4, window_size_y)
+
+			ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
+			print(ev)
+
+			vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+
 
 """
 	HERE FOLLOWS THE KERNEL CALLS
@@ -78,8 +122,12 @@ if __name__ == "__main__":
 	img_output = vl.create_blank_image_as(img_input)
 	img_output.set_oclPtr( vl.get_similar_oclPtr_object(img_input) )
 	vl.vglAddContext(img_output, vl.VGL_CL_CONTEXT())
+
+	convolution_window_2d = np.ones((5, 5), np.float32) * (1/25)
+	convolution_window_cl = cl.Buffer(wrp.ocl.context , cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=convolution_window_2d)
 	
-	wrp.vglClBlurSq3(img_input, img_output)
+	#wrp.vglClBlurSq3(img_input, img_output)
+	wrp.vglClConvolution(img_input, img_output, convolution_window_cl, np.uint32(5), np.uint32(5))
 	
 	vl.vglClDownload(img_output)
 
@@ -98,18 +146,6 @@ if __name__ == "__main__":
 
 """
 class Wrapper:
-	def __init__(self):
-		self.cl_ctx = vl.opencl_context()
-		self.ctx = self.cl_ctx.get_context()
-		self.queue = self.cl_ctx.get_queue()
-		self.pgr = None
-
-		vl.setOcl( self.cl_ctx.get_vglClContext_attributes() )
-		
-	""""""
-		HERE FOLLOWS THE METHODS THAT STRUCTURE THE 
-		VGLSHAPE AND VGLSTREL BUFFERS TO OPENCL.
-	""""""
 	def makeStructures(self, strElType, strElDim):
 		print("Making Structures")
 		mf = pyopencl.mem_flags
