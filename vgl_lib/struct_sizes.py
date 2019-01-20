@@ -35,7 +35,7 @@ class struct_sizes:
 	# AND INITIATES THE QUEUE, ADDING QUE CONTEXT TO IT.
 
 	def __init__(self):
-		print("Starting OpenCL")
+		print("struct_sizes: Starting")
 		self.struct_sizes_host = None
 		self.platform = cl.get_platforms()[0]
 		self.devs = self.platform.get_devices()
@@ -44,7 +44,7 @@ class struct_sizes:
 		#self.ctx = cl.create_some_context()
 		self.queue = cl.CommandQueue(self.ctx)
 		self.builded = False
-		self.filepath = "get_struct_sizes.cl"
+		self.filepath = "vgl_lib/get_struct_sizes.cl"
 
 		self.loadCL()
 		self.execute()
@@ -61,10 +61,10 @@ class struct_sizes:
 	# THIS FUNCTION WILL LOAD THE KERNEL FILE
 	# AND BUILD IT IF NECESSARY.
 	def loadCL(self):
-		print("Loading OpenCL Kernel")
+		print("struct_sizes: loading Kernel")
 		self.kernel_file = open(self.filepath, "r")
 
-		buildDir = self.getDir("../../CL_ND/testprobe.cl")
+		buildDir = self.getDir("vgl_lib/testprobe.cl")
 
 		self.build_options = ""
 		self.build_options = self.build_options + "-I "+buildDir
@@ -109,12 +109,12 @@ class struct_sizes:
 		self.struct_sizes_device = cl.Buffer( self.ctx, self.mf.READ_ONLY, self.struct_sizes_host.nbytes )
 
 		# EXECUTING KERNEL WITH THE IMAGES
-		print("Executing kernel")
+		print("struct_sizes: Executing kernel")
 		self.pgr.get_struct_sizes(self.queue, self.struct_sizes_host.shape, None, self.struct_sizes_device).wait()
 
 		cl.enqueue_copy(self.queue, self.struct_sizes_host, self.struct_sizes_device, is_blocking=True)
 		#print("Out:", self.struct_sizes_host)
 
 	def get_struct_sizes(self):
-		print("Getting Structure Sizes")
+		print("struct_sizes: returning Structure Sizes")
 		return self.struct_sizes_host
