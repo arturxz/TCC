@@ -281,6 +281,45 @@ class cl2py_CL:
 			print(ev)
 
 			vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+
+	def vglClSum(self, img_input, img_input2, img_output):
+
+		if( vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+			exit()
+		elif( vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+			exit()
+		elif( vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+			exit()
+		else:
+			self.load_kernel("../CL/vglClSum.cl", "vglClSum")
+			kernel_run = self._program.vglClSum
+
+			kernel_run.set_arg(0, img_input.get_oclPtr())
+			kernel_run.set_arg(1, img_input2.get_oclPtr())
+			kernel_run.set_arg(2, img_output.get_oclPtr())
+			
+			ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
+			print(ev)
+
+			vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+	
+	def vglClSwapRgb(self, img_input, img_output):
+
+		if( vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+			exit()
+		elif( vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+			exit()
+		else:
+			self.load_kernel("../CL/vglClSwapRgb.cl", "vglClSwapRgb")
+			kernel_run = self._program.vglClSwapRgb
+
+			kernel_run.set_arg(0, img_input.get_oclPtr())
+			kernel_run.set_arg(1, img_output.get_oclPtr())
+			
+			ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
+			print(ev)
+
+			vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 """
 	HERE FOLLOWS THE KERNEL CALLS
 """
@@ -300,8 +339,8 @@ if __name__ == "__main__":
 	img_output_morph.set_oclPtr( vl.get_similar_oclPtr_object(img_input_morph) )
 	vl.vglAddContext(img_output_morph, vl.VGL_CL_CONTEXT())
 
-	#img_input = vl.VglImage("", vl.VGL_IMAGE_2D_IMAGE())
-	img_input = vl.VglImage("yamamoto-dilate.jpg", vl.VGL_IMAGE_2D_IMAGE())
+	img_input = vl.VglImage("", vl.VGL_IMAGE_2D_IMAGE())
+	#img_input = vl.VglImage("yamamoto-dilate.jpg", vl.VGL_IMAGE_2D_IMAGE())
 	vl.vglLoadImage(img_input, sys.argv[1])
 	if( img_input.getVglShape().getNChannels() == 3 ):
 		vl.rgb_to_rgba(img_input)
@@ -337,7 +376,9 @@ if __name__ == "__main__":
 	#wrp.vglClInvert(img_input, img_output)
 	#wrp.vglClMax(img_input, img_input2, img_output)
 	#wrp.vglClMin(img_input, img_input2, img_output)
-	wrp.vglClSub(img_input, img_input2, img_output)
+	#wrp.vglClSub(img_input, img_input2, img_output)
+	#wrp.vglClSum(img_input, img_input2, img_output)
+	wrp.vglClSwapRgb(img_input, img_output)
 
 	#vl.vglClDownload(img_output_morph)
 	vl.vglClDownload(img_output)
