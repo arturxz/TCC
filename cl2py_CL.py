@@ -787,47 +787,11 @@ if __name__ == "__main__":
 	#vl.vglSaveImage(sys.argv[2], img_output_morph_2d)
 	vl.vglSaveImage(sys.argv[2], img_output_2d)
 
-
-"""
-class Wrapper:
-	def makeStructures(self, strElType, strElDim):
-		print("Making Structures")
-		mf = pyopencl.mem_flags
-
-		ss = vl.StructSizes()
-		ss = ss.get_struct_sizes()
-
-		# MAKING STRUCTURING ELEMENT
-		self.strEl = vl.VglStrEl()
-		self.strEl.constructorFromTypeNdim(strElType, strElDim)
-		
-		image_cl_strel = self.strEl.asVglClStrEl()
-		image_cl_shape = self.vglimage.getVglShape().asVglClShape()
-
-		vgl_strel_obj = np.zeros(ss[0], np.uint8)
-		vgl_shape_obj = np.zeros(ss[6], np.uint8)
-
-		# COPYING DATA AS BYTES TO HOST BUFFER
-		self.copy_into_byte_array(image_cl_strel.data,  vgl_strel_obj, ss[1])
-		self.copy_into_byte_array(image_cl_strel.shape, vgl_strel_obj, ss[2])
-		self.copy_into_byte_array(image_cl_strel.offset,vgl_strel_obj, ss[3])
-		self.copy_into_byte_array(image_cl_strel.ndim,  vgl_strel_obj, ss[4])
-		self.copy_into_byte_array(image_cl_strel.size,  vgl_strel_obj, ss[5])
-
-		self.copy_into_byte_array(image_cl_shape.ndim,  vgl_shape_obj, ss[7])
-		self.copy_into_byte_array(image_cl_shape.shape, vgl_shape_obj, ss[8])
-		self.copy_into_byte_array(image_cl_shape.offset,vgl_shape_obj, ss[9])
-		self.copy_into_byte_array(image_cl_shape.size, vgl_shape_obj, ss[10])
-
-		# CREATING DEVICE BUFFER TO HOLD STRUCT DATA
-		self.vglstrel_buffer = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_strel_obj.nbytes)
-		self.vglshape_buffer = cl.Buffer(self.ctx, mf.READ_ONLY, vgl_shape_obj.nbytes)
-				
-		# COPYING DATA FROM HOST TO DEVICE
-		cl.enqueue_copy(self.queue, self.vglstrel_buffer, vgl_strel_obj.tobytes(), is_blocking=True)
-		cl.enqueue_copy(self.queue, self.vglshape_buffer, vgl_shape_obj.tobytes(), is_blocking=True)
-
-	def copy_into_byte_array(self, value, byte_array, offset):
-		for iterator, byte in enumerate( value.tobytes() ):
-			byte_array[iterator+offset] = byte
-"""
+	wrp = None
+	img_input_2d = None
+	img_input2_2d = None
+	img_input_morph_2d = None
+	img_output_2d = None
+	img_output_morph_2d = None
+	convolution_window_2d = None
+	convolution_window_cl = None
