@@ -201,6 +201,24 @@ class cl2py_CL:
 
 			vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
+	def vglClInvert(self, img_input, img_output):
+
+		if( vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+			exit()
+		elif( vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+			exit()
+		else:
+			self.load_kernel("../CL/vglClInvert.cl", "vglClInvert")
+			kernel_run = self._program.vglClInvert
+
+			kernel_run.set_arg(0, img_input.get_oclPtr())
+			kernel_run.set_arg(1, img_output.get_oclPtr())
+			
+			ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
+			print(ev)
+
+			vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+
 """
 	HERE FOLLOWS THE KERNEL CALLS
 """
@@ -248,9 +266,10 @@ if __name__ == "__main__":
 	#wrp.vglClCopy(img_input, img_output)
 	#wrp.vglClDilate(img_input_morph, img_output_morph, convolution_window_morph, np.uint32(3), np.uint32(3))
 	#wrp.vglClErode(img_input_morph, img_output_morph, convolution_window_morph, np.uint32(3), np.uint32(3))
+	wrp.vglClCopy(img_input, img_output)
 	
-	vl.vglClDownload(img_output_morph)
-	#vl.vglClDownload(img_output)
+	#vl.vglClDownload(img_output_morph)
+	vl.vglClDownload(img_output)
 	
 
 	# SAVING IMAGE img_output
@@ -263,8 +282,8 @@ if __name__ == "__main__":
 		if( img_output.getVglShape().getNChannels() == 4 ):
 			vl.rgba_to_rgb(img_output)
 
-	vl.vglSaveImage(sys.argv[2], img_output_morph)
-	#vl.vglSaveImage(sys.argv[2], img_output)
+	#vl.vglSaveImage(sys.argv[2], img_output_morph)
+	vl.vglSaveImage(sys.argv[2], img_output)
 
 
 """
