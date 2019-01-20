@@ -320,6 +320,42 @@ class cl2py_CL:
 			print(ev)
 
 			vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+
+	def vglClThreshold(self, img_input, img_output, thresh, top):
+
+		if( vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+			exit()
+		elif( vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+			exit()
+		elif( not isinstance(thresh, np.float32) ):
+			print("vglClThreshold: Warning: thresh not np.float32! Trying to convert...")
+			try:
+				thresh = np.float32(thresh)
+			except Exception as e:
+				print("vglClThreshold: Error!! Impossible to convert thresh as a np.float32 object.")
+				print(str(e))
+				exit()
+		elif( not isinstance(top, np.float32) ):
+			print("vglClThreshold: Warning: top not np.float32! Trying to convert...")
+			try:
+				top = np.float32(top)
+			except Exception as e:
+				print("vglClThreshold: Error!! Impossible to convert top as a np.float32 object.")
+				print(str(e))
+				exit()
+		else:
+			self.load_kernel("../CL/vglClThreshold.cl", "vglClThreshold")
+			kernel_run = self._program.vglClThreshold
+
+			kernel_run.set_arg(0, img_input.get_oclPtr())
+			kernel_run.set_arg(1, img_output.get_oclPtr())
+			kernel_run.set_arg(2, thresh)
+			kernel_run.set_arg(3, top)
+			
+			ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
+			print(ev)
+
+			vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 """
 	HERE FOLLOWS THE KERNEL CALLS
 """
@@ -378,7 +414,8 @@ if __name__ == "__main__":
 	#wrp.vglClMin(img_input, img_input2, img_output)
 	#wrp.vglClSub(img_input, img_input2, img_output)
 	#wrp.vglClSum(img_input, img_input2, img_output)
-	wrp.vglClSwapRgb(img_input, img_output)
+	#wrp.vglClSwapRgb(img_input, img_output)
+	#wrp.vglClThreshold(img_input, img_output, np.float32(0.5), np.float32(0.9))
 
 	#vl.vglClDownload(img_output_morph)
 	vl.vglClDownload(img_output)
