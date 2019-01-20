@@ -84,7 +84,66 @@ class cl2py_ND:
 				struct_sizes = vl.struct_sizes()
 				struct_sizes = struct_sizes.get_struct_sizes()
 
-				print(struct_sizes)
+				image_cl_strel = window.asVglClStrEl()
+				image_cl_shape = img_input.getVglShape().asVglClShape()
+
+				strel_obj = np.zeros(struct_sizes[0], np.uint8)
+				shape_obj = np.zeros(struct_sizes[6], np.uint8)
+
+				# COPYING DATA AS BYTES TO HOST BUFFER
+				self.copy_into_byte_array(image_cl_strel.data,	strel_obj, struct_sizes[1])
+				self.copy_into_byte_array(image_cl_strel.shape,	strel_obj, struct_sizes[2])
+				self.copy_into_byte_array(image_cl_strel.offset,strel_obj, struct_sizes[3])
+				self.copy_into_byte_array(image_cl_strel.ndim,	strel_obj, struct_sizes[4])
+				self.copy_into_byte_array(image_cl_strel.size,	strel_obj, struct_sizes[5])
+
+				self.copy_into_byte_array(image_cl_shape.ndim,	shape_obj, struct_sizes[7])
+				self.copy_into_byte_array(image_cl_shape.shape,	shape_obj, struct_sizes[8])
+				self.copy_into_byte_array(image_cl_shape.offset,shape_obj, struct_sizes[9])
+				self.copy_into_byte_array(image_cl_shape.size,	shape_obj, struct_sizes[10])
+
+				# CREATING OPENCL BUFFER TO VglStrEl and VglShape
+				mobj_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, strel_obj.nbytes)
+				mobj_img_shape = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, shape_obj.nbytes)
+
+				cl.enqueue_copy(self.ocl.commandQueue, mobj_window, strel_obj.tobytes(), is_blocking=True)
+				cl.enqueue_copy(self.ocl.commandQueue, mobj_img_shape, shape_obj.tobytes(), is_blocking=True)
+
+				# SETTING ARGUMENTS
+				kernel_run.set_arg(0, img_input.get_oclPtr())
+				kernel_run.set_arg(1, img_output.get_oclPtr())
+				kernel_run.set_arg(2, mobj_img_shape)
+				kernel_run.set_arg(3, mobj_window)
+				
+				# ENQUEUEING KERNEL EXECUTION
+				ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
+				print(ev)
+
+				vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+
+	def vglClNdDilate(self, img_input, img_output, window):
+
+		if( not img_input.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
+			print("vglClNdDilate: Error: this function supports only OpenCL data as buffer and img_input isn't.")
+			exit()
+		elif( not img_output.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
+			print("vglClNdDilate: Error: this function supports only OpenCL data as buffer and img_output isn't.")
+			exit()
+		else:
+			if( vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+				exit()
+			elif( vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+				exit()
+			elif( not isinstance(window, vl.VglStrEl) ):
+				print("vglClNdDilate: Error: window is not a VglStrEl object. aborting execution.")
+				exit()
+			else:
+				self.load_kernel("../CL_ND/vglClNdDilate.cl", "vglClNdDilate")
+				kernel_run = self._program.vglClNdDilate
+
+				# HERE, THE IMAGE STRUCTURE WILL BE BUILDED.
+				struct_sizes = vl.struct_sizes()
+				struct_sizes = struct_sizes.get_struct_sizes()
 
 				image_cl_strel = window.asVglClStrEl()
 				image_cl_shape = img_input.getVglShape().asVglClShape()
@@ -171,7 +230,8 @@ if __name__ == "__main__":
 	window.constructorFromTypeNdim(vl.VGL_STREL_CROSS(), 2)
 
 	#wrp.vglClNdCopy(img_input, img_output)
-	wrp.vglClNdConvolution(img_input, img_output, window)
+	#wrp.vglClNdConvolution(img_input, img_output, window)
+	wrp.vglClNdDilate(img_input, img_output, window)
 
 	# SAVING IMAGE
 	vl.vglClDownload(img_output)
@@ -182,12 +242,3 @@ if __name__ == "__main__":
 	img_input = None
 	img_output = None
 	window = None
-
-"""
-class Wrapper:
-
-
-	def copy_into_byte_array(self, value, byte_array, offset):
-		for iterator, byte in enumerate( value.tobytes() ):
-			byte_array[iterator+offset] = byte
-"""
