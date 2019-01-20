@@ -51,18 +51,18 @@ from typing import Union
 		GLuint cudaPbo equivalent; (CUDA not implemented)
 """
 class VglImage(object):
-	def __init__(self, imgPath="", ndim=None, isBuffer=None ):
+	def __init__(self, imgPath="", ndim=None, clForceAsBuf=None ):
 		# IF THE IMAGE TYPE IS NOT SPECIFIED, A 2D IMAGE WILL BE ASSUMED
 		# INICIALIZING DATA
 		self.ipl = None
 		self.ndim = ndim
 		self.shape = np.zeros((2*vl.VGL_MAX_DIM()), np.uint8)
-		self.vglShape: Union[vl.vglShape] = None
+		self.vglShape: Union[None, vl.vglShape] = None
 		self.depht = 0
 		self.nChannels = 0
 		self.has_mipmap = 0
 		self.oclPtr: Union[cl.Image, cl.Buffer] = None
-		self.clForceAsBuf = isBuffer
+		self.clForceAsBuf = clForceAsBuf
 		self.inContext = 0
 		self.filename = imgPath
 
@@ -70,7 +70,7 @@ class VglImage(object):
 			self.clForceAsBuf = vl.IMAGE_CL_OBJECT()
 		elif( not((self.clForceAsBuf is vl.IMAGE_CL_OBJECT() )
 			   or (self.clForceAsBuf is vl.IMAGE_ND_ARRAY() ) ) ):
-			print("ERROR! UNEXISTENT IMAGE MODE! YOU'LL NEED TO INSTANTIATE AGAIN!")
+			print("VglImage: ERROR! UNEXISTENT IMAGE MODE! YOU'LL NEED TO INSTANTIATE AGAIN!")
 
 		if(self.ndim is None):
 			self.ndim = vl.VGL_IMAGE_2D_IMAGE()
@@ -79,6 +79,8 @@ class VglImage(object):
 			print("Creating 2D Image!")
 		elif(self.ndim is vl.VGL_IMAGE_3D_IMAGE()):
 			print("Creating 3D Image!")
+		else:
+			print("vglImage: Warning! Image is not 2D or 3D. Execution will continue.")
 
 	def getVglShape(self):
 		return self.vglShape
@@ -133,24 +135,26 @@ def vglImage4To3Channels(img):
 def vglLoadImage(img, filename=""):
 	if( img.filename == "" ):
 		if( filename == "" ):
-			print("Error: Image file path not defined! Empty string received!")
+			print("vglLoadImage: Error: Image file path not defined! Empty string received!")
 			exit()
 		else:
 			img.filename = filename
 	try:
 		img.ipl = io.imread(img.filename)
 		vl.vglAddContext(img, vl.VGL_RAM_CONTEXT())
-		print("Image loaded! VGL_RAM_CONTEXT.")
 	except FileNotFoundError as fnf:
-		print("vglCreateImage: Error loading image from file:", img.filename)    
+		print("vglLoadImage: Error loading image from file:", img.filename)    
 		print(str(fnf))
 		exit()
 	except Exception as e:
-		print("Unrecognized error:")
+		print("vglLoadImage: Unrecognized error:")
 		print(str(e))
 		exit()
+	
+	if( isinstance(img.ipl, np.ndarray) ):
+		print("vglLoadImage: Image loaded! VGL_RAM_CONTEXT.")
 
-	create_vglShape(img)
+	vl.create_vglShape(img)
 	
 """
 	EQUIVALENT TO DIFFERENT IMAGE SAVE
@@ -171,7 +175,7 @@ def vglSaveImage(filename, img):
 """
 def create_vglShape(img):
 	if(img.ipl is not None):
-		print("The image is valid. Creating vglShape.")
+		print("create_vglShape: The image is valid. Creating vglShape.")
 
 		img.vglShape = vl.VglShape()
 		if( img.ndim == vl.VGL_IMAGE_2D_IMAGE() ):
@@ -195,9 +199,13 @@ def create_vglShape(img):
 				print("VglImage RGB")
 				img.vglShape.constructor3DShape( img.ipl.shape[3], img.ipl.shape[2], img.ipl.shape[1], img.ipl.shape[0] )
 		else:
-			print("Impossible to create a vglImage object. ram_image is None.")
+			print("create_vglShape: image dimension not recognized. img.ndim:", img.ndim)
+			print("-> VGL_IMAGE_2D_IMAGE:", vl.VGL_IMAGE_2D_IMAGE())
+			print("-> VGL_IMAGE_3D_IMAGE:", vl.VGL_IMAGE_3D_IMAGE())
+			exit()
 	else:
-		print("The image wasn't loaded. Please, load the image.")
+		print("create_vglShape: img.ipl is None. Please, load image first!")
+		exit()
 
 """
 	EQUIVALENT TO vglImage.3To4Channels()

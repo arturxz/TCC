@@ -78,6 +78,7 @@ def vglClDownload(img):
 """
 def vglClImageUpload(img):
 	global ocl
+	mf = cl.mem_flags
 
 	# IMAGE VARS
 	print("Uploading image to device.")
@@ -86,20 +87,18 @@ def vglClImageUpload(img):
 		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), 1 )
 		shape  = ( img.getVglShape().getWidth(), img.getVglShape().getHeight() )
 
-		mf = cl.mem_flags
-		imgFormat = cl.ImageFormat(cl_channel_order(img), cl_channel_type(img))
+		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
 		img.oclPtr = cl.Image(ocl.context, mf.READ_ONLY, imgFormat, shape)
 	elif( img.getVglShape().getNFrames() > 1 ):
 		origin = ( 0, 0, 0 )
 		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), img.getVglShape().getNFrames() )
 		shape = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), img.getVglShape().getNFrames() )
 
-		mf = cl.mem_flags
-		imgFormat = cl.ImageFormat(cl_channel_order(img), cl_channel_type(img))
+		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
 		img.oclPtr = cl.Image(ocl.context, mf.READ_ONLY, imgFormat, shape)
 	else:
-		print("VglImage NFrames wrong. NFrames returns:", img.getVglShape().getNFrames() )
-		return
+		print("vglClImageUpload: VglImage NFrames wrong. NFrames returns:", img.getVglShape().getNFrames() )
+		exit()
 
 	# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
 	cl.enqueue_copy(ocl.commandQueue, img.get_oclPtr(), img.get_ipl(), origin=origin, region=region, is_blocking=True)
@@ -153,9 +152,9 @@ def vglClImageDownload(img):
 """
 def vglClNdImageUpload(img):
 	global ocl 
+	mf = cl.mem_flags
 
-	print("NdArray image Upload")
-		
+	print("vglClNdImageUpload: Uploading to cl.Buffer")	
 	# CREATING DEVICE POINTER AND COPYING HOST TO DEVICE
 	img.oclPtr = cl.Buffer(ocl.context, mf.READ_ONLY, img.get_ipl().nbytes)
 	cl.enqueue_copy(ocl.commandQueue, img.get_oclPtr(), img.get_ipl().tobytes(), is_blocking=True)
@@ -169,19 +168,19 @@ def vglClNdImageUpload(img):
 """
 def vglClNdImageDownload(img):
 	global ocl
-	print("NdArray image Download")
+	print("vglClNdImageDownload: Downloading from cl.Buffer")
 
 	cl.enqueue_copy(ocl.commandQueue, img.get_ipl(), img.get_oclPtr())
-	img.create_vglShape()
+	vl.create_vglShape(img)
 
 def cl_channel_type(img):
 	oclPtr_dtype = None
 	if( img.ipl.dtype == np.uint8 ):
 		oclPtr_dtype = cl.channel_type.UNORM_INT8
-		print("8bit Channel Size!")
+		print("cl_channel_type: 8bit Channel Size!")
 	elif( img.ipl.dtype == np.uint16 ):
 		oclPtr_dtype = cl.channel_type.UNORM_INT16
-		print("16bit Channel Size!")
+		print("cl_channel_type: 16bit Channel Size!")
 
 	return oclPtr_dtype
 	
@@ -201,8 +200,18 @@ def cl_channel_order(img):
 def get_similar_oclPtr_object(img):
 	global ocl
 	mf = cl.mem_flags
-	imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
-	return cl.Image(ocl.context, mf.WRITE_ONLY, imgFormat, img.get_oclPtr().shape )
+
+	opencl_device: Union[cl.Image, cl.Buffer] = None
+
+	if( isinstance(img.get_oclPtr(), cl.Image) ):
+		print("get_similar_oclPtr_object: oclPtr is cl.Image.")
+		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
+		opencl_device = cl.Image(ocl.context, mf.WRITE_ONLY, imgFormat, img.get_oclPtr().shape )
+	elif isinstance(img.get_oclPtr(), cl.Buffer):
+		print("get_similar_oclPtr_object: oclPtr is cl.Buffer.")
+		opencl_device = cl.Buffer(ocl.context, mf.WRITE_ONLY, img.get_ipl().nbytes)
+	
+	return opencl_device
 
 def create_blank_image_as(img):
 	image = vl.VglImage(img.filename, img.ndim, img.clForceAsBuf)
