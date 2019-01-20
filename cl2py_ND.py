@@ -268,6 +268,74 @@ class cl2py_ND:
 
 				vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
+	def vglClNdNot(self, img_input, img_output):
+
+		if( not img_input.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
+			print("vglClNdNot: Error: this function supports only OpenCL data as buffer and img_input isn't.")
+			exit()
+		elif( not img_output.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
+			print("vglClNdNot: Error: this function supports only OpenCL data as buffer and img_output isn't.")
+			exit()
+		else:
+			if( vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+				exit()
+			elif( vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+				exit()
+			else:
+				self.load_kernel("../CL_ND/vglClNdNot.cl", "vglClNdNot")
+				kernel_run = self._program.vglClNdNot
+
+				kernel_run.set_arg(0, img_input.get_oclPtr())
+				kernel_run.set_arg(1, img_output.get_oclPtr())
+				
+				ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
+				print(ev)
+
+				vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+
+	def vglClNdThreshold(self, img_input, img_output, thresh, top):
+
+		if( not img_input.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
+			print("vglClNdThreshold: Error: this function supports only OpenCL data as buffer and img_input isn't.")
+			exit()
+		elif( not img_output.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
+			print("vglClNdThreshold: Error: this function supports only OpenCL data as buffer and img_output isn't.")
+			exit()
+		elif( not isinstance(thresh, np.uint8) ):
+			print("vglCl3dThreshold: Warning: thresh not np.uint8! Trying to convert...")
+			try:
+				thresh = np.uint8(thresh)
+			except Exception as e:
+				print("vglCl3dThreshold: Error!! Impossible to convert thresh as a np.uint8 object.")
+				print(str(e))
+				exit()
+		elif( not isinstance(top, np.uint8) ):
+			print("vglCl3dThreshold: Warning: top not np.uint8! Trying to convert...")
+			try:
+				top = np.uint8(top)
+			except Exception as e:
+				print("vglCl3dThreshold: Error!! Impossible to convert top as a np.uint8 object.")
+				print(str(e))
+				exit()
+		else:
+			if( vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+				exit()
+			elif( vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT()) == vl.VGL_ERROR() ):
+				exit()
+			else:
+				self.load_kernel("../CL_ND/vglClNdThreshold.cl", "vglClNdThreshold")
+				kernel_run = self._program.vglClNdThreshold
+
+				kernel_run.set_arg(0, img_input.get_oclPtr())
+				kernel_run.set_arg(1, img_output.get_oclPtr())
+				kernel_run.set_arg(2, thresh)
+				kernel_run.set_arg(3, top)
+				
+				ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
+				print(ev)
+
+				vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+
 """
 	HERE FOLLOWS THE KERNEL CALLS
 """
@@ -292,7 +360,10 @@ if __name__ == "__main__":
 	#wrp.vglClNdCopy(img_input, img_output)
 	#wrp.vglClNdConvolution(img_input, img_output, window)
 	#wrp.vglClNdDilate(img_input, img_output, window)
-	wrp.vglClNdErode(img_input, img_output, window)
+	#wrp.vglClNdErode(img_input, img_output, window)
+	#wrp.vglClNdNot(img_input, img_output)
+	wrp.vglClNdThreshold(img_input, img_output, np.uint8(120), np.uint8(190))
+	
 
 	# SAVING IMAGE
 	vl.vglClDownload(img_output)
