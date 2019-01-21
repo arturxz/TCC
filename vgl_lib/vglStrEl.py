@@ -155,7 +155,8 @@ class VglStrEl(object):
 
 		size = self.getSize()
 		if( size > vl.VGL_ARR_CLSTREL_SIZE() ):
-			print("Error: structuring element size > VGL_ARR_CLSTREL_SIZE. Change this value in vglClStrEl.h to a greater one.")
+			print("vglStrEl: asVglClStrEl Error: structuring element size > VGL_ARR_CLSTREL_SIZE. Change this value in vglClStrEl.h to a greater one.")
+			exit()
 
 		result.ndim = np.int32(self.vglShape.getNdim())
 		result.size = np.int32(self.vglShape.getSize())

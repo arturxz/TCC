@@ -103,11 +103,8 @@ class cl2py_ND:
 				self.copy_into_byte_array(image_cl_shape.size,	shape_obj, struct_sizes[10])
 
 				# CREATING OPENCL BUFFER TO VglStrEl and VglShape
-				mobj_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, strel_obj.nbytes)
-				mobj_img_shape = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, shape_obj.nbytes)
-
-				cl.enqueue_copy(self.ocl.commandQueue, mobj_window, strel_obj.tobytes(), is_blocking=True)
-				cl.enqueue_copy(self.ocl.commandQueue, mobj_img_shape, shape_obj.tobytes(), is_blocking=True)
+				mobj_window = vl.get_vglstrel_opencl_buffer(strel_obj)
+				mobj_img_shape = vl.get_vglshape_opencl_buffer(shape_obj)
 
 				# SETTING ARGUMENTS
 				kernel_run.set_arg(0, img_input.get_oclPtr())
@@ -189,11 +186,8 @@ class cl2py_ND:
 				self.copy_into_byte_array(image_cl_shape.size,	shape_obj, struct_sizes[10])
 
 				# CREATING OPENCL BUFFER TO VglStrEl and VglShape
-				mobj_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, strel_obj.nbytes)
-				mobj_img_shape = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, shape_obj.nbytes)
-
-				cl.enqueue_copy(self.ocl.commandQueue, mobj_window, strel_obj.tobytes(), is_blocking=True)
-				cl.enqueue_copy(self.ocl.commandQueue, mobj_img_shape, shape_obj.tobytes(), is_blocking=True)
+				mobj_window = vl.get_vglstrel_opencl_buffer(strel_obj)
+				mobj_img_shape = vl.get_vglshape_opencl_buffer(shape_obj)
 
 				# SETTING ARGUMENTS
 				kernel_run.set_arg(0, img_input.get_oclPtr())
@@ -250,11 +244,8 @@ class cl2py_ND:
 				self.copy_into_byte_array(image_cl_shape.size,	shape_obj, struct_sizes[10])
 
 				# CREATING OPENCL BUFFER TO VglStrEl and VglShape
-				mobj_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, strel_obj.nbytes)
-				mobj_img_shape = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, shape_obj.nbytes)
-
-				cl.enqueue_copy(self.ocl.commandQueue, mobj_window, strel_obj.tobytes(), is_blocking=True)
-				cl.enqueue_copy(self.ocl.commandQueue, mobj_img_shape, shape_obj.tobytes(), is_blocking=True)
+				mobj_window = vl.get_vglstrel_opencl_buffer(strel_obj)
+				mobj_img_shape = vl.get_vglshape_opencl_buffer(shape_obj)
 
 				# SETTING ARGUMENTS
 				kernel_run.set_arg(0, img_input.get_oclPtr())
@@ -362,7 +353,7 @@ if __name__ == "__main__":
 	#wrp.vglClNdDilate(img_input, img_output, window)
 	#wrp.vglClNdErode(img_input, img_output, window)
 	#wrp.vglClNdNot(img_input, img_output)
-	wrp.vglClNdThreshold(img_input, img_output, np.uint8(120), np.uint8(190))
+	#wrp.vglClNdThreshold(img_input, img_output, np.uint8(120), np.uint8(190))
 	
 
 	# SAVING IMAGE

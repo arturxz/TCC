@@ -61,8 +61,8 @@ class VglShape(object):
 		self.size = 1
 
 		if( (bps == 1) and (shape[0] != 1) ):
-			print("Error: Image with 1 bps and mode then one color channels(!)")
-			return 1
+			print("vglShape: vglCreateShape Error: Image with 1 bps and mode then one color channels(!)")
+			exit()
 
 		maxi = ndim
 		c = shape[vl.VGL_SHAPE_NCHANNELS()]

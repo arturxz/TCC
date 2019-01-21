@@ -70,7 +70,8 @@ class VglImage(object):
 			self.clForceAsBuf = vl.IMAGE_CL_OBJECT()
 		elif( not((self.clForceAsBuf is vl.IMAGE_CL_OBJECT() )
 			   or (self.clForceAsBuf is vl.IMAGE_ND_ARRAY() ) ) ):
-			print("VglImage: ERROR! UNEXISTENT IMAGE MODE! YOU'LL NEED TO INSTANTIATE AGAIN!")
+			print("VglImage: Error! Unexistent image treatment. Use vl.IMAGE_CL_OBJECT() or vl.IMAGE_ND_ARRAY()!")
+			exit()
 
 		if(self.ndim is None):
 			self.ndim = vl.VGL_IMAGE_2D_IMAGE()
@@ -90,17 +91,18 @@ class VglImage(object):
 			if( isinstance(img, cl.Image) ):
 				self.oclPtr = img
 			else:
-				print("Error! This image must have a OpenCL Image object as oclPtr.")
+				print("vglImage: set_oclPtr Error! This image must have a OpenCL Image object as oclPtr.")
 				exit()
 
 		elif( self.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
 			if( isinstance(img, cl.Buffer) ):
 				self.oclPtr = img
 			else:
-				print("Error! This image must have a OpenCL Buffer object as oclPtr.")
+				print("vglImage: set_oclPtr Error: This image must have a OpenCL Buffer object as oclPtr.")
 				exit()
 		else:
-			print("Invalid object. oclPtr must be cl.Image or cl.Buffer objects, according to clForceAsBuf.")
+			print("vglImage: set_oclPtr Error: Invalid object. oclPtr must be cl.Image or cl.Buffer objects, according to clForceAsBuf.")
+			exit()
 		
 	def get_oclPtr(self):
 		return self.oclPtr
@@ -135,7 +137,7 @@ def vglImage4To3Channels(img):
 def vglLoadImage(img, filename=""):
 	if( img.filename == "" ):
 		if( filename == "" ):
-			print("vglLoadImage: Error: Image file path not defined! Empty string received!")
+			print("vglImage: vglLoadImage Error: Image file path not defined! Empty string received!")
 			exit()
 		else:
 			img.filename = filename
@@ -143,16 +145,16 @@ def vglLoadImage(img, filename=""):
 		img.ipl = io.imread(img.filename)
 		vl.vglAddContext(img, vl.VGL_RAM_CONTEXT())
 	except FileNotFoundError as fnf:
-		print("vglLoadImage: Error loading image from file:", img.filename)    
+		print("vglImage: vglLoadImage Error: loading image from file:", img.filename)    
 		print(str(fnf))
 		exit()
 	except Exception as e:
-		print("vglLoadImage: Unrecognized error:")
+		print("vglImage: vglLoadImage: Unrecognized exception was thrown.")
 		print(str(e))
 		exit()
 	
 	if( isinstance(img.ipl, np.ndarray) ):
-		print("vglLoadImage: Image loaded! VGL_RAM_CONTEXT.")
+		print("vglImage: Image loaded! VGL_RAM_CONTEXT.")
 
 	vl.create_vglShape(img)
 	
@@ -199,9 +201,7 @@ def create_vglShape(img):
 				print("VglImage RGB")
 				img.vglShape.constructor3DShape( img.ipl.shape[3], img.ipl.shape[2], img.ipl.shape[1], img.ipl.shape[0] )
 		else:
-			print("create_vglShape: image dimension not recognized. img.ndim:", img.ndim)
-			print("-> VGL_IMAGE_2D_IMAGE:", vl.VGL_IMAGE_2D_IMAGE())
-			print("-> VGL_IMAGE_3D_IMAGE:", vl.VGL_IMAGE_3D_IMAGE())
+			print("vglImage: create_vglShape Error: image dimension not recognized. img.ndim:", img.ndim)
 			exit()
 	else:
 		print("create_vglShape: img.ipl is None. Please, load image first!")
@@ -228,7 +228,8 @@ def rgb_to_rgba(img):
 def rgba_to_rgb(img):
 	print("[RGBA -> RGB]")
 	if( (img.ipl[0,0,:].size < 4) | (img.ipl[0,0,:].size > 4) ):
-		print("rgba_to_rgb: Error: IMAGE IS NOT RGBA.")
+		print("vglImage: rgba_to_rgb: Error: IMAGE IS NOT RGBA.")
+		exit()
 	else:
 		ipl_rgb = np.empty((img.vglShape.getHeight(), img.vglShape.getWidth(), 3), img.ipl.dtype)
 		ipl_rgb[:,:,0] = img.ipl[:,:,0]

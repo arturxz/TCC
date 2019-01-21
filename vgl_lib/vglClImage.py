@@ -275,5 +275,32 @@ def create_blank_image_as(img):
 
 """
 """
-def set_struct_sizes():
+def get_struct_sizes():
+	global struct_sizes
 
+	if( struct_sizes == None ):
+		struct_sizes = vl.struct_sizes()
+	else:
+		print("vglClImage: get_struct_sizes already set!")
+
+	return struct_sizes
+
+"""
+	RETURNS A OPENCL BUFFER WITH DATA 
+	OF VglClStrel TO KERNELS TO READ
+"""
+def get_vglstrel_opencl_buffer(strel):
+	global ocl
+	buf = cl.Buffer(ocl.context, cl.mem_flags.READ_ONLY, strel.nbytes)
+	cl.enqueue_copy(ocl.commandQueue, buf, strel.tobytes(), is_blocking=True)
+	return buf
+
+"""
+	RETURNS A OPENCL BUFFER WITH DATA 
+	OF VglClShape TO KERNELS TO READ
+"""
+def get_vglshape_opencl_buffer(shape):
+	global ocl
+	buf = cl.Buffer(ocl.context, cl.mem_flags.READ_ONLY, shape.nbytes)
+	cl.enqueue_copy(ocl.commandQueue, buf, shape.tobytes(), is_blocking=True)
+	return buf
