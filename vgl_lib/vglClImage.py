@@ -10,23 +10,22 @@ import vgl_lib as vl
 from typing import Union
 
 """
-	VARIABLE EQUIVALENT TO cl IN vglClImage.
+	ocl AND ocl_context ARE GLOBAL VARIABLES.
+	ocl IS EQUIVALENT TO cl ON ORIGINAL vglClImage.
 """
 ocl: Union[vl.VglClContext] = None
 ocl_context: Union[vl.opencl_context] = None
 
-def get_ocl():
-	return ocl
 
-def get_ocl_context():
-	return ocl_context
+"""
+	struct_sizes IS A PYTHON-EXCLUSIVE GLOBAL VARIABLE.
 
-def set_ocl(ctx):
-	global ocl
-	if( isinstance(ctx, vl.VglClContext) ):
-		ocl = ctx
-	else:
-		print("Error! not VglClContext object!")
+	THIS VARIABLE CAN BE USED TO STORE THE WAY CURRENT
+	OPENCL-DEVICE ORGANIZES THE vglClStrEl AND vglClShape
+	DATA. WITH THE ORGANIZATION INFORMATION, THE BITWISE 
+	PROCESS CAN BE DONE.
+"""
+struct_sizes: Union[np.ndarray] = None
 
 """
 	EQUIVALENT TO vglClInit METHOD, FOUND ON
@@ -173,6 +172,35 @@ def vglClNdImageDownload(img):
 	cl.enqueue_copy(ocl.commandQueue, img.get_ipl(), img.get_oclPtr())
 	vl.create_vglShape(img)
 
+"""
+	PYTHON-EXCLUSIVE METHODS
+"""
+
+"""
+	RETURNS THE vl.VglClContext OBJECT
+"""
+def get_ocl():
+	return ocl
+
+"""
+	RETURNS THE vl.opencl_context OBJECT
+"""
+def get_ocl_context():
+	return ocl_context
+
+"""
+	SETS THE vl.VglClContext OBJECT
+"""
+def set_ocl(ctx):
+	global ocl
+	if( isinstance(ctx, vl.VglClContext) ):
+		ocl = ctx
+	else:
+		print("Error! not VglClContext object!")
+
+"""
+	RETURNS THE IMAGE CHANNEL TYPE
+"""
 def cl_channel_type(img):
 	oclPtr_dtype = None
 	if( img.ipl.dtype == np.uint8 ):
@@ -183,7 +211,11 @@ def cl_channel_type(img):
 		print("cl_channel_type: 16bit Channel Size!")
 
 	return oclPtr_dtype
-	
+
+"""
+	RETURNS THE IMAGE CHANNEL ORDER
+	(OR QUANTITY OF CHANNELS)
+"""
 def cl_channel_order(img):
 	oclPtr_channel_order = None
 	if( img.getVglShape().getNChannels() == 1 ):
@@ -197,6 +229,15 @@ def cl_channel_order(img):
 	
 	return oclPtr_channel_order
 
+"""
+	RETURNS A cl.Buffer or cl.Image OBJECT
+	WITH THE SAME PROPERTIES OF THE img SENT
+	AS ARGUMENT.
+
+	IT IS USED TO CREATE A OUTPUT IMAGE WITH
+	THE SAME SIZE AS THE INPUT IMAGE, FOR 
+	EXAMPLE.
+"""
 def get_similar_oclPtr_object(img):
 	global ocl
 	mf = cl.mem_flags
@@ -213,6 +254,13 @@ def get_similar_oclPtr_object(img):
 	
 	return opencl_device
 
+"""
+	IT RETURNS A vl.Image OBJECT, WITH SIMILAR
+	PROPERTIES AS THE img SENT AS ARGUMENT.
+
+	img.ipl IS NOT SET, BUT OTHER PROPERTIES ARE.
+	THE img.inContext IS SET AS VGL_BLANK_CONTEXT().
+"""
 def create_blank_image_as(img):
 	image = vl.VglImage(img.filename, img.ndim, img.clForceAsBuf)
 	image.ipl		= np.asarray(img.ipl, img.ipl.dtype)
@@ -224,3 +272,8 @@ def create_blank_image_as(img):
 	image.inContext	= vl.VGL_BLANK_CONTEXT()
 
 	return image
+
+"""
+"""
+def set_struct_sizes():
+
