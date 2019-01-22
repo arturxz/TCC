@@ -1,5 +1,7 @@
 # __init__.py
 
+import platform
+
 from .struct_sizes 		import struct_sizes
 from .opencl_context	import opencl_context, VglClContext
 from .vglShape 			import VglShape
@@ -38,7 +40,7 @@ from .vglContext import vglSetContext
 from .vglContext import vglCheckContext
 from .vglContext import vglCheckContextForOutput
 
-# CONSTANT RETURNS
+# METHODS THAT EMULATE CONSTANTS.
 from .vglConst import VGL_WIN_X0
 from .vglConst import VGL_WIN_X1
 from .vglConst import VGL_WIN_DX
@@ -53,6 +55,12 @@ from .vglConst import VGL_SHAPE_NCHANNELS
 from .vglConst import VGL_SHAPE_WIDTH 
 from .vglConst import VGL_SHAPE_HEIGHT
 from .vglConst import VGL_SHAPE_LENGTH
+from .vglConst import VGL_4D
+from .vglConst import VGL_SHAPE_D0
+from .vglConst import VGL_SHAPE_D1
+from .vglConst import VGL_SHAPE_D2
+from .vglConst import VGL_SHAPE_D3
+from .vglConst import VGL_SHAPE_D4
 from .vglConst import VGL_MAX_DIM
 from .vglConst import VGL_ARR_SHAPE_SIZE
 from .vglConst import VGL_ARR_CLSTREL_SIZE
@@ -70,3 +78,24 @@ from .vglConst import VGL_CL_CONTEXT
 from .vglConst import VGL_ERROR
 from .vglConst import IMAGE_CL_OBJECT
 from .vglConst import IMAGE_ND_ARRAY
+
+# PACK 64
+from .vglConst import VGL_PACK_SIZE_BITS_8
+from .vglConst import VGL_PACK_SIZE_BYTES_8
+from .vglConst import VGL_PACK_MAX_UINT_8
+from .vglConst import VGL_PACK_CL_CONST_TYPE_8
+from .vglConst import VGL_PACK_CL_SHADER_TYPE_8
+from .vglConst import VGL_PACK_OUTPUT_SWAP_MASK_8
+from .vglConst import VGL_PACK_SIZE_BITS_32
+from .vglConst import VGL_PACK_SIZE_BYTES_32
+from .vglConst import VGL_PACK_MAX_UINT_32
+from .vglConst import VGL_PACK_CL_CONST_TYPE_32
+from .vglConst import VGL_PACK_CL_SHADER_TYPE_32
+from .vglConst import VGL_PACK_OUTPUT_SWAP_MASK_32
+from .vglConst import VGL_PACK_SIZE_BITS_64
+from .vglConst import VGL_PACK_SIZE_BYTES_64
+from .vglConst import VGL_PACK_MAX_UINT_64
+from .vglConst import VGL_PACK_CL_CONST_TYPE_64
+from .vglConst import VGL_PACK_CL_SHADER_TYPE_64
+from .vglConst import VGL_PACK_OUTPUT_SWAP_MASK_64
+from .vglConst import VGL_PACK_OUTPUT_DIRECT_MASK
