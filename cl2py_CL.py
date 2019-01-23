@@ -690,108 +690,65 @@ if __name__ == "__main__":
 	"""
 		CL.IMAGE OBJECTS
 	"""
-	img_input_morph_2d = vl.VglImage(sys.argv[1], vl.VGL_IMAGE_3D_IMAGE())
-	vl.vglLoadImage(img_input_morph_2d)
-	"""
-	if( img_input_morph_2d.getVglShape().getNChannels() == 3 ):
-		vl.rgb_to_rgba(img_input_morph_2d)
-	"""
+
+	img_input = vl.VglImage("", vl.VGL_IMAGE_2D_IMAGE())
+	vl.vglLoadImage(img_input, sys.argv[1])
+	if( img_input.getVglShape().getNChannels() == 3 ):
+		vl.rgb_to_rgba(img_input)
 	
-	vl.vglClUpload(img_input_morph_2d)
+	vl.vglClUpload(img_input)
 
-	img_output_morph_2d = vl.create_blank_image_as(img_input_morph_2d)
-	img_output_morph_2d.set_oclPtr( vl.get_similar_oclPtr_object(img_input_morph_2d) )
-	vl.vglAddContext(img_output_morph_2d, vl.VGL_CL_CONTEXT())
+	img_input2 = vl.VglImage("3d-treshold.tif", vl.VGL_IMAGE_2D_IMAGE())
+	vl.vglLoadImage(img_input2)
+	if( img_input2.getVglShape().getNChannels() == 3 ):
+		vl.rgb_to_rgba(img_input2)
 
-	img_input_2d = vl.VglImage("", vl.VGL_IMAGE_3D_IMAGE())
-	#img_input_2d = vl.VglImage("yamamoto-dilate.jpg", vl.VGL_IMAGE_3D_IMAGE())
-	vl.vglLoadImage(img_input_2d, sys.argv[1])
-	"""
-	if( img_input_2d.getVglShape().getNChannels() == 3 ):
-		vl.rgb_to_rgba(img_input_2d)
-	"""
-	
-	vl.vglClUpload(img_input_2d)
+	img_output = vl.create_blank_image_as(img_input)
+	img_output.set_oclPtr( vl.get_similar_oclPtr_object(img_input) )
+	vl.vglAddContext(img_output, vl.VGL_CL_CONTEXT())
 
-	img_input2_2d = vl.VglImage("3d-treshold.tif", vl.VGL_IMAGE_3D_IMAGE())
-	vl.vglLoadImage(img_input2_2d)
-	if( img_input2_2d.getVglShape().getNChannels() == 3 ):
-		vl.rgb_to_rgba(img_input2_2d)
+	wrp.vglClBlurSq3(img_input, img_output)
+	#wrp.vglClConvolution(img_input, img_output, convolution_window_cl, np.uint32(5), np.uint32(5))
+	#wrp.vglClCopy(img_input, img_output)
+	#wrp.vglClDilate(img_input, img_output, convolution_window_2d, np.uint32(3), np.uint32(3))
+	#wrp.vglClErode(img_input, img_output, convolution_window_2d, np.uint32(3), np.uint32(3))
+	#wrp.vglClInvert(img_input, img_output)
+	#wrp.vglClMax(img_input, img_input2, img_output)
+	#wrp.vglClMin(img_input, img_input2, img_output)
+	#wrp.vglClSub(img_input, img_input2, img_output)
+	#wrp.vglClSum(img_input, img_input2, img_output)
+	#wrp.vglClSwapRgb(img_input, img_output)
+	#wrp.vglClThreshold(img_input, img_output, np.float32(0.5), np.float32(0.9))
 
-	img_output_2d = vl.create_blank_image_as(img_input_2d)
-	img_output_2d.set_oclPtr( vl.get_similar_oclPtr_object(img_input_2d) )
-	vl.vglAddContext(img_output_2d, vl.VGL_CL_CONTEXT())
+	#wrp.vglCl3dBlurSq3(img_input, img_output)
+	#wrp.vglCl3dConvolution(img_input, img_output, convolution_window_cl, np.uint32(5), np.uint32(5), np.uint32(5))
+	#wrp.vglCl3dCopy(img_input, img_output)
+	#wrp.vglCl3dDilate(img_input, img_output, convolution_window_2d, np.uint32(3), np.uint32(3), np.uint32(3))
+	#wrp.vglCl3dErode(img_input, img_output, convolution_window_2d, np.uint32(3), np.uint32(3), np.uint32(3))
+	#wrp.vglCl3dNot(img_input, img_output)
+	#wrp.vglCl3dMax(img_input, img_input2, img_output)
+	#wrp.vglCl3dMin(img_input, img_input2, img_output)
+	#wrp.vglCl3dSub(img_input, img_input2, img_output)
+	#wrp.vglCl3dSum(img_input, img_input2, img_output)
+	#wrp.vglCl3dThreshold(img_input, img_output, np.float32(0.4), np.float32(.8))
 
-	convolution_window_morph_2d = np.ones((3, 3, 3), np.float32)
-	convolution_window_morph_2d[0,0,1] = np.float32(0)
-	convolution_window_morph_2d[0,1,0] = np.float32(0)
-	convolution_window_morph_2d[0,1,1] = np.float32(0)
-	convolution_window_morph_2d[0,1,2] = np.float32(0)
-	convolution_window_morph_2d[0,2,1] = np.float32(0)
-	convolution_window_morph_2d[1,0,1] = np.float32(0)
-	convolution_window_morph_2d[1,1,0] = np.float32(0)
-	convolution_window_morph_2d[1,1,1] = np.float32(0)
-	convolution_window_morph_2d[1,1,2] = np.float32(0)
-	convolution_window_morph_2d[1,2,1] = np.float32(0)
-	convolution_window_morph_2d[2,0,1] = np.float32(0)
-	convolution_window_morph_2d[2,1,0] = np.float32(0)
-	convolution_window_morph_2d[2,1,1] = np.float32(0)
-	convolution_window_morph_2d[2,1,2] = np.float32(0)
-	convolution_window_morph_2d[2,2,1] = np.float32(0)
-
-	convolution_window_morph_2d = cl.Buffer(wrp.ocl.context , cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=convolution_window_morph_2d)
-
-	convolution_window_2d = np.ones((5, 5, 5), np.float32) * (1/125)
-	convolution_window_cl = cl.Buffer(wrp.ocl.context , cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=convolution_window_2d)
-	
-	#wrp.vglClBlurSq3(img_input_2d, img_output_2d)
-	#wrp.vglClConvolution(img_input_2d, img_output_2d, convolution_window_cl, np.uint32(5), np.uint32(5))
-	#wrp.vglClCopy(img_input_2d, img_output_2d)
-	#wrp.vglClDilate(img_input_morph_2d, img_output_morph_2d, convolution_window_morph_2d, np.uint32(3), np.uint32(3))
-	#wrp.vglClErode(img_input_morph_2d, img_output_morph_2d, convolution_window_morph_2d, np.uint32(3), np.uint32(3))
-	#wrp.vglClInvert(img_input_2d, img_output_2d)
-	#wrp.vglClMax(img_input_2d, img_input2_2d, img_output_2d)
-	#wrp.vglClMin(img_input_2d, img_input2_2d, img_output_2d)
-	#wrp.vglClSub(img_input_2d, img_input2_2d, img_output_2d)
-	#wrp.vglClSum(img_input_2d, img_input2_2d, img_output_2d)
-	#wrp.vglClSwapRgb(img_input_2d, img_output_2d)
-	#wrp.vglClThreshold(img_input_2d, img_output_2d, np.float32(0.5), np.float32(0.9))
-
-	#wrp.vglCl3dBlurSq3(img_input_2d, img_output_2d)
-	#wrp.vglCl3dConvolution(img_input_2d, img_output_2d, convolution_window_cl, np.uint32(5), np.uint32(5), np.uint32(5))
-	#wrp.vglCl3dCopy(img_input_2d, img_output_2d)
-	#wrp.vglCl3dDilate(img_input_morph_2d, img_output_morph_2d, convolution_window_morph_2d, np.uint32(3), np.uint32(3), np.uint32(3))
-	#wrp.vglCl3dErode(img_input_morph_2d, img_output_morph_2d, convolution_window_morph_2d, np.uint32(3), np.uint32(3), np.uint32(3))
-	#wrp.vglCl3dNot(img_input_2d, img_output_2d)
-	#wrp.vglCl3dMax(img_input_2d, img_input2_2d, img_output_2d)
-	#wrp.vglCl3dMin(img_input_2d, img_input2_2d, img_output_2d)
-	#wrp.vglCl3dSub(img_input_2d, img_input2_2d, img_output_2d)
-	#wrp.vglCl3dSum(img_input_2d, img_input2_2d, img_output_2d)
-	#wrp.vglCl3dThreshold(img_input_2d, img_output_2d, np.float32(0.4), np.float32(.8))
-
-	#vl.vglClDownload(img_output_morph_2d)
-	vl.vglClDownload(img_output_2d)
+	#vl.vglClDownload(img_output)
+	vl.vglClDownload(img_output)
 	
 
 	# SAVING IMAGE img_output
 	ext = sys.argv[2].split(".")
 	ext.reverse()
 
-	vl.vglCheckContext(img_output_2d, vl.VGL_RAM_CONTEXT())
+	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
 
-	"""
 	if( ext.pop(0).lower() == 'jpg' ):
-		if( img_output_2d.getVglShape().getNChannels() == 4 ):
-			vl.rgba_to_rgb(img_output_2d)
-	"""
-	#vl.vglSaveImage(sys.argv[2], img_output_morph_2d)
-	vl.vglSaveImage(sys.argv[2], img_output_2d)
+		if( img_output.getVglShape().getNChannels() == 4 ):
+			vl.rgba_to_rgb(img_output)
+	
+	vl.vglSaveImage(sys.argv[2], img_output)
 
 	wrp = None
-	img_input_2d = None
-	img_input2_2d = None
-	img_input_morph_2d = None
-	img_output_2d = None
-	img_output_morph_2d = None
-	convolution_window_2d = None
-	convolution_window_cl = None
+	img_input = None
+	img_input2 = None
+	img_output = None
