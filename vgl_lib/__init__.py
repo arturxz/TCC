@@ -31,6 +31,7 @@ from .vglClImage import get_similar_oclPtr_object
 from .vglClImage import create_blank_image_as
 from .vglClImage import get_vglstrel_opencl_buffer
 from .vglClImage import get_vglshape_opencl_buffer
+from .vglClImage import get_struct_sizes
 
 # OPENCL CONTEXT METHODS IMPORT
 from .vglContext import vglIsContextValid

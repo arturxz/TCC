@@ -16,7 +16,6 @@ from typing import Union
 ocl: Union[vl.VglClContext] = None
 ocl_context: Union[vl.opencl_context] = None
 
-
 """
 	struct_sizes IS A PYTHON-EXCLUSIVE GLOBAL VARIABLE.
 
@@ -34,8 +33,14 @@ struct_sizes: Union[np.ndarray] = None
 def vglClInit():
 	global ocl
 	global ocl_context
+	global struct_sizes
+
 	ocl_context = vl.opencl_context()
 	ocl = ocl_context.get_vglClContext_attributes()
+	ss = vl.struct_sizes()
+	struct_sizes = ss.get_struct_sizes()
+
+	ss = None
 
 """
 	EQUIVALENT TO vglClImage.vglClUpload()
@@ -158,7 +163,6 @@ def vglClNdImageUpload(img):
 	img.oclPtr = cl.Buffer(ocl.context, mf.READ_ONLY, img.get_ipl().nbytes)
 	cl.enqueue_copy(ocl.commandQueue, img.get_oclPtr(), img.get_ipl().tobytes(), is_blocking=True)
 
-
 """
 	THIS METHOD TAKES THE DEVICE-SIDE OPENCL BUFFER AND
 	COPY IT BACK TO THE RAM-SIDE. THEN, THE METHOD CALLS
@@ -172,6 +176,13 @@ def vglClNdImageDownload(img):
 	cl.enqueue_copy(ocl.commandQueue, img.get_ipl(), img.get_oclPtr())
 	vl.create_vglShape(img)
 
+"""
+	METHOD CURRENTLY NOT IN USE
+
+	EQUIVALENT TO vglClImage.vglClCheckError
+	THIS METHOD VERIFIES IF IS REALLY AN ERROR.
+	IF IS, IT SHOWS THE ERROR ID AND PRINTS THE CAUSE. 
+"""
 def vglClCheckError(error, name):
 	if(error < vl.CL_SUCCESS() and error >= vl.CL_MIN_ERROR()):
 		print("Error", error, vl.vglClErrorMessages()[error], "while doing the following operation:")
@@ -283,11 +294,9 @@ def create_blank_image_as(img):
 """
 def get_struct_sizes():
 	global struct_sizes
-
-	if( struct_sizes == None ):
-		struct_sizes = vl.struct_sizes()
-	else:
-		print("vglClImage: get_struct_sizes already set!")
+	if( not isinstance(struct_sizes, np.ndarray) ):
+		vl.vglClInit()
+		print("get_struct_sizes: Warning! get_struct_sizes before vglClInit. Calling vglClInit now...")
 
 	return struct_sizes
 
@@ -310,3 +319,4 @@ def get_vglshape_opencl_buffer(shape):
 	buf = cl.Buffer(ocl.context, cl.mem_flags.READ_ONLY, shape.nbytes)
 	cl.enqueue_copy(ocl.commandQueue, buf, shape.tobytes(), is_blocking=True)
 	return buf
+
