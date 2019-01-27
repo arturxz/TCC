@@ -21,6 +21,7 @@ from .vglImage import rgba_to_rgb
 from .vglClImage import vglClInit
 from .vglClImage import vglClUpload
 from .vglClImage import vglClDownload
+from .vglClImage import vglClCheckError
 from .vglClImage import cl_channel_type
 from .vglClImage import cl_channel_order
 from .vglClImage import get_ocl
@@ -78,6 +79,11 @@ from .vglConst import VGL_CL_CONTEXT
 from .vglConst import VGL_ERROR
 from .vglConst import IMAGE_CL_OBJECT
 from .vglConst import IMAGE_ND_ARRAY
+
+# ERROR MESSAGES
+from .vglConst import vglClErrorMessages
+from .vglConst import CL_SUCCESS
+from .vglConst import CL_MIN_ERROR
 
 # PACK 64
 from .vglConst import VGL_PACK_SIZE_BITS_8
