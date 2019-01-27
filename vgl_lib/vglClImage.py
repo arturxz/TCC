@@ -174,10 +174,10 @@ def vglClNdImageDownload(img):
 
 def vglClCheckError(error, name):
 	if(error < vl.CL_SUCCESS() and error >= vl.CL_MIN_ERROR()):
-		print("Error", error, vl.vglClErrorMessages()[error] "while doing the following operation:")
+		print("Error", error, vl.vglClErrorMessages()[error], "while doing the following operation:")
 		print(name)
 		exit(error)
-		
+
 """
 	PYTHON-EXCLUSIVE METHODS
 """
