@@ -200,6 +200,11 @@ def vglClErrorMessages():
     "CL_INVALID_LINKER_OPTIONS",
     "CL_INVALID_DEVICE_PARTITION_COUNT"]
 
+def CL_SUCCESS():
+	return 0
+
+def CL_MIN_ERROR():
+	return -68
 
 # PACK64 CONSTANTS
 import pyopencl as cl
