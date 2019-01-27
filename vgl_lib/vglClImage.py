@@ -172,6 +172,12 @@ def vglClNdImageDownload(img):
 	cl.enqueue_copy(ocl.commandQueue, img.get_ipl(), img.get_oclPtr())
 	vl.create_vglShape(img)
 
+def vglClCheckError(error, name):
+	if(error < vl.CL_SUCCESS() and error >= vl.CL_MIN_ERROR()):
+		print("Error", error, vl.vglClErrorMessages()[error] "while doing the following operation:")
+		print(name)
+		exit(error)
+		
 """
 	PYTHON-EXCLUSIVE METHODS
 """
