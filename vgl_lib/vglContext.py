@@ -41,7 +41,7 @@ def vglIsInContext(img, x):
 def vglAddContext(img, context):
 	if( not vglIsContextUnique(context) ):
 		print("vglAddContext: Error: context =", context, "is not unique or invalid")
-		return vl.VGL_ERROR()
+		exit()
 	
 	img.inContext = img.inContext | context
 	return img.inContext
@@ -55,7 +55,7 @@ def vglAddContext(img, context):
 def vglSetContext(img, context):
 	if( not vglIsContextUnique(context) and (context is not 0) ):
 		print("vglSetContext: Error: context =", context, "is not unique")
-		return vl.VGL_ERROR()
+		exit()
 	
 	img.inContext = context
 	return img.inContext
@@ -82,7 +82,7 @@ def vglSetContext(img, context):
 def vglCheckContext(img, context):
 	if( not vglIsContextUnique( context ) ):
 		print("vglCheckContext: Error: context =", context, "is not unique or invalid")
-		return vl.VGL_ERROR()
+		exit()
 	
 	if( vglIsInContext(img, context) ):
 		print("vglCheckContext: image already in context", context)
@@ -109,7 +109,7 @@ def vglCheckContext(img, context):
 			vl.vglClUpload(img)
 	else:
 		print("vglCheckContext: Error: Trying to copy to invalid context =", context)
-		return vl.VGL_ERROR()
+		exit()
 	
 	return img.inContext
 
