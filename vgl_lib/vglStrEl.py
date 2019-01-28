@@ -12,6 +12,7 @@ class VglClStrEl(object):
 		self.shape = np.zeros((vl.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.offset = np.zeros((vl.VGL_ARR_SHAPE_SIZE()), np.int32)
 		self.size = np.int32(0)
+
 """
 	EQUIVALENT TO VglStrEl OBJECT
 	LOCATED IN vglStrEl.cpp
@@ -169,3 +170,30 @@ class VglStrEl(object):
 			result.data[i] = np.int32(self.data[i])
 
 		return result
+	
+	"""
+		ON C/C++ VERSION, asVglClStrEl WOULD BE ENOUGH.
+
+		PYTHON-SIDE MUST TREAT THIS DATA BEFORE RETURN IT.
+		HERE FOLLOWS THOSE TREATMENTS 
+	"""
+	def get_asVglClStrEl_buffer(self):
+		struct_sizes = vl.get_struct_sizes()
+		image_cl_strel = self.asVglClStrEl()
+
+		strel_obj = np.zeros(struct_sizes[0], np.uint8)
+		
+		self.copy_into_byte_array(image_cl_strel.data,	strel_obj, struct_sizes[1])
+		self.copy_into_byte_array(image_cl_strel.shape,	strel_obj, struct_sizes[2])
+		self.copy_into_byte_array(image_cl_strel.offset,strel_obj, struct_sizes[3])
+		self.copy_into_byte_array(image_cl_strel.ndim,	strel_obj, struct_sizes[4])
+		self.copy_into_byte_array(image_cl_strel.size,	strel_obj, struct_sizes[5])
+
+		return vl.get_vglstrel_opencl_buffer(strel_obj)
+
+	"""
+		PYTHON-ONLY METHODS
+	"""
+	def copy_into_byte_array(self, value, byte_array, offset):
+		for iterator, byte in enumerate( value.tobytes() ):
+			byte_array[iterator+offset] = byte

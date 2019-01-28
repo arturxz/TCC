@@ -271,6 +271,27 @@ class VglShape(object):
 			result.shape[vl.VGL_SHAPE_HEIGHT()] = np.int32(self.getHeight())
 			result.offset[vl.VGL_SHAPE_HEIGHT()] = np.int32(result.shape[vl.VGL_SHAPE_HEIGHT()-1] * result.offset[vl.VGL_SHAPE_HEIGHT()-1])
 
-		return result
+		#return result
+		"""
+			ON C/C++ VERSION, THIS METHOD WULD RETURN
+			THE result VARIABLE.
 
+			PYTHON-SIDE MUST TREAT THIS DATA BEFORE RETURN IT.
+			HERE FOLLOWS THOSE TREATMENTS 
+		"""
+		struct_sizes = vl.get_struct_sizes()
+		shape_obj = np.zeros(struct_sizes[6], np.uint8)
 
+		self.copy_into_byte_array(result.ndim,	shape_obj, struct_sizes[7])
+		self.copy_into_byte_array(result.shape,	shape_obj, struct_sizes[8])
+		self.copy_into_byte_array(result.offset,shape_obj, struct_sizes[9])
+		self.copy_into_byte_array(result.size,	shape_obj, struct_sizes[10])
+
+		return shape_obj
+
+	"""
+		PYTHON-ONLY METHODS
+	"""
+	def copy_into_byte_array(self, value, byte_array, offset):
+		for iterator, byte in enumerate( value.tobytes() ):
+			byte_array[iterator+offset] = byte
