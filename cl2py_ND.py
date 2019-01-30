@@ -56,10 +56,6 @@ class cl2py_ND:
 			self._program.build(options=self.cl_ctx.get_build_options())
 		kernel_file.close()
 
-	def copy_into_byte_array(self, value, byte_array, offset):
-		for iterator, byte in enumerate( value.tobytes() ):
-			byte_array[iterator+offset] = byte
-
 	def vglClNdCopy(self, img_input, img_output):
 
 		if( not img_input.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
