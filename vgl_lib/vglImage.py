@@ -92,6 +92,8 @@ class VglImage(object):
 				self.oclPtr = img
 			else:
 				print("vglImage: set_oclPtr Error! This image must have a OpenCL Image object as oclPtr.")
+				print("Image sent:")
+				print(img)
 				exit()
 
 		elif( self.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
