@@ -261,7 +261,7 @@ if __name__ == "__main__":
 	wrp = cl2py_ND()
 
 	# INPUT IMAGE
-	img_input = vl.VglImage(sys.argv[1], vl.VGL_IMAGE_2D_IMAGE(), vl.IMAGE_ND_ARRAY())
+	img_input = vl.VglImage("yamamoto.jpg", vl.VGL_IMAGE_2D_IMAGE(), vl.IMAGE_ND_ARRAY())
 	vl.vglLoadImage(img_input)
 	vl.vglClUpload(img_input)
 
