@@ -56,8 +56,7 @@ class cl2py_CL:
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		#print(ev)
+		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, None, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 	
@@ -321,7 +320,7 @@ class cl2py_CL:
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-	def vglClThreshold(self, img_input, img_output, thresh, top):
+	def vglClThreshold(self, img_input, img_output, thresh, top=1.0):
 
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
@@ -647,7 +646,7 @@ class cl2py_CL:
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 	
-	def vglCl3dThreshold(self, img_input, img_output, thresh, top):
+	def vglCl3dThreshold(self, img_input, img_output, thresh, top=1.0):
 
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
@@ -718,7 +717,7 @@ if __name__ == "__main__":
 		vl.rgb_to_rgba(img_input)
 	
 	vl.vglClUpload(img_input)
-
+	
 	img_input2 = vl.VglImage("yamamoto-vglClThreshold.jpg", vl.VGL_IMAGE_2D_IMAGE())
 	vl.vglLoadImage(img_input2)
 	if( img_input2.getVglShape().getNChannels() == 3 ):
@@ -760,7 +759,7 @@ if __name__ == "__main__":
 	wrp.vglClBlurSq3(img_input, img_output)
 	salvando2d(img_output, "yamamoto-vglClBlurSq3.jpg")
 	vl.rgb_to_rgba(img_output)
-
+	"""
 	wrp.vglClConvolution(img_input, img_output, convolution_window_2d, np.uint32(5), np.uint32(5))
 	salvando2d(img_output, "yamamoto-vglClConvolution.jpg")
 	vl.rgb_to_rgba(img_output)
@@ -837,7 +836,7 @@ if __name__ == "__main__":
 
 	wrp.vglCl3dThreshold(img_input_3d, img_output_3d, np.float32(0.4), np.float32(.8))
 	salvando2d(img_output_3d, "3d-vglCl3dThreshold.tif")
-
+	"""
 	wrp = None
 	
 	img_input = None

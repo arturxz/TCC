@@ -211,7 +211,7 @@ class cl2py_ND:
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-	def vglClNdThreshold(self, img_input, img_output, thresh, top):
+	def vglClNdThreshold(self, img_input, img_output, thresh, top=255):
 
 		if( not img_input.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
 			print("vglClNdThreshold: Error: this function supports only OpenCL data as buffer and img_input isn't.")
