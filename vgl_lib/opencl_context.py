@@ -25,13 +25,53 @@ class opencl_context:
 	"""
 
 	def __init__(self):
-		print("## Instanciating Context and Queue...")
+		print("opencl_context: Instanciating Context and Queue...")
 		self.platform = cl.get_platforms()[0]
 		self.devs = self.platform.get_devices()
-		print("## Selecting first avaliable device on System...")
 		self.device = self.devs[0]
 		self.ctx = cl.Context([self.device])
 		self.queue = cl.CommandQueue(self.ctx)
+
+		# PROGRAM VARIABLE. STORES ALL COMPILED KERNELS
+		self.programs = []
+
+	def is_kernel_compiled(method_name):
+		for program in self.programs:
+			if( method_name in program.kernel_names ):
+				return program
+		return None
+
+	"""
+		THIS METHOD VERIFIES IF PATH TO KERNEL FILE EXISTS.
+			IF EXISTS, IT VERIFIES IF THE KERNEL IS ALREADY COMPILED.
+			IF IS NOT COMPILED, THE KERNEL IS BUILDED.
+			IF THE KERNEL IS ALREADY COMPILED, IT DOES NOTHING.
+	"""
+	def get_compiled_kernel(self, filepath, kernelname):
+		print("get_compiled_kernel: Loading OpenCL Kernel")
+		kernel_file = None
+
+		try:
+			kernel_file = open(filepath, "r")
+		except FileNotFoundError as fnf:
+			print("get_compiled_kernel: Error: Kernel File not found. Filepath:", filepath)    
+			print(str(fnf))
+			exit()
+		except Exception as e:
+			print("get_compiled_kernel: Error: A unexpected exception was thrown while trying to open kernel file. Filepath:", filepath)
+			print(str(e))
+			exit()
+
+		program = is_kernel_compiled(kernelname)
+
+		if( program is None ):
+			print("get_compiled_kernel: Building Kernel.")
+			self.load_headers(filepath)
+			program = cl.Program(self.ctx, kernel_file.read())
+			programs.append( program.build(options=self.get_build_options()) )
+			
+		kernel_file.close()
+		return program
 		
 		"""
 			Making the vglClContext variables to retrocompatibility, where
