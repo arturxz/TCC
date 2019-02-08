@@ -34,41 +34,22 @@ pip3 install mako pyopencl scikit numpy matplotlib pil tifffile dicom
 
 ## Running the tests
 
-Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
+put a image called yamamoto.jpg and see the thing go.
 
 ## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+* [Python](https://www.python.org/) - Python 3
+* [PyOpenCL](https://documen.tician.de/pyopencl/) - PyOpenCL API
+* [Visual Studio Code](https://code.visualstudio.com/) - Simple IDE, have good helps to code in Python.
 
-## Contributing
+* [VisionGL Library](https://github.com/ddantas/visiongl) - The Library makes all happen
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+* [Coffe] - To get throught night
+* [Tears] - Just that. 
 
 ## Versioning
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+I've used Github and fear if my computer breaks.
 
 ## Authors
 
