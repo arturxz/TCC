@@ -17,7 +17,6 @@ class cl2py_ND:
 		self.cl_ctx: Union[None, vl.opencl_context] = cl_ctx
 
 		# COMMON VARIABLES. self.ocl IS EQUIVALENT TO cl.
-		self._program: Union[None, cl.Program] = None
 		self.ocl: Union[None, vl.VglClContext] = None
 
 		if( self.cl_ctx is None ):
@@ -26,35 +25,6 @@ class cl2py_ND:
 			self.cl_ctx = vl.get_ocl_context()
 		else:
 			self.ocl = cl_ctx.get_vglClContext_attributes()
-
-	def load_kernel(self, filepath, kernelname):
-		print("load_kernel: Loading OpenCL Kernel")
-		kernel_file = None
-
-		try:
-			kernel_file = open(filepath, "r")
-		except FileNotFoundError as fnf:
-			print("load_kernel: Error: Kernel File not found. Filepath:", filepath)    
-			print(str(fnf))
-			exit()
-		except Exception as e:
-			print("load_kernel: Error: A unexpected exception was thrown while trying to open kernel file. Filepath:", filepath)
-			print(str(e))
-			exit()
-
-		if(self._program is None):
-			print("::Building Kernel")
-			self.cl_ctx.load_headers(filepath)
-			self._program = cl.Program(self.ocl.context, kernel_file.read())
-			self._program.build(options=self.cl_ctx.get_build_options())
-		elif( (kernelname in self._program.kernel_names) ):
-			print("::Kernel already builded. Going to next step...")
-		else:
-			print("::Building Kernel")
-			self.cl_ctx.load_headers(filepath)
-			self._program = cl.Program(self.ocl.context, kernel_file.read())
-			self._program.build(options=self.cl_ctx.get_build_options())
-		kernel_file.close()
 
 	def vglClNdCopy(self, img_input, img_output):
 
@@ -68,8 +38,8 @@ class cl2py_ND:
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL_ND/vglClNdCopy.cl", "vglClNdCopy")
-		kernel_run = self._program.vglClNdCopy
+		_program = self.cl_ctx.get_compiled_kernel("../CL_ND/vglClNdCopy.cl", "vglClNdCopy")
+		kernel_run = _program.vglClNdCopy
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -95,8 +65,8 @@ class cl2py_ND:
 			print("vglClNdConvolution: Error: window is not a VglStrEl object. aborting execution.")
 			exit()
 
-		self.load_kernel("../CL_ND/vglClNdConvolution.cl", "vglClNdConvolution")
-		kernel_run = self._program.vglClNdConvolution
+		_program = self.cl_ctx.get_compiled_kernel("../CL_ND/vglClNdConvolution.cl", "vglClNdConvolution")
+		kernel_run = _program.vglClNdConvolution
 
 		# CREATING OPENCL BUFFER TO VglStrEl and VglShape
 		mobj_window = window.get_asVglClStrEl_buffer()
@@ -130,8 +100,8 @@ class cl2py_ND:
 			print("vglClNdDilate: Error: window is not a VglStrEl object. aborting execution.")
 			exit()
 		
-		self.load_kernel("../CL_ND/vglClNdDilate.cl", "vglClNdDilate")
-		kernel_run = self._program.vglClNdDilate
+		_program = self.cl_ctx.get_compiled_kernel("../CL_ND/vglClNdDilate.cl", "vglClNdDilate")
+		kernel_run = _program.vglClNdDilate
 
 		# CREATING OPENCL BUFFER TO VglStrEl and VglShape
 		mobj_window = window.get_asVglClStrEl_buffer()
@@ -165,8 +135,8 @@ class cl2py_ND:
 			print("vglClNdErode: Error: window is not a VglStrEl object. aborting execution.")
 			exit()
 
-		self.load_kernel("../CL_ND/vglClNdErode.cl", "vglClNdErode")
-		kernel_run = self._program.vglClNdErode
+		_program = self.cl_ctx.get_compiled_kernel("../CL_ND/vglClNdErode.cl", "vglClNdErode")
+		kernel_run = _program.vglClNdErode
 
 		# CREATING OPENCL BUFFER TO VglStrEl and VglShape
 		mobj_window = window.get_asVglClStrEl_buffer()
@@ -200,8 +170,8 @@ class cl2py_ND:
 			print("vglClNdNot: Error: window is not a VglStrEl object. aborting execution.")
 			exit()
 
-		self.load_kernel("../CL_ND/vglClNdNot.cl", "vglClNdNot")
-		kernel_run = self._program.vglClNdNot
+		_program = self.cl_ctx.get_compiled_kernel("../CL_ND/vglClNdNot.cl", "vglClNdNot")
+		kernel_run = _program.vglClNdNot
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -240,8 +210,8 @@ class cl2py_ND:
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL_ND/vglClNdThreshold.cl", "vglClNdThreshold")
-		kernel_run = self._program.vglClNdThreshold
+		_program = self.cl_ctx.get_compiled_kernel("../CL_ND/vglClNdThreshold.cl", "vglClNdThreshold")
+		kernel_run = _program.vglClNdThreshold
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -297,10 +267,6 @@ if __name__ == "__main__":
 	wrp.vglClNdThreshold(img_input, img_output, np.uint8(120), np.uint8(190))
 	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
 	vl.vglSaveImage("yamamoto-vglNdThreshold.jpg", img_output)
-
-	# SAVING IMAGE
-	#vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
-	#vl.vglSaveImage(sys.argv[2], img_output)
 
 	wrp = None
 	img_input = None

@@ -17,9 +17,10 @@ class cl2py_CL:
 		self.cl_ctx: Union[None, vl.opencl_context] = cl_ctx
 
 		# COMMON VARIABLES. self.ocl IS EQUIVALENT TO cl.
-		self._program: Union[None, cl.Program] = None
 		self.ocl: Union[None, vl.VglClContext] = None
 
+		# SE O CONTEXTO OPENCL NÃO FOR DEFINIDO
+		# ELE INSTANCIADO E DEFINIDO
 		if( self.cl_ctx is None ):
 			vl.vglClInit()
 			self.ocl = vl.get_ocl()
@@ -27,36 +28,18 @@ class cl2py_CL:
 		else:
 			self.ocl = cl_ctx.get_vglClContext_attributes()
 
-	def load_kernel(self, filepath, kernelname):
-		print("--> Loading OpenCL Kernel", kernelname)
-		kernel_file = open(filepath, "r")
-
-		if(self._program is None):
-			print("::Building Kernel")
-			self.cl_ctx.load_headers(filepath)
-			self._program = cl.Program(self.ocl.context , kernel_file.read())
-			self._program.build(options=self.cl_ctx.get_build_options())
-		elif( (kernelname in self._program.kernel_names) ):
-			print("::Kernel already builded. Going to next step...")
-		else:
-			print("::Building Kernel")
-			self.cl_ctx.load_headers(filepath)
-			self._program = cl.Program(self.ocl.context, kernel_file.read())
-			self._program.build(options=self.cl_ctx.get_build_options())
-		kernel_file.close()
-
 	def vglClBlurSq3(self, img_input, img_output):
 
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL/vglClBlurSq3.cl", "vglClBlurSq3")
-		kernel_run = self._program.vglClBlurSq3
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClBlurSq3.cl", "vglClBlurSq3")
+		kernel_run = _program.vglClBlurSq3
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, None, None)
+		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 	
@@ -93,8 +76,8 @@ class cl2py_CL:
 				print(str(e))
 				exit()
 
-		self.load_kernel("../CL/vglClConvolution.cl", "vglClConvolution")
-		kernel_run = self._program.vglClConvolution
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClConvolution.cl", "vglClConvolution")
+		kernel_run = _program.vglClConvolution
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -112,8 +95,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
-		self.load_kernel("../CL/vglClCopy.cl", "vglClCopy")
-		kernel_run = self._program.vglClCopy
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClCopy.cl", "vglClCopy")
+		kernel_run = _program.vglClCopy
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -155,8 +138,8 @@ class cl2py_CL:
 				print(str(e))
 				exit()
 
-		self.load_kernel("../CL/vglClDilate.cl", "vglClDilate")
-		kernel_run = self._program.vglClDilate
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClDilate.cl", "vglClDilate")
+		kernel_run = _program.vglClDilate
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -202,8 +185,8 @@ class cl2py_CL:
 				print(str(e))
 				exit()
 
-		self.load_kernel("../CL/vglClErode.cl", "vglClErode")
-		kernel_run = self._program.vglClErode
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClErode.cl", "vglClErode")
+		kernel_run = _program.vglClErode
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -221,8 +204,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
-		self.load_kernel("../CL/vglClInvert.cl", "vglClInvert")
-		kernel_run = self._program.vglClInvert
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClInvert.cl", "vglClInvert")
+		kernel_run = _program.vglClInvert
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -238,8 +221,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
-		self.load_kernel("../CL/vglClMax.cl", "vglClMax")
-		kernel_run = self._program.vglClMax
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClMax.cl", "vglClMax")
+		kernel_run = _program.vglClMax
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
@@ -256,8 +239,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL/vglClMin.cl", "vglClMin")
-		kernel_run = self._program.vglClMin
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClMin.cl", "vglClMin")
+		kernel_run = _program.vglClMin
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
@@ -274,8 +257,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL/vglClSub.cl", "vglClSub")
-		kernel_run = self._program.vglClSub
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClSub.cl", "vglClSub")
+		kernel_run = _program.vglClSub
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
@@ -292,8 +275,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL/vglClSum.cl", "vglClSum")
-		kernel_run = self._program.vglClSum
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClSum.cl", "vglClSum")
+		kernel_run = _program.vglClSum
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
@@ -309,8 +292,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL/vglClSwapRgb.cl", "vglClSwapRgb")
-		kernel_run = self._program.vglClSwapRgb
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClSwapRgb.cl", "vglClSwapRgb")
+		kernel_run = _program.vglClSwapRgb
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -343,8 +326,8 @@ class cl2py_CL:
 				print(str(e))
 				exit()
 		
-		self.load_kernel("../CL/vglClThreshold.cl", "vglClThreshold")
-		kernel_run = self._program.vglClThreshold
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglClThreshold.cl", "vglClThreshold")
+		kernel_run = _program.vglClThreshold
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -361,8 +344,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL/vglCl3dBlurSq3.cl", "vglCl3dBlurSq3")
-		kernel_run = self._program.vglCl3dBlurSq3
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglCl3dBlurSq3.cl", "vglCl3dBlurSq3")
+		kernel_run = _program.vglCl3dBlurSq3
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -414,8 +397,8 @@ class cl2py_CL:
 				print(str(e))
 				exit()
 		
-		self.load_kernel("../CL/vglCl3dConvolution.cl", "vglCl3dConvolution")
-		kernel_run = self._program.vglCl3dConvolution
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglCl3dConvolution.cl", "vglCl3dConvolution")
+		kernel_run = _program.vglCl3dConvolution
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -434,8 +417,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
-		self.load_kernel("../CL/vglCl3dCopy.cl", "vglCl3dCopy")
-		kernel_run = self._program.vglCl3dCopy
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglCl3dCopy.cl", "vglCl3dCopy")
+		kernel_run = _program.vglCl3dCopy
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -487,8 +470,8 @@ class cl2py_CL:
 				print(str(e))
 				exit()
 		
-		self.load_kernel("../CL/vglCl3dDilate.cl", "vglCl3dDilate")
-		kernel_run = self._program.vglCl3dDilate
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglCl3dDilate.cl", "vglCl3dDilate")
+		kernel_run = _program.vglCl3dDilate
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -543,8 +526,8 @@ class cl2py_CL:
 				print(str(e))
 				exit()
 		
-		self.load_kernel("../CL/vglCl3dErode.cl", "vglCl3dErode")
-		kernel_run = self._program.vglCl3dErode
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglCl3dErode.cl", "vglCl3dErode")
+		kernel_run = _program.vglCl3dErode
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -563,8 +546,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL/vglCl3dNot.cl", "vglCl3dNot")
-		kernel_run = self._program.vglCl3dNot
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglCl3dNot.cl", "vglCl3dNot")
+		kernel_run = _program.vglCl3dNot
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -580,8 +563,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 	
-		self.load_kernel("../CL/vglCl3dMax.cl", "vglCl3dMax")
-		kernel_run = self._program.vglCl3dMax
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglCl3dMax.cl", "vglCl3dMax")
+		kernel_run = _program.vglCl3dMax
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
@@ -598,8 +581,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL/vglCl3dMin.cl", "vglCl3dMin")
-		kernel_run = self._program.vglCl3dMin
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglCl3dMin.cl", "vglCl3dMin")
+		kernel_run = _program.vglCl3dMin
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
@@ -616,8 +599,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL/vglCl3dSub.cl", "vglCl3dSub")
-		kernel_run = self._program.vglCl3dSub
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglCl3dSub.cl", "vglCl3dSub")
+		kernel_run = _program.vglCl3dSub
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
@@ -634,8 +617,8 @@ class cl2py_CL:
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-		self.load_kernel("../CL/vglCl3dSum.cl", "vglCl3dSum")
-		kernel_run = self._program.vglCl3dSum
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglCl3dSum.cl", "vglCl3dSum")
+		kernel_run = _program.vglCl3dSum
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
@@ -669,8 +652,8 @@ class cl2py_CL:
 				print(str(e))
 				exit()
 		
-		self.load_kernel("../CL/vglCl3dThreshold.cl", "vglCl3dThreshold")
-		kernel_run = self._program.vglCl3dThreshold
+		_program = self.cl_ctx.get_compiled_kernel("../CL/vglCl3dThreshold.cl", "vglCl3dThreshold")
+		kernel_run = _program.vglCl3dThreshold
 
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
@@ -759,7 +742,7 @@ if __name__ == "__main__":
 	wrp.vglClBlurSq3(img_input, img_output)
 	salvando2d(img_output, "yamamoto-vglClBlurSq3.jpg")
 	vl.rgb_to_rgba(img_output)
-	"""
+	
 	wrp.vglClConvolution(img_input, img_output, convolution_window_2d, np.uint32(5), np.uint32(5))
 	salvando2d(img_output, "yamamoto-vglClConvolution.jpg")
 	vl.rgb_to_rgba(img_output)
@@ -803,7 +786,7 @@ if __name__ == "__main__":
 	wrp.vglClThreshold(img_input, img_output, np.float32(0.5), np.float32(0.9))
 	salvando2d(img_output, "yamamoto-vglClThreshold.jpg")
 	vl.rgb_to_rgba(img_output)
-
+	"""
 	wrp.vglCl3dBlurSq3(img_input_3d, img_output_3d)
 	salvando2d(img_output_3d, "3d-vglCl3dBlurSq3.tif")
 

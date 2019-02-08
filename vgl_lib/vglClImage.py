@@ -184,6 +184,8 @@ def vglClNdImageDownload(img):
 	IF IS, IT SHOWS THE ERROR ID AND PRINTS THE CAUSE. 
 """
 def vglClCheckError(error, name):
+	print("error:", error)
+	print("name:", name)
 	if(error < vl.CL_SUCCESS() and error >= vl.CL_MIN_ERROR()):
 		print("Error", error, vl.vglClErrorMessages()[error], "while doing the following operation:")
 		print(name)

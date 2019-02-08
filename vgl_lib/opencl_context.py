@@ -35,7 +35,7 @@ class opencl_context:
 		# PROGRAM VARIABLE. STORES ALL COMPILED KERNELS
 		self.programs = []
 
-	def is_kernel_compiled(method_name):
+	def is_kernel_compiled(self, method_name):
 		for program in self.programs:
 			if( method_name in program.kernel_names ):
 				return program
@@ -62,24 +62,24 @@ class opencl_context:
 			print(str(e))
 			exit()
 
-		program = is_kernel_compiled(kernelname)
-
+		program = self.is_kernel_compiled(kernelname)
+		
 		if( program is None ):
 			print("get_compiled_kernel: Building Kernel.")
 			self.load_headers(filepath)
 			program = cl.Program(self.ctx, kernel_file.read())
-			programs.append( program.build(options=self.get_build_options()) )
+			self.programs.append( program.build(options=self.get_build_options()) )
 			
 		kernel_file.close()
-		return program
+		return self.is_kernel_compiled(kernelname)
 		
-		"""
-			Making the vglClContext variables to retrocompatibility, where
-				self.platformId = self.platform.int_ptr
-				self.deviceId = self.device.int_ptr
-				self.context = self.ctx
-				self.commandQueue = self.queue
-		"""
+	"""
+		Making the vglClContext variables to retrocompatibility, where
+			self.platformId = self.platform.int_ptr
+			self.deviceId = self.device.int_ptr
+			self.context = self.ctx
+			self.commandQueue = self.queue
+	"""
 	def get_vglClContext_attributes(self):
 		return VglClContext(self.platform.int_ptr, self.device.int_ptr, self.ctx, self.queue)
 	
