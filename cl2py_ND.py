@@ -44,8 +44,7 @@ class cl2py_ND:
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -79,9 +78,8 @@ class cl2py_ND:
 		kernel_run.set_arg(3, mobj_window)
 				
 		# ENQUEUEING KERNEL EXECUTION
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
-		print(ev)
-
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
+		
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClNdDilate(self, img_input, img_output, window):
@@ -114,9 +112,8 @@ class cl2py_ND:
 		kernel_run.set_arg(3, mobj_window)
 				
 		# ENQUEUEING KERNEL EXECUTION
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
-		print(ev)
-
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
+		
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClNdErode(self, img_input, img_output, window):
@@ -149,9 +146,8 @@ class cl2py_ND:
 		kernel_run.set_arg(3, mobj_window)
 				
 		# ENQUEUEING KERNEL EXECUTION
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
-		print(ev)
-
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
+		
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClNdNot(self, img_input, img_output):
@@ -176,9 +172,8 @@ class cl2py_ND:
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 				
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
-		print(ev)
-
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
+		
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClNdThreshold(self, img_input, img_output, thresh, top=255):
@@ -218,9 +213,8 @@ class cl2py_ND:
 		kernel_run.set_arg(2, thresh)
 		kernel_run.set_arg(3, top)
 				
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
-		print(ev)
-
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
+		
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 """
