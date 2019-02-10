@@ -88,15 +88,15 @@ def vglClImageUpload(img):
 	print("Uploading image to device.")
 	if( img.getVglShape().getNFrames() == 1 ):
 		origin = ( 0, 0, 0 )
-		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), 1 )
-		shape  = ( img.getVglShape().getWidth(), img.getVglShape().getHeight() )
+		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeigth(), 1 )
+		shape  = ( img.getVglShape().getWidth(), img.getVglShape().getHeigth() )
 
 		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
 		img.oclPtr = cl.Image(ocl.context, mf.READ_ONLY, imgFormat, shape)
 	elif( img.getVglShape().getNFrames() > 1 ):
 		origin = ( 0, 0, 0 )
-		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), img.getVglShape().getNFrames() )
-		shape = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), img.getVglShape().getNFrames() )
+		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeigth(), img.getVglShape().getNFrames() )
+		shape = ( img.getVglShape().getWidth(), img.getVglShape().getHeigth(), img.getVglShape().getNFrames() )
 
 		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
 		img.oclPtr = cl.Image(ocl.context, mf.READ_ONLY, imgFormat, shape)
@@ -121,30 +121,30 @@ def vglClImageDownload(img):
 
 	if( img.getVglShape().getNFrames() == 1 ):
 		origin = ( 0, 0, 0 )
-		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), 1 )
-		totalSize = img.getVglShape().getHeight() * img.getVglShape().getWidth() * img.getVglShape().getNChannels()
+		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeigth(), 1 )
+		totalSize = img.getVglShape().getHeigth() * img.getVglShape().getWidth() * img.getVglShape().getNChannels()
 
 		buffer = np.zeros(totalSize, img.get_ipl().dtype)
 		cl.enqueue_copy(ocl.commandQueue, buffer, img.get_oclPtr(), origin=origin, region=region, is_blocking=True)
 
 		if( img.getVglShape().getNChannels() == 1 ):
-			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getHeight(), img.getVglShape().getWidth() )
+			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getHeigth(), img.getVglShape().getWidth() )
 		elif( (img.getVglShape().getNChannels() == 3) or (img.getVglShape().getNChannels() == 4) ):
-			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getHeight(), img.getVglShape().getWidth(), img.getVglShape().getNChannels() )
+			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getHeigth(), img.getVglShape().getWidth(), img.getVglShape().getNChannels() )
 	elif( img.getVglShape().getNFrames() > 1 ):
 		#pitch = (0, 0)
 		origin = ( 0, 0, 0 )
-		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeight(), img.getVglShape().getNFrames() )
-		totalSize = img.getVglShape().getHeight() * img.getVglShape().getWidth() * img.getVglShape().getNFrames()
+		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeigth(), img.getVglShape().getNFrames() )
+		totalSize = img.getVglShape().getHeigth() * img.getVglShape().getWidth() * img.getVglShape().getNFrames()
 
 		buffer = np.zeros(totalSize, img.get_ipl().dtype)
 		cl.enqueue_copy(ocl.commandQueue, buffer, img.get_oclPtr(), origin=origin, region=region, is_blocking=True)
 
 
 		if( img.getVglShape().getNChannels() == 1 ):
-			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getNFrames(), img.getVglShape().getHeight(), img.getVglShape().getWidth() )
+			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getNFrames(), img.getVglShape().getHeigth(), img.getVglShape().getWidth() )
 		elif( (img.getVglShape().getNChannels() == 3) or (img.getVglShape().getNChannels() == 4) ):
-			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getNFrames(), img.getVglShape().getHeight(), img.getVglShape().getWidth(), img.getVglShape().getNChannels() )
+			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getNFrames(), img.getVglShape().getHeigth(), img.getVglShape().getWidth(), img.getVglShape().getNChannels() )
 
 	img.ipl = buffer
 	vl.create_vglShape(img)
