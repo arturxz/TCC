@@ -58,7 +58,7 @@ from .vglConst import VGL_MAX_WINDOWS
 from .vglConst import IPL_DEPTH_1U
 from .vglConst import VGL_SHAPE_NCHANNELS 
 from .vglConst import VGL_SHAPE_WIDTH 
-from .vglConst import VGL_SHAPE_HEIGHT
+from .vglConst import VGL_SHAPE_HEIGTH
 from .vglConst import VGL_SHAPE_LENGTH
 from .vglConst import VGL_4D
 from .vglConst import VGL_SHAPE_D0
