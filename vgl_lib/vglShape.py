@@ -26,11 +26,11 @@ class VglShape(object):
 			2D Images:
 				[0] Image channels (RGB=3, RGBA=4, GreyScale=1)
 				[1] Image width 
-				[2] Image height
+				[2] Image heigth
 			3D Images:
 				[0] Image Channels (RGB=3, RGBA=4, GreyScale=1)
 				[1] Image width
-				[2] Image height
+				[2] Image heigth
 				[3] Image depht
 		bps
 			All Images:
@@ -108,7 +108,7 @@ class VglShape(object):
 		EQUIVALENT TO THE 1D vglShape CONSTRUCTOR.
 		RECEIVES TWO PARAMETERS:
 		w: width
-		h: height
+		h: heigth
 	"""
 	def constructor1DShape(self, w, h):
 		shape = np.ones((vl.VGL_MAX_DIM()+1), np.int32)
@@ -124,7 +124,7 @@ class VglShape(object):
 		RECEIVES THREE PARAMETERS:
 		nChannels: number of channels
 		w: width
-		h: height
+		h: heigth
 	"""
 	def constructor2DShape(self, nChannels, w, h):
 		shape = np.ones((vl.VGL_MAX_DIM()+1), np.int32)
@@ -140,7 +140,7 @@ class VglShape(object):
 		RECEIVES FOUR PARAMETERS:
 		nChannels: number of channels
 		w: width
-		h: height
+		h: heigth
 		d3: numer of frames
 	"""
 	def constructor3DShape(self, nChannels, w, h, d3):
@@ -210,13 +210,13 @@ class VglShape(object):
 
 	def getWidth(self):
 		if(self.ndim == 1):
-			return self.shape[vl.VGL_SHAPE_WIDTH()] * self.shape[vl.VGL_SHAPE_HEIGHT()]
+			return self.shape[vl.VGL_SHAPE_WIDTH()] * self.shape[vl.VGL_SHAPE_HEIGTH()]
 		return self.shape[vl.VGL_SHAPE_WIDTH()]
 
-	def getHeight(self):
+	def getHeigth(self):
 		if(self.ndim == 1):
 			return 1
-		return self.shape[vl.VGL_SHAPE_HEIGHT()]
+		return self.shape[vl.VGL_SHAPE_HEIGTH()]
 
 	def getLength(self):
 		return self.shape[vl.VGL_SHAPE_LENGTH()]
@@ -224,8 +224,8 @@ class VglShape(object):
 	def getWidthIn(self):
 		return self.shape[vl.VGL_SHAPE_WIDTH()]
 
-	def getHeightIn(self):
-		return self.shape[vl.VGL_SHAPE_HEIGHT()]
+	def getHeigthIn(self):
+		return self.shape[vl.VGL_SHAPE_HEIGTH()]
 
 	def getNFrames(self):
 		nframes = 1
@@ -268,8 +268,8 @@ class VglShape(object):
 		if(self.ndim == 1):
 			result.shape[vl.VGL_SHAPE_WIDTH()] = np.int32(self.getWidth())
 			result.offset[vl.VGL_SHAPE_WIDTH()] = np.int32(result.shape[vl.VGL_SHAPE_WIDTH()-1] * result.offset[vl.VGL_SHAPE_WIDTH()-1])
-			result.shape[vl.VGL_SHAPE_HEIGHT()] = np.int32(self.getHeight())
-			result.offset[vl.VGL_SHAPE_HEIGHT()] = np.int32(result.shape[vl.VGL_SHAPE_HEIGHT()-1] * result.offset[vl.VGL_SHAPE_HEIGHT()-1])
+			result.shape[vl.VGL_SHAPE_HEIGTH()] = np.int32(self.getHeigth())
+			result.offset[vl.VGL_SHAPE_HEIGTH()] = np.int32(result.shape[vl.VGL_SHAPE_HEIGTH()-1] * result.offset[vl.VGL_SHAPE_HEIGTH()-1])
 
 		return result
 
