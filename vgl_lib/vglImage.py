@@ -144,7 +144,7 @@ class VglImage(object):
 		widthStep: int = None
 
 		if( self.ipl != None ):
-			widthStep = vl.iplFindWidthStep(self.depth, self.vglShape.width , self.nChannels)
+			widthStep = vl.iplFindWidthStep(self.depth, self.getWidth() , self.nChannels)
 		else:
 			bps = self.getBitsPerSample()
 			if( bps == 1 ):
@@ -156,6 +156,12 @@ class VglImage(object):
 				widthStep = (bps / 8) * self.getNChannels() * self.getWidthIn()
 		
 		return widthStep
+	
+	def getTotalRows(self):
+		return self.vglShape.getHeigthIn() * self.vglShape.getNFrames()
+	
+	def getTotalSizeInBytes(self):
+		return self.getTotalRows() * self.getWidthStep()
 
 """
 	EQUIVALENT TO iplImage.iplFindBitsPerSample(int depth)
