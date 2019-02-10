@@ -14,12 +14,12 @@ from typing import Union
 		is the input image
 	cl_shape:
 		3D Images:
-			The OpenCL's default is to be (img_width, img_height, img_depht)
+			The OpenCL's default is to be (img_width, img_Heigth, img_depht)
 		2D Images:
-			The The OpenCL's default is to be (img_width, img_height)
+			The The OpenCL's default is to be (img_width, img_Heigth)
 	cl_pitch:
 		3D Images (needed):
-			The OpenCL's default is to be (img_width*bytes_per_pixel, img_height*img_width*bytes_per_pixel)
+			The OpenCL's default is to be (img_width*bytes_per_pixel, img_Heigth*img_width*bytes_per_pixel)
 			and it is assumed when pitch=(0, 0) is given
 		2D Images (optional):
 			The OpenCL's default is to be (img_width*bytes_per_pixel)
@@ -118,8 +118,8 @@ class VglImage(object):
 	def getWidth(self):
 		return self.vglShape.getWidth()
 	
-	def getHeight(self):
-		return self.vglShape.getHeight()
+	def getHeigth(self):
+		return self.vglShape.getHeigth()
 	
 	def getLength(self):
 		return self.vglShape.getLength()
@@ -285,7 +285,7 @@ def create_vglShape(img):
 """
 def rgb_to_rgba(img):
 	print("[RGB -> RGBA]")
-	ipl_rgba = np.empty((img.vglShape.getHeight(), img.vglShape.getWidth(), 4), img.ipl.dtype)
+	ipl_rgba = np.empty((img.vglShape.getHeigth(), img.vglShape.getWidth(), 4), img.ipl.dtype)
 
 	ipl_rgba[:,:,0] = img.ipl[:,:,0]
 	ipl_rgba[:,:,1] = img.ipl[:,:,1]
@@ -304,7 +304,7 @@ def rgba_to_rgb(img):
 		print("vglImage: rgba_to_rgb: Error: IMAGE IS NOT RGBA.")
 		exit()
 	else:
-		ipl_rgb = np.empty((img.vglShape.getHeight(), img.vglShape.getWidth(), 3), img.ipl.dtype)
+		ipl_rgb = np.empty((img.vglShape.getHeigth(), img.vglShape.getWidth(), 3), img.ipl.dtype)
 		ipl_rgb[:,:,0] = img.ipl[:,:,0]
 		ipl_rgb[:,:,1] = img.ipl[:,:,1]
 		ipl_rgb[:,:,2] = img.ipl[:,:,2]
