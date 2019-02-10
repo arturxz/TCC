@@ -39,7 +39,7 @@ class cl2py_CL:
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 	
@@ -85,8 +85,7 @@ class cl2py_CL:
 		kernel_run.set_arg(3, window_size_x)
 		kernel_run.set_arg(4, window_size_y)
 
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		#print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -101,8 +100,7 @@ class cl2py_CL:
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -147,8 +145,7 @@ class cl2py_CL:
 		kernel_run.set_arg(3, window_size_x)
 		kernel_run.set_arg(4, window_size_y)
 
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -194,8 +191,7 @@ class cl2py_CL:
 		kernel_run.set_arg(3, window_size_x)
 		kernel_run.set_arg(4, window_size_y)
 
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -210,8 +206,7 @@ class cl2py_CL:
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -228,8 +223,7 @@ class cl2py_CL:
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
 		kernel_run.set_arg(2, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -246,8 +240,7 @@ class cl2py_CL:
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
 		kernel_run.set_arg(2, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -264,8 +257,7 @@ class cl2py_CL:
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
 		kernel_run.set_arg(2, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -282,8 +274,7 @@ class cl2py_CL:
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
 		kernel_run.set_arg(2, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 	
@@ -298,8 +289,7 @@ class cl2py_CL:
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -334,8 +324,7 @@ class cl2py_CL:
 		kernel_run.set_arg(2, thresh)
 		kernel_run.set_arg(3, top)
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -350,8 +339,7 @@ class cl2py_CL:
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 	
@@ -407,8 +395,7 @@ class cl2py_CL:
 		kernel_run.set_arg(4, window_size_y)
 		kernel_run.set_arg(5, window_size_z)
 
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -423,8 +410,7 @@ class cl2py_CL:
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -480,8 +466,7 @@ class cl2py_CL:
 		kernel_run.set_arg(4, window_size_y)
 		kernel_run.set_arg(5, window_size_z)
 
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -536,8 +521,7 @@ class cl2py_CL:
 		kernel_run.set_arg(4, window_size_y)
 		kernel_run.set_arg(5, window_size_z)
 
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -552,8 +536,7 @@ class cl2py_CL:
 		kernel_run.set_arg(0, img_input.get_oclPtr())
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -570,8 +553,7 @@ class cl2py_CL:
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
 		kernel_run.set_arg(2, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -588,9 +570,8 @@ class cl2py_CL:
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
 		kernel_run.set_arg(2, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
-
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
+		
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglCl3dSub(self, img_input, img_input2, img_output):
@@ -606,8 +587,7 @@ class cl2py_CL:
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
 		kernel_run.set_arg(2, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -624,8 +604,7 @@ class cl2py_CL:
 		kernel_run.set_arg(1, img_input2.get_oclPtr())
 		kernel_run.set_arg(2, img_output.get_oclPtr())
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 	
@@ -660,8 +639,7 @@ class cl2py_CL:
 		kernel_run.set_arg(2, thresh)
 		kernel_run.set_arg(3, top)
 			
-		ev = cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
-		print(ev)
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_oclPtr().shape, None)
 
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -786,7 +764,7 @@ if __name__ == "__main__":
 	wrp.vglClThreshold(img_input, img_output, np.float32(0.5), np.float32(0.9))
 	salvando2d(img_output, "yamamoto-vglClThreshold.jpg")
 	vl.rgb_to_rgba(img_output)
-	"""
+	
 	wrp.vglCl3dBlurSq3(img_input_3d, img_output_3d)
 	salvando2d(img_output_3d, "3d-vglCl3dBlurSq3.tif")
 
@@ -819,7 +797,7 @@ if __name__ == "__main__":
 
 	wrp.vglCl3dThreshold(img_input_3d, img_output_3d, np.float32(0.4), np.float32(.8))
 	salvando2d(img_output_3d, "3d-vglCl3dThreshold.tif")
-	"""
+	
 	wrp = None
 	
 	img_input = None
