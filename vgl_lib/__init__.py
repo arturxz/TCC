@@ -16,6 +16,8 @@ from .vglImage import vglSaveImage
 from .vglImage import create_vglShape
 from .vglImage import rgb_to_rgba
 from .vglImage import rgba_to_rgb
+from .vglImage import iplFindBitsPerSample
+from .vglImage import iplFindWidthStep
 
 # VGLCLIMAGE METHODS
 from .vglClImage import vglClInit
@@ -53,6 +55,7 @@ from .vglConst import VGL_MIN_WINDOW_SPLIT
 from .vglConst import VGL_DEFAULT_WINDOW_SPLIT
 from .vglConst import VGL_MAX_WINDOW_SPLIT
 from .vglConst import VGL_MAX_WINDOWS
+from .vglConst import IPL_DEPTH_1U
 from .vglConst import VGL_SHAPE_NCHANNELS 
 from .vglConst import VGL_SHAPE_WIDTH 
 from .vglConst import VGL_SHAPE_HEIGHT
