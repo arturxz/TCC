@@ -70,7 +70,7 @@ class struct_sizes:
 		self.build_options = self.build_options + "-I "+buildDir
 		self.build_options = self.build_options + " -D VGL_SHAPE_NCHANNELS={0}".format(vl.VGL_SHAPE_NCHANNELS())
 		self.build_options = self.build_options + " -D VGL_SHAPE_WIDTH={0}".format(vl.VGL_SHAPE_WIDTH())
-		self.build_options = self.build_options + " -D VGL_SHAPE_HEIGHT={0}".format(vl.VGL_SHAPE_HEIGHT())
+		self.build_options = self.build_options + " -D VGL_SHAPE_HEIGTH={0}".format(vl.VGL_SHAPE_HEIGTH())
 		self.build_options = self.build_options + " -D VGL_SHAPE_LENGTH={0}".format(vl.VGL_SHAPE_LENGTH())
 		self.build_options = self.build_options + " -D VGL_MAX_DIM={0}".format(vl.VGL_MAX_DIM())
 		self.build_options = self.build_options + " -D VGL_ARR_SHAPE_SIZE={0}".format(vl.VGL_ARR_SHAPE_SIZE())
