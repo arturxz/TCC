@@ -58,7 +58,7 @@ class VglImage(object):
 		self.ndim = ndim
 		self.shape = np.zeros((2*vl.VGL_MAX_DIM()), np.uint8)
 		self.vglShape: Union[None, vl.vglShape] = None
-		self.depht = 0
+		self.depth = 0
 		self.nChannels = 0
 		self.has_mipmap = 0
 		self.oclPtr: Union[cl.Image, cl.Buffer] = None
@@ -111,6 +111,71 @@ class VglImage(object):
 		
 	def get_ipl(self):
 		return self.ipl
+	
+	def getNChannels(self):
+		return self.vglShape.shape[vl.VGL_SHAPE_NCHANNELS()]
+	
+	def getWidth(self):
+		return self.vglShape.getWidth()
+	
+	def getHeight(self):
+		return self.vglShape.getHeight()
+	
+	def getLength(self):
+		return self.vglShape.getLength()
+	
+	def getWidthIn(self):
+		return self.vglShape.getWidthIn()
+	
+	def getHeigthIn(self):
+		return self.vglShape.getHeigthIn()
+	
+	def getNFrames(self):
+		return self.vglShape.getNFrames()
+
+	
+	def getBitsPerSample(self):
+		return self.depth & 255
+	
+	"""
+		EQUIVALENT TO vglImage.h -> getWidthStep().
+	"""
+	def getWidthStep(self):
+		widthStep: int = None
+
+		if( self.ipl != None ):
+			widthStep = vl.iplFindWidthStep(self.depth, self.vglShape.width , self.nChannels)
+		else:
+			bps = self.getBitsPerSample()
+			if( bps == 1 ):
+				widthStep = (self.getWidthIn() - 1) / (8 + 1)
+			elif( bps < 8 ):
+				print("getWidthStep: Error: bits per pixel =", bps, " < 8 and != 1. Image depth may be wrong.")
+				exit(1)
+			else:
+				widthStep = (bps / 8) * self.getNChannels() * self.getWidthIn()
+		
+		return widthStep
+
+"""
+	EQUIVALENT TO iplImage.iplFindBitsPerSample(int depth)
+"""
+def iplFindBitsPerSample(depth):
+	return depth & 255
+
+"""
+	EQUIVALENT TO iplImage.iplFindWidthStep(int depth, int width, int channels)
+"""
+def iplFindWidthStep(depth, width, channels=1):
+	if( depth == vl.IPL_DEPTH_1U() ):
+		return (width - 1) / (8 + 1)
+	
+	bpp = vl.iplFindBitsPerSample(depth)
+	if(bpp < 8):
+		print("iplFindWidthStep: Error: bits per pixel=", bpp, "and != 1. Image depth may be wrong.")
+		exit(1)
+	
+	return (depth / 8) * channels * width
 
 """
 	EQUIVALENT TO vglImage.vglImage3To4Channels()
@@ -240,4 +305,6 @@ def rgba_to_rgb(img):
 
 		img.ipl = ipl_rgb
 		vl.create_vglShape(img)
-		
+
+"""
+"""
