@@ -285,7 +285,7 @@ def create_blank_image_as(img):
 	image.ipl		= np.asarray(img.ipl, img.ipl.dtype)
 	image.shape		= img.shape
 	image.vglShape	= img.vglShape
-	image.depht		= img.depht
+	image.depth		= img.depth
 	image.nChannels	= img.nChannels
 	image.has_mipmap= img.has_mipmap
 	image.inContext	= vl.VGL_BLANK_CONTEXT()
