@@ -14,7 +14,7 @@ from typing import Union
 		is the input image
 	cl_shape:
 		3D Images:
-			The OpenCL's default is to be (img_width, img_Heigth, img_depht)
+			The OpenCL's default is to be (img_width, img_Heigth, img_depth)
 		2D Images:
 			The The OpenCL's default is to be (img_width, img_Heigth)
 	cl_pitch:
@@ -143,7 +143,7 @@ class VglImage(object):
 	def getWidthStep(self):
 		widthStep: int = None
 
-		if( self.ipl != None ):
+		if( self.ipl is not None ):
 			widthStep = vl.iplFindWidthStep(self.depth, self.getWidth() , self.nChannels)
 		else:
 			bps = self.getBitsPerSample()
@@ -230,6 +230,10 @@ def vglLoadImage(img, filename=""):
 		print("vglImage: Image loaded! VGL_RAM_CONTEXT.")
 
 	vl.create_vglShape(img)
+
+	img.depth = img.getVglShape().getNFrames()
+	img.nChannels = img.getVglShape().getNChannels()
+	
 	
 """
 	EQUIVALENT TO DIFFERENT IMAGE SAVE
