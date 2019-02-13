@@ -27,20 +27,47 @@ ocl_context: Union[vl.opencl_context] = None
 struct_sizes: Union[np.ndarray] = None
 
 """
+	VARIABLE TO BINARY-IMAGES 
+"""
+bin_image_pack_size: int = None
+
+"""
 	EQUIVALENT TO vglClInit METHOD, FOUND ON
 	vglClImage.vglClInit().
 """
-def vglClInit():
+def vglClInit(ocl_context_a=None, ss_a=None, bin_image_pack_size_a=None):
 	global ocl
 	global ocl_context
 	global struct_sizes
-
-	ocl_context = vl.opencl_context()
-	ocl = ocl_context.get_vglClContext_attributes()
-	ss = vl.struct_sizes()
-	struct_sizes = ss.get_struct_sizes()
-
-	ss = None
+	global bin_image_pack_size
+	
+	# INITIATING OCL_CONTEXT
+	if( ocl_context is None ):
+		ocl_context = vl.opencl_context()
+		ocl = ocl_context.get_vglClContext_attributes()
+	else:
+		ocl_context = ocl_context_a
+		ocl = ocl_context.get_vglClContext_attributes()
+	
+	# INITIATING STRUCT SIZES
+	if( ss_a is None ):
+		ss = vl.struct_sizes()
+		struct_sizes = ss.get_struct_sizes()
+		ss = None
+	else:
+		struct_sizes = ss_a.get_struct_sizes()
+	
+	# INITIATING BIN_IMAGE_PACK_SIZE
+	if((bin_image_pack_size_a == vl.PACK_SIZE_8())
+	or (bin_image_pack_size_a == vl.PACK_SIZE_32())
+	or (bin_image_pack_size_a == vl.PACK_SIZE_64()) ):
+		bin_image_pack_size = bin_image_pack_size_a
+	elif( bin_image_pack_size_a is None ):
+		print("vglClInit: Warning: Assuming bin_image_pack_size as 8")
+		bin_image_pack_size = vl.PACK_SIZE_8()
+	else:
+		print("vglClInit: Error! bin_image_pack_size not 8, 32 or 64. Ending execution.")
+		exit()
 
 """
 	EQUIVALENT TO vglClImage.vglClUpload()
@@ -194,22 +221,20 @@ def vglClCheckError(error, name):
 """
 	PYTHON-EXCLUSIVE METHODS
 """
+# RETURNS the image_pack_size 
+def get_bin_image_pack_size():
+	global bin_image_pack_size
+	return bin_image_pack_size
 
-"""
-	RETURNS THE vl.VglClContext OBJECT
-"""
+# RETURNS THE vl.VglClContext OBJECT
 def get_ocl():
 	return ocl
 
-"""
-	RETURNS THE vl.opencl_context OBJECT
-"""
+# RETURNS THE vl.opencl_context OBJECT
 def get_ocl_context():
 	return ocl_context
 
-"""
-	SETS THE vl.VglClContext OBJECT
-"""
+# SETS THE vl.VglClContext OBJECT
 def set_ocl(ctx):
 	global ocl
 	if( isinstance(ctx, vl.VglClContext) ):
@@ -217,9 +242,16 @@ def set_ocl(ctx):
 	else:
 		print("Error! not VglClContext object!")
 
-"""
-	RETURNS THE IMAGE CHANNEL TYPE
-"""
+# RETURNS struct_sizes ARRAY
+def get_struct_sizes():
+	global struct_sizes
+	if( not isinstance(struct_sizes, np.ndarray) ):
+		vl.vglClInit()
+		print("get_struct_sizes: Warning! get_struct_sizes before vglClInit. Calling vglClInit now...")
+
+	return struct_sizes
+
+# RETURNS THE IMAGE CHANNEL TYPE
 def cl_channel_type(img):
 	oclPtr_dtype = None
 	if( img.ipl.dtype == np.uint8 ):
@@ -291,16 +323,6 @@ def create_blank_image_as(img):
 	image.inContext	= vl.VGL_BLANK_CONTEXT()
 
 	return image
-
-"""
-"""
-def get_struct_sizes():
-	global struct_sizes
-	if( not isinstance(struct_sizes, np.ndarray) ):
-		vl.vglClInit()
-		print("get_struct_sizes: Warning! get_struct_sizes before vglClInit. Calling vglClInit now...")
-
-	return struct_sizes
 
 """
 	RETURNS A OPENCL BUFFER WITH DATA 
