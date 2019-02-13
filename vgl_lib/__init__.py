@@ -26,6 +26,7 @@ from .vglClImage import vglClDownload
 from .vglClImage import vglClCheckError
 from .vglClImage import cl_channel_type
 from .vglClImage import cl_channel_order
+from .vglClImage import get_bin_image_pack_size
 from .vglClImage import get_ocl
 from .vglClImage import set_ocl
 from .vglClImage import get_ocl_context
@@ -90,22 +91,13 @@ from .vglConst import CL_SUCCESS
 from .vglConst import CL_MIN_ERROR
 
 # PACK 64
-from .vglConst import VGL_PACK_SIZE_BITS_8
-from .vglConst import VGL_PACK_SIZE_BYTES_8
-from .vglConst import VGL_PACK_MAX_UINT_8
-from .vglConst import VGL_PACK_CL_CONST_TYPE_8
-from .vglConst import VGL_PACK_CL_SHADER_TYPE_8
-from .vglConst import VGL_PACK_OUTPUT_SWAP_MASK_8
-from .vglConst import VGL_PACK_SIZE_BITS_32
-from .vglConst import VGL_PACK_SIZE_BYTES_32
-from .vglConst import VGL_PACK_MAX_UINT_32
-from .vglConst import VGL_PACK_CL_CONST_TYPE_32
-from .vglConst import VGL_PACK_CL_SHADER_TYPE_32
-from .vglConst import VGL_PACK_OUTPUT_SWAP_MASK_32
-from .vglConst import VGL_PACK_SIZE_BITS_64
-from .vglConst import VGL_PACK_SIZE_BYTES_64
-from .vglConst import VGL_PACK_MAX_UINT_64
-from .vglConst import VGL_PACK_CL_CONST_TYPE_64
-from .vglConst import VGL_PACK_CL_SHADER_TYPE_64
-from .vglConst import VGL_PACK_OUTPUT_SWAP_MASK_64
+from .vglConst import PACK_SIZE_8
+from .vglConst import PACK_SIZE_32
+from .vglConst import PACK_SIZE_64
+from .vglConst import VGL_PACK_SIZE_BITS
+from .vglConst import VGL_PACK_SIZE_BYTES
+from .vglConst import VGL_PACK_MAX_UINT
+from .vglConst import VGL_PACK_CL_CONST_TYPE
+from .vglConst import VGL_PACK_CL_SHADER_TYPE
+from .vglConst import VGL_PACK_OUTPUT_SWAP_MASK
 from .vglConst import VGL_PACK_OUTPUT_DIRECT_MASK
