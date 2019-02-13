@@ -213,6 +213,7 @@ def CL_MIN_ERROR():
 # PACK64 CONSTANTS
 import pyopencl as cl
 import numpy as np
+import vgl_lib as vl
 
 def VGL_PACK_SIZE_BITS_8():
 	return 8
@@ -240,6 +241,18 @@ def VGL_PACK_OUTPUT_SWAP_MASK_8():
 	outputSwapMask[6] = VGL_PACK_CL_SHADER_TYPE_8()(0x02)
 	outputSwapMask[7] = VGL_PACK_CL_SHADER_TYPE_8()(0x01)
 	return outputSwapMask
+
+def VGL_PACK_OUTPUT_DIRECT_MASK_8():
+	outputDirectMask = np.ndarray(32, VGL_PACK_CL_SHADER_TYPE_8)
+	outputDirectMask[0] = VGL_PACK_CL_SHADER_TYPE_8()(0x80)
+	outputDirectMask[1] = VGL_PACK_CL_SHADER_TYPE_8()(0x40)
+	outputDirectMask[2] = VGL_PACK_CL_SHADER_TYPE_8()(0x20)
+	outputDirectMask[3] = VGL_PACK_CL_SHADER_TYPE_8()(0x10)
+	outputDirectMask[4] = VGL_PACK_CL_SHADER_TYPE_8()(0x08)
+	outputDirectMask[5] = VGL_PACK_CL_SHADER_TYPE_8()(0x04)
+	outputDirectMask[6] = VGL_PACK_CL_SHADER_TYPE_8()(0x02)
+	outputDirectMask[7] = VGL_PACK_CL_SHADER_TYPE_8()(0x01)
+	return outputDirectMask
 
 def VGL_PACK_SIZE_BITS_32():
 	return 32
@@ -278,11 +291,55 @@ def VGL_PACK_OUTPUT_SWAP_MASK_32():
 	outputSwapMask[17] = VGL_PACK_CL_SHADER_TYPE_32()(0x400000)
 	outputSwapMask[18] = VGL_PACK_CL_SHADER_TYPE_32()(0x200000)
 	outputSwapMask[19] = VGL_PACK_CL_SHADER_TYPE_32()(0x100000)
-	outputSwapMask[20] = VGL_PACK_CL_SHADER_TYPE_32()(0x08000000)
-	outputSwapMask[21] = VGL_PACK_CL_SHADER_TYPE_32()(0x04000000)
-	outputSwapMask[22] = VGL_PACK_CL_SHADER_TYPE_32()(0x02000000)
-	outputSwapMask[23] = VGL_PACK_CL_SHADER_TYPE_32()(0x01000000)
+	outputSwapMask[20] = VGL_PACK_CL_SHADER_TYPE_32()(0x080000)
+	outputSwapMask[21] = VGL_PACK_CL_SHADER_TYPE_32()(0x040000)
+	outputSwapMask[22] = VGL_PACK_CL_SHADER_TYPE_32()(0x020000)
+	outputSwapMask[23] = VGL_PACK_CL_SHADER_TYPE_32()(0x010000)
+	outputSwapMask[24] = VGL_PACK_CL_SHADER_TYPE_32()(0x80000000)
+	outputSwapMask[25] = VGL_PACK_CL_SHADER_TYPE_32()(0x40000000)
+	outputSwapMask[26] = VGL_PACK_CL_SHADER_TYPE_32()(0x20000000)
+	outputSwapMask[27] = VGL_PACK_CL_SHADER_TYPE_32()(0x10000000)
+	outputSwapMask[28] = VGL_PACK_CL_SHADER_TYPE_32()(0x08000000)
+	outputSwapMask[29] = VGL_PACK_CL_SHADER_TYPE_32()(0x04000000)
+	outputSwapMask[30] = VGL_PACK_CL_SHADER_TYPE_32()(0x02000000)
+	outputSwapMask[31] = VGL_PACK_CL_SHADER_TYPE_32()(0x01000000)
 	return outputSwapMask
+
+def VGL_PACK_OUTPUT_DIRECT_MASK_32():
+	outputDirectMask = np.ndarray(64, VGL_PACK_CL_SHADER_TYPE_32)
+	outputDirectMask[0] = VGL_PACK_CL_SHADER_TYPE_32()(0x80)
+	outputDirectMask[1] = VGL_PACK_CL_SHADER_TYPE_32()(0x40)
+	outputDirectMask[2] = VGL_PACK_CL_SHADER_TYPE_32()(0x20)
+	outputDirectMask[3] = VGL_PACK_CL_SHADER_TYPE_32()(0x10)
+	outputDirectMask[4] = VGL_PACK_CL_SHADER_TYPE_32()(0x08)
+	outputDirectMask[5] = VGL_PACK_CL_SHADER_TYPE_32()(0x04)
+	outputDirectMask[6] = VGL_PACK_CL_SHADER_TYPE_32()(0x02)
+	outputDirectMask[7] = VGL_PACK_CL_SHADER_TYPE_32()(0x01)
+	outputDirectMask[8] = VGL_PACK_CL_SHADER_TYPE_32()(0x8000)
+	outputDirectMask[9] = VGL_PACK_CL_SHADER_TYPE_32()(0x4000)
+	outputDirectMask[10] = VGL_PACK_CL_SHADER_TYPE_32()(0x2000)
+	outputDirectMask[11] = VGL_PACK_CL_SHADER_TYPE_32()(0x1000)
+	outputDirectMask[12] = VGL_PACK_CL_SHADER_TYPE_32()(0x0800)
+	outputDirectMask[13] = VGL_PACK_CL_SHADER_TYPE_32()(0x0400)
+	outputDirectMask[14] = VGL_PACK_CL_SHADER_TYPE_32()(0x0200)
+	outputDirectMask[15] = VGL_PACK_CL_SHADER_TYPE_32()(0x0100)
+	outputDirectMask[16] = VGL_PACK_CL_SHADER_TYPE_32()(0x800000)
+	outputDirectMask[17] = VGL_PACK_CL_SHADER_TYPE_32()(0x400000)
+	outputDirectMask[18] = VGL_PACK_CL_SHADER_TYPE_32()(0x200000)
+	outputDirectMask[19] = VGL_PACK_CL_SHADER_TYPE_32()(0x100000)
+	outputDirectMask[20] = VGL_PACK_CL_SHADER_TYPE_32()(0x080000)
+	outputDirectMask[21] = VGL_PACK_CL_SHADER_TYPE_32()(0x040000)
+	outputDirectMask[22] = VGL_PACK_CL_SHADER_TYPE_32()(0x020000)
+	outputDirectMask[23] = VGL_PACK_CL_SHADER_TYPE_32()(0x010000)
+	outputDirectMask[24] = VGL_PACK_CL_SHADER_TYPE_32()(0x80000000)
+	outputDirectMask[25] = VGL_PACK_CL_SHADER_TYPE_32()(0x40000000)
+	outputDirectMask[26] = VGL_PACK_CL_SHADER_TYPE_32()(0x20000000)
+	outputDirectMask[27] = VGL_PACK_CL_SHADER_TYPE_32()(0x10000000)
+	outputDirectMask[28] = VGL_PACK_CL_SHADER_TYPE_32()(0x08000000)
+	outputDirectMask[29] = VGL_PACK_CL_SHADER_TYPE_32()(0x04000000)
+	outputDirectMask[30] = VGL_PACK_CL_SHADER_TYPE_32()(0x02000000)
+	outputDirectMask[31] = VGL_PACK_CL_SHADER_TYPE_32()(0x01000000)
+	return outputDirectMask
 
 def VGL_PACK_SIZE_BITS_64():
 	return 64
@@ -321,60 +378,223 @@ def VGL_PACK_OUTPUT_SWAP_MASK_64():
 	outputSwapMask[17] = VGL_PACK_CL_SHADER_TYPE_64()(0x400000)
 	outputSwapMask[18] = VGL_PACK_CL_SHADER_TYPE_64()(0x200000)
 	outputSwapMask[19] = VGL_PACK_CL_SHADER_TYPE_64()(0x100000)
-	outputSwapMask[20] = VGL_PACK_CL_SHADER_TYPE_64()(0x08000000)
-	outputSwapMask[21] = VGL_PACK_CL_SHADER_TYPE_64()(0x04000000)
-	outputSwapMask[22] = VGL_PACK_CL_SHADER_TYPE_64()(0x02000000)
-	outputSwapMask[23] = VGL_PACK_CL_SHADER_TYPE_64()(0x01000000)
-	outputSwapMask[24] = VGL_PACK_CL_SHADER_TYPE_64()(0x0800000000)
-	outputSwapMask[25] = VGL_PACK_CL_SHADER_TYPE_64()(0x0400000000)
-	outputSwapMask[26] = VGL_PACK_CL_SHADER_TYPE_64()(0x0200000000)
-	outputSwapMask[27] = VGL_PACK_CL_SHADER_TYPE_64()(0x0100000000)
-	outputSwapMask[28] = VGL_PACK_CL_SHADER_TYPE_64()(0x080000000000)
-	outputSwapMask[29] = VGL_PACK_CL_SHADER_TYPE_64()(0x040000000000)
-	outputSwapMask[30] = VGL_PACK_CL_SHADER_TYPE_64()(0x020000000000)
-	outputSwapMask[31] = VGL_PACK_CL_SHADER_TYPE_64()(0x010000000000)
-	outputSwapMask[32] = VGL_PACK_CL_SHADER_TYPE_64()(0x08000000000000)
-	outputSwapMask[33] = VGL_PACK_CL_SHADER_TYPE_64()(0x04000000000000)
-	outputSwapMask[34] = VGL_PACK_CL_SHADER_TYPE_64()(0x02000000000000)
-	outputSwapMask[35] = VGL_PACK_CL_SHADER_TYPE_64()(0x01000000000000)
+	outputSwapMask[20] = VGL_PACK_CL_SHADER_TYPE_64()(0x080000)
+	outputSwapMask[21] = VGL_PACK_CL_SHADER_TYPE_64()(0x040000)
+	outputSwapMask[22] = VGL_PACK_CL_SHADER_TYPE_64()(0x020000)
+	outputSwapMask[23] = VGL_PACK_CL_SHADER_TYPE_64()(0x010000)
+	outputSwapMask[24] = VGL_PACK_CL_SHADER_TYPE_64()(0x80000000)
+	outputSwapMask[25] = VGL_PACK_CL_SHADER_TYPE_64()(0x40000000)
+	outputSwapMask[26] = VGL_PACK_CL_SHADER_TYPE_64()(0x20000000)
+	outputSwapMask[27] = VGL_PACK_CL_SHADER_TYPE_64()(0x10000000)
+	outputSwapMask[28] = VGL_PACK_CL_SHADER_TYPE_64()(0x08000000)
+	outputSwapMask[29] = VGL_PACK_CL_SHADER_TYPE_64()(0x04000000)
+	outputSwapMask[30] = VGL_PACK_CL_SHADER_TYPE_64()(0x02000000)
+	outputSwapMask[31] = VGL_PACK_CL_SHADER_TYPE_64()(0x01000000)
+	outputSwapMask[32] = VGL_PACK_CL_SHADER_TYPE_64()(0x8000000000)
+	outputSwapMask[33] = VGL_PACK_CL_SHADER_TYPE_64()(0x4000000000)
+	outputSwapMask[34] = VGL_PACK_CL_SHADER_TYPE_64()(0x2000000000)
+	outputSwapMask[35] = VGL_PACK_CL_SHADER_TYPE_64()(0x1000000000)
+	outputSwapMask[36] = VGL_PACK_CL_SHADER_TYPE_64()(0x0800000000)
+	outputSwapMask[37] = VGL_PACK_CL_SHADER_TYPE_64()(0x0400000000)
+	outputSwapMask[38] = VGL_PACK_CL_SHADER_TYPE_64()(0x0200000000)
+	outputSwapMask[39] = VGL_PACK_CL_SHADER_TYPE_64()(0x0100000000)
+	outputSwapMask[40] = VGL_PACK_CL_SHADER_TYPE_64()(0x800000000000)
+	outputSwapMask[41] = VGL_PACK_CL_SHADER_TYPE_64()(0x400000000000)
+	outputSwapMask[42] = VGL_PACK_CL_SHADER_TYPE_64()(0x200000000000)
+	outputSwapMask[43] = VGL_PACK_CL_SHADER_TYPE_64()(0x100000000000)
+	outputSwapMask[44] = VGL_PACK_CL_SHADER_TYPE_64()(0x080000000000)
+	outputSwapMask[45] = VGL_PACK_CL_SHADER_TYPE_64()(0x040000000000)
+	outputSwapMask[46] = VGL_PACK_CL_SHADER_TYPE_64()(0x020000000000)
+	outputSwapMask[47] = VGL_PACK_CL_SHADER_TYPE_64()(0x010000000000)
+	outputSwapMask[48] = VGL_PACK_CL_SHADER_TYPE_64()(0x80000000000000)
+	outputSwapMask[49] = VGL_PACK_CL_SHADER_TYPE_64()(0x40000000000000)
+	outputSwapMask[50] = VGL_PACK_CL_SHADER_TYPE_64()(0x20000000000000)
+	outputSwapMask[51] = VGL_PACK_CL_SHADER_TYPE_64()(0x10000000000000)
+	outputSwapMask[52] = VGL_PACK_CL_SHADER_TYPE_64()(0x08000000000000)
+	outputSwapMask[53] = VGL_PACK_CL_SHADER_TYPE_64()(0x04000000000000)
+	outputSwapMask[54] = VGL_PACK_CL_SHADER_TYPE_64()(0x02000000000000)
+	outputSwapMask[55] = VGL_PACK_CL_SHADER_TYPE_64()(0x01000000000000)
+	outputSwapMask[56] = VGL_PACK_CL_SHADER_TYPE_64()(0x8000000000000000)
+	outputSwapMask[57] = VGL_PACK_CL_SHADER_TYPE_64()(0x4000000000000000)
+	outputSwapMask[58] = VGL_PACK_CL_SHADER_TYPE_64()(0x2000000000000000)
+	outputSwapMask[59] = VGL_PACK_CL_SHADER_TYPE_64()(0x1000000000000000)
+	outputSwapMask[60] = VGL_PACK_CL_SHADER_TYPE_64()(0x0800000000000000)
+	outputSwapMask[61] = VGL_PACK_CL_SHADER_TYPE_64()(0x0400000000000000)
+	outputSwapMask[62] = VGL_PACK_CL_SHADER_TYPE_64()(0x0200000000000000)
+	outputSwapMask[63] = VGL_PACK_CL_SHADER_TYPE_64()(0x0100000000000000)
 	return outputSwapMask
 
-def VGL_PACK_OUTPUT_DIRECT_MASK():
+def VGL_PACK_OUTPUT_DIRECT_MASK_64():
 	outputDirectMask = np.ndarray(64, VGL_PACK_CL_SHADER_TYPE_64)
-	outputDirectMask[0] = VGL_PACK_CL_SHADER_TYPE_64()(0x80)
-	outputDirectMask[1] = VGL_PACK_CL_SHADER_TYPE_64()(0x40)
-	outputDirectMask[2] = VGL_PACK_CL_SHADER_TYPE_64()(0x20)
-	outputDirectMask[3] = VGL_PACK_CL_SHADER_TYPE_64()(0x10)
-	outputDirectMask[4] = VGL_PACK_CL_SHADER_TYPE_64()(0x08)
-	outputDirectMask[5] = VGL_PACK_CL_SHADER_TYPE_64()(0x04)
-	outputDirectMask[6] = VGL_PACK_CL_SHADER_TYPE_64()(0x02)
-	outputDirectMask[7] = VGL_PACK_CL_SHADER_TYPE_64()(0x01)
-	outputDirectMask[8] = VGL_PACK_CL_SHADER_TYPE_64()(0x8000)
-	outputDirectMask[9] = VGL_PACK_CL_SHADER_TYPE_64()(0x4000)
-	outputDirectMask[10] = VGL_PACK_CL_SHADER_TYPE_64()(0x2000)
-	outputDirectMask[11] = VGL_PACK_CL_SHADER_TYPE_64()(0x1000)
-	outputDirectMask[12] = VGL_PACK_CL_SHADER_TYPE_64()(0x0800)
-	outputDirectMask[13] = VGL_PACK_CL_SHADER_TYPE_64()(0x0400)
-	outputDirectMask[14] = VGL_PACK_CL_SHADER_TYPE_64()(0x0200)
-	outputDirectMask[15] = VGL_PACK_CL_SHADER_TYPE_64()(0x0100)
-	outputDirectMask[16] = VGL_PACK_CL_SHADER_TYPE_64()(0x800000)
-	outputDirectMask[17] = VGL_PACK_CL_SHADER_TYPE_64()(0x400000)
-	outputDirectMask[18] = VGL_PACK_CL_SHADER_TYPE_64()(0x200000)
-	outputDirectMask[19] = VGL_PACK_CL_SHADER_TYPE_64()(0x100000)
-	outputDirectMask[20] = VGL_PACK_CL_SHADER_TYPE_64()(0x08000000)
-	outputDirectMask[21] = VGL_PACK_CL_SHADER_TYPE_64()(0x04000000)
-	outputDirectMask[22] = VGL_PACK_CL_SHADER_TYPE_64()(0x02000000)
-	outputDirectMask[23] = VGL_PACK_CL_SHADER_TYPE_64()(0x01000000)
-	outputDirectMask[24] = VGL_PACK_CL_SHADER_TYPE_64()(0x0800000000)
-	outputDirectMask[25] = VGL_PACK_CL_SHADER_TYPE_64()(0x0400000000)
-	outputDirectMask[26] = VGL_PACK_CL_SHADER_TYPE_64()(0x0200000000)
-	outputDirectMask[27] = VGL_PACK_CL_SHADER_TYPE_64()(0x0100000000)
-	outputDirectMask[28] = VGL_PACK_CL_SHADER_TYPE_64()(0x080000000000)
-	outputDirectMask[29] = VGL_PACK_CL_SHADER_TYPE_64()(0x040000000000)
-	outputDirectMask[30] = VGL_PACK_CL_SHADER_TYPE_64()(0x020000000000)
-	outputDirectMask[31] = VGL_PACK_CL_SHADER_TYPE_64()(0x010000000000)
-	outputDirectMask[32] = VGL_PACK_CL_SHADER_TYPE_64()(0x08000000000000)
-	outputDirectMask[33] = VGL_PACK_CL_SHADER_TYPE_64()(0x04000000000000)
-	outputDirectMask[34] = VGL_PACK_CL_SHADER_TYPE_64()(0x02000000000000)
-	outputDirectMask[35] = VGL_PACK_CL_SHADER_TYPE_64()(0x01000000000000)
+	outputDirectMask[0] = VGL_PACK_CL_SHADER_TYPE_64()(0x01)
+	outputDirectMask[1] = VGL_PACK_CL_SHADER_TYPE_64()(0x02)
+	outputDirectMask[2] = VGL_PACK_CL_SHADER_TYPE_64()(0x04)
+	outputDirectMask[3] = VGL_PACK_CL_SHADER_TYPE_64()(0x08)
+	outputDirectMask[4] = VGL_PACK_CL_SHADER_TYPE_64()(0x10)
+	outputDirectMask[5] = VGL_PACK_CL_SHADER_TYPE_64()(0x20)
+	outputDirectMask[6] = VGL_PACK_CL_SHADER_TYPE_64()(0x40)
+	outputDirectMask[7] = VGL_PACK_CL_SHADER_TYPE_64()(0x80)
+	outputDirectMask[8] = VGL_PACK_CL_SHADER_TYPE_64()(0x0100)
+	outputDirectMask[9] = VGL_PACK_CL_SHADER_TYPE_64()(0x0200)
+	outputDirectMask[10] = VGL_PACK_CL_SHADER_TYPE_64()(0x0400)
+	outputDirectMask[11] = VGL_PACK_CL_SHADER_TYPE_64()(0x0800)
+	outputDirectMask[12] = VGL_PACK_CL_SHADER_TYPE_64()(0x1000)
+	outputDirectMask[13] = VGL_PACK_CL_SHADER_TYPE_64()(0x2000)
+	outputDirectMask[14] = VGL_PACK_CL_SHADER_TYPE_64()(0x4000)
+	outputDirectMask[15] = VGL_PACK_CL_SHADER_TYPE_64()(0x8000)
+	outputDirectMask[16] = VGL_PACK_CL_SHADER_TYPE_64()(0x010000)
+	outputDirectMask[17] = VGL_PACK_CL_SHADER_TYPE_64()(0x020000)
+	outputDirectMask[18] = VGL_PACK_CL_SHADER_TYPE_64()(0x040000)
+	outputDirectMask[19] = VGL_PACK_CL_SHADER_TYPE_64()(0x080000)
+	outputDirectMask[20] = VGL_PACK_CL_SHADER_TYPE_64()(0x100000)
+	outputDirectMask[21] = VGL_PACK_CL_SHADER_TYPE_64()(0x200000)
+	outputDirectMask[22] = VGL_PACK_CL_SHADER_TYPE_64()(0x400000)
+	outputDirectMask[23] = VGL_PACK_CL_SHADER_TYPE_64()(0x800000)
+	outputDirectMask[24] = VGL_PACK_CL_SHADER_TYPE_64()(0x01000000)
+	outputDirectMask[25] = VGL_PACK_CL_SHADER_TYPE_64()(0x02000000)
+	outputDirectMask[26] = VGL_PACK_CL_SHADER_TYPE_64()(0x04000000)
+	outputDirectMask[27] = VGL_PACK_CL_SHADER_TYPE_64()(0x08000000)
+	outputDirectMask[28] = VGL_PACK_CL_SHADER_TYPE_64()(0x10000000)
+	outputDirectMask[29] = VGL_PACK_CL_SHADER_TYPE_64()(0x20000000)
+	outputDirectMask[30] = VGL_PACK_CL_SHADER_TYPE_64()(0x40000000)
+	outputDirectMask[31] = VGL_PACK_CL_SHADER_TYPE_64()(0x80000000)
+	outputDirectMask[32] = VGL_PACK_CL_SHADER_TYPE_64()(0x0100000000)
+	outputDirectMask[33] = VGL_PACK_CL_SHADER_TYPE_64()(0x0200000000)
+	outputDirectMask[34] = VGL_PACK_CL_SHADER_TYPE_64()(0x0400000000)
+	outputDirectMask[35] = VGL_PACK_CL_SHADER_TYPE_64()(0x0800000000)
+	outputDirectMask[36] = VGL_PACK_CL_SHADER_TYPE_64()(0x1000000000)
+	outputDirectMask[37] = VGL_PACK_CL_SHADER_TYPE_64()(0x2000000000)
+	outputDirectMask[38] = VGL_PACK_CL_SHADER_TYPE_64()(0x4000000000)
+	outputDirectMask[39] = VGL_PACK_CL_SHADER_TYPE_64()(0x8000000000)
+	outputDirectMask[40] = VGL_PACK_CL_SHADER_TYPE_64()(0x010000000000)
+	outputDirectMask[41] = VGL_PACK_CL_SHADER_TYPE_64()(0x020000000000)
+	outputDirectMask[42] = VGL_PACK_CL_SHADER_TYPE_64()(0x040000000000)
+	outputDirectMask[43] = VGL_PACK_CL_SHADER_TYPE_64()(0x080000000000)
+	outputDirectMask[44] = VGL_PACK_CL_SHADER_TYPE_64()(0x100000000000)
+	outputDirectMask[45] = VGL_PACK_CL_SHADER_TYPE_64()(0x200000000000)
+	outputDirectMask[46] = VGL_PACK_CL_SHADER_TYPE_64()(0x400000000000)
+	outputDirectMask[47] = VGL_PACK_CL_SHADER_TYPE_64()(0x800000000000)
+	outputDirectMask[48] = VGL_PACK_CL_SHADER_TYPE_64()(0x01000000000000)
+	outputDirectMask[49] = VGL_PACK_CL_SHADER_TYPE_64()(0x02000000000000)
+	outputDirectMask[50] = VGL_PACK_CL_SHADER_TYPE_64()(0x04000000000000)
+	outputDirectMask[51] = VGL_PACK_CL_SHADER_TYPE_64()(0x08000000000000)
+	outputDirectMask[52] = VGL_PACK_CL_SHADER_TYPE_64()(0x10000000000000)
+	outputDirectMask[53] = VGL_PACK_CL_SHADER_TYPE_64()(0x20000000000000)
+	outputDirectMask[54] = VGL_PACK_CL_SHADER_TYPE_64()(0x40000000000000)
+	outputDirectMask[55] = VGL_PACK_CL_SHADER_TYPE_64()(0x80000000000000)
+	outputDirectMask[56] = VGL_PACK_CL_SHADER_TYPE_64()(0x0100000000000000)
+	outputDirectMask[57] = VGL_PACK_CL_SHADER_TYPE_64()(0x0200000000000000)
+	outputDirectMask[58] = VGL_PACK_CL_SHADER_TYPE_64()(0x0400000000000000)
+	outputDirectMask[59] = VGL_PACK_CL_SHADER_TYPE_64()(0x0800000000000000)
+	outputDirectMask[60] = VGL_PACK_CL_SHADER_TYPE_64()(0x1000000000000000)
+	outputDirectMask[61] = VGL_PACK_CL_SHADER_TYPE_64()(0x2000000000000000)
+	outputDirectMask[62] = VGL_PACK_CL_SHADER_TYPE_64()(0x4000000000000000)
+	outputDirectMask[63] = VGL_PACK_CL_SHADER_TYPE_64()(0x8000000000000000)
 	return outputDirectMask
+
+def PACK_SIZE_8():
+	return 8
+
+def PACK_SIZE_32():
+	return 32
+
+def PACK_SIZE_64():
+	return 64
+
+def VGL_PACK_SIZE_BITS():
+	if( vl.get_bin_image_pack_size is None ):
+		vl.vglClInit()
+
+	if( vl.get_bin_image_pack_size == vl.PACK_SIZE_8() ):
+		return VGL_PACK_SIZE_BITS_8()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_32() ):
+		return VGL_PACK_SIZE_BITS_32()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_64() ):
+		return VGL_PACK_SIZE_BITS_64()
+
+	print("VGL_PACK_SIZE_BITS: Error! get_bin_image_pack_size not 8, 32 or 64.")
+	exit()
+
+def VGL_PACK_SIZE_BYTES():
+	if( vl.get_bin_image_pack_size is None ):
+		vl.vglClInit()
+
+	if( vl.get_bin_image_pack_size == vl.PACK_SIZE_8() ):
+		return VGL_PACK_SIZE_BYTES_8()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_32() ):
+		return VGL_PACK_SIZE_BYTES_32()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_64() ):
+		return VGL_PACK_SIZE_BYTES_64()
+
+	print("VGL_PACK_SIZE_BYTES: Error! get_bin_image_pack_size not 8, 32 or 64.")
+	exit()
+
+def VGL_PACK_MAX_UINT():
+	if( vl.get_bin_image_pack_size is None ):
+		vl.vglClInit()
+
+	if( vl.get_bin_image_pack_size == vl.PACK_SIZE_8() ):
+		return VGL_PACK_MAX_UINT_8()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_32() ):
+		return VGL_PACK_MAX_UINT_32()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_64() ):
+		return VGL_PACK_MAX_UINT_64()
+
+	print("VGL_PACK_MAX_UINT: Error! get_bin_image_pack_size not 8, 32 or 64.")
+	exit()
+
+def VGL_PACK_CL_CONST_TYPE():
+	if( vl.get_bin_image_pack_size is None ):
+		vl.vglClInit()
+
+	if( vl.get_bin_image_pack_size == vl.PACK_SIZE_8() ):
+		return VGL_PACK_CL_CONST_TYPE_8()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_32() ):
+		return VGL_PACK_CL_CONST_TYPE_32()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_64() ):
+		return VGL_PACK_CL_CONST_TYPE_64()
+
+	print("VGL_PACK_CL_CONST_TYPE: Error! get_bin_image_pack_size not 8, 32 or 64.")
+	exit()
+
+def VGL_PACK_CL_SHADER_TYPE():
+	if( vl.get_bin_image_pack_size is None ):
+		vl.vglClInit()
+
+	if( vl.get_bin_image_pack_size == vl.PACK_SIZE_8() ):
+		return VGL_PACK_CL_SHADER_TYPE_8()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_32() ):
+		return VGL_PACK_CL_SHADER_TYPE_32()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_64() ):
+		return VGL_PACK_CL_SHADER_TYPE_64()
+
+	print("VGL_PACK_CL_SHADER_TYPE: Error! get_bin_image_pack_size not 8, 32 or 64.")
+	exit()
+
+def VGL_PACK_OUTPUT_SWAP_MASK():
+	if( vl.get_bin_image_pack_size is None ):
+		vl.vglClInit()
+
+	if( vl.get_bin_image_pack_size == vl.PACK_SIZE_8() ):
+		return VGL_PACK_OUTPUT_SWAP_MASK_8()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_32() ):
+		return VGL_PACK_OUTPUT_SWAP_MASK_32()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_64() ):
+		return VGL_PACK_OUTPUT_SWAP_MASK_64()
+
+	print("VGL_PACK_OUTPUT_SWAP_MASK: Error! get_bin_image_pack_size not 8, 32 or 64.")
+	exit()
+
+def VGL_PACK_OUTPUT_DIRECT_MASK():
+	if( vl.get_bin_image_pack_size is None ):
+		vl.vglClInit()
+
+	if( vl.get_bin_image_pack_size == vl.PACK_SIZE_8() ):
+		return VGL_PACK_OUTPUT_DIRECT_MASK_8()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_32() ):
+		return VGL_PACK_OUTPUT_DIRECT_MASK_32()
+	elif( vl.get_bin_image_pack_size == vl.PACK_SIZE_64() ):
+		return VGL_PACK_OUTPUT_DIRECT_MASK_64()
+
+	print("VGL_PACK_SIZE_BITS: Error! get_bin_image_pack_size not 8, 32 or 64.")
+	exit()
