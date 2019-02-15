@@ -1,120 +1,47 @@
-from skimage import io
 import pyopencl as cl
 import numpy as np
 
 import vgl_lib as vl
 
-# SYSTEM LIBRARYS
-import sys, glob, os
-
 """
-	img:
-		is the input image
-	img_shape:
-		3D Images:
-			The OpenCL's default is to be (img_width, img_height, img_depht)
-		2D Images:
-			The The OpenCL's default is to be (img_width, img_height)
-	img_pitch:
-		3D Images (needed):
-			The OpenCL's default is to be (img_width*bytes_per_pixel, img_height*img_width*bytes_per_pixel)
-			and it is assumed if pitch=(0, 0) is given
-		2D Images (optional):
-			The OpenCL's default is to be (img_width*bytes_per_pixel)
-			and it is assumed if pitch=(0) is given
-	img_origin
-		Is the origin of the image, where to start copying the image.
-		2D images must have 0 in the z-axis
-	img_region
-		Is where to end the copying of the image.
-		2D images must have 1 in the z-axis 
+	struct_sizes GETS THE WAY OPENCL DEVICE
+	ORGANIZES STRUCT DATA AND STORES IT
+	INTO THE struct_sizes_host .
 """
-
 class struct_sizes:
-	# THE vgl CONSTRUCTOR CREATES A NEW CONTEXT
-	# AND INITIATES THE QUEUE, ADDING QUE CONTEXT TO IT.
-
 	def __init__(self):
 		print("struct_sizes: Starting")
-		self.struct_sizes_host = None
-		self.platform = cl.get_platforms()[0]
-		self.devs = self.platform.get_devices()
-		self.device = self.devs[0]
-		self.ctx = cl.Context([self.device])
-		#self.ctx = cl.create_some_context()
-		self.queue = cl.CommandQueue(self.ctx)
-		self.builded = False
-		self.filepath = "vgl_lib/get_struct_sizes.cl"
+		
+		# INSTANTIATING THE VARIABLE THAT WILL STORE THE DATA
+		self.struct_sizes_host = np.zeros(11, np.uint32)
 
-		self.loadCL()
+		# GETTING EXISTING DATA
+		self.ocl_ctx = vl.get_ocl_context()
+		
+		# IF THERE'S NO CONTEXT, CREATE ONE AND GETS IT
+		if( self.ocl_ctx is None ):
+			vl.vglClInit()
+			self.ocl_ctx = vl.get_ocl_context()
+		
+		# COMPILING KERNEL THAT WILL RETURN DATA ORGANIZATION
+		self._program = self.ocl_ctx.get_compiled_kernel("vgl_lib/get_struct_sizes.cl", "get_struct_sizes")
+		self.kernel_run = self._program.get_struct_sizes
+
 		self.execute()
-
-	def getDir(self, filePath):
-		size = len(filePath)-1
-		bar = -1
-		for i in range(0, size):
-			if(filePath[i] == '/'):
-				bar = i
-				i = -1
-		return filePath[:bar+1]
-
-	# THIS FUNCTION WILL LOAD THE KERNEL FILE
-	# AND BUILD IT IF NECESSARY.
-	def loadCL(self):
-		print("struct_sizes: loading Kernel")
-		self.kernel_file = open(self.filepath, "r")
-
-		buildDir = self.getDir("vgl_lib/testprobe.cl")
-
-		self.build_options = ""
-		self.build_options = self.build_options + "-I "+buildDir
-		self.build_options = self.build_options + " -D VGL_SHAPE_NCHANNELS={0}".format(vl.VGL_SHAPE_NCHANNELS())
-		self.build_options = self.build_options + " -D VGL_SHAPE_WIDTH={0}".format(vl.VGL_SHAPE_WIDTH())
-		self.build_options = self.build_options + " -D VGL_SHAPE_HEIGTH={0}".format(vl.VGL_SHAPE_HEIGTH())
-		self.build_options = self.build_options + " -D VGL_SHAPE_LENGTH={0}".format(vl.VGL_SHAPE_LENGTH())
-		self.build_options = self.build_options + " -D VGL_MAX_DIM={0}".format(vl.VGL_MAX_DIM())
-		self.build_options = self.build_options + " -D VGL_ARR_SHAPE_SIZE={0}".format(vl.VGL_ARR_SHAPE_SIZE())
-		self.build_options = self.build_options + " -D VGL_ARR_CLSTREL_SIZE={0}".format(vl.VGL_ARR_CLSTREL_SIZE())
-		self.build_options = self.build_options + " -D VGL_STREL_CUBE={0}".format(vl.VGL_STREL_CUBE())
-		self.build_options = self.build_options + " -D VGL_STREL_CROSS={0}".format(vl.VGL_STREL_CROSS())
-		self.build_options = self.build_options + " -D VGL_STREL_GAUSS={0}".format(vl.VGL_STREL_GAUSS())
-		self.build_options = self.build_options + " -D VGL_STREL_MEAN={0}".format(vl.VGL_STREL_MEAN())
-
-		#print("Build Options:\n", self.build_options)
-
-		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
-		while( buildDir ):
-			for file in glob.glob(buildDir+"/*.h"):
-				self.pgr = cl.Program(self.ctx, open(file, "r"))
-			
-			buildDir = self.getDir(buildDir)
-
-		if ((self.builded == False)):
-			self.pgr = cl.Program(self.ctx, self.kernel_file.read())
-			self.pgr.build(options=self.build_options)
-			#self.pgr.build()
-			self.builded = True
-		else:
-			print("Kernel already builded. Going to next step...")
-
-		self.kernel_file.close()
-		#print("Kernel", self.pgr.get_info(cl.program_info.KERNEL_NAMES), "compiled.")
+		print("struct_sizes: Ending")
 
 	def execute(self):
-		# CREATING NUMPY ARRAY
-		self.struct_sizes_host = np.zeros(11, np.uint32)
-		#print("In:", self.struct_sizes_host)
 
-		self.mf = cl.mem_flags
-		self.struct_sizes_device = cl.Buffer( self.ctx, self.mf.READ_ONLY, self.struct_sizes_host.nbytes )
+		# GETTING DEVICE POINTER AND COPYING DATA TO IT
+		self.struct_sizes_device = cl.Buffer( self.ocl_ctx.ctx, cl.mem_flags.READ_ONLY, self.struct_sizes_host.nbytes )
 
 		# EXECUTING KERNEL WITH THE IMAGES
 		print("struct_sizes: Executing kernel")
-		self.pgr.get_struct_sizes(self.queue, self.struct_sizes_host.shape, None, self.struct_sizes_device).wait()
+		self.kernel_run.set_arg( 0, self.struct_sizes_device )
 
-		cl.enqueue_copy(self.queue, self.struct_sizes_host, self.struct_sizes_device, is_blocking=True)
-		#print("Out:", self.struct_sizes_host)
+		#EXECUTING KERNEL AND COPYING DATA BACK TO RAM
+		cl.enqueue_nd_range_kernel(self.ocl_ctx.queue, self.kernel_run, self.struct_sizes_host.shape, None)
+		cl.enqueue_copy(self.ocl_ctx.queue, self.struct_sizes_host, self.struct_sizes_device, is_blocking=True)
 
 	def get_struct_sizes(self):
-		print("struct_sizes: returning Structure Sizes")
 		return self.struct_sizes_host
