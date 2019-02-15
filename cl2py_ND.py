@@ -27,7 +27,7 @@ class cl2py_ND:
 			self.ocl = cl_ctx.get_vglClContext_attributes()
 
 	def vglClNdCopy(self, img_input, img_output):
-
+		print("# Running vglClNdCopy")
 		if( not img_input.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
 			print("vglClNdCopy: Error: this function supports only OpenCL data as buffer and img_input isn't.")
 			exit()
@@ -49,7 +49,7 @@ class cl2py_ND:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClNdConvolution(self, img_input, img_output, window):
-
+		print("# Running vglClNdConvolution")
 		if( not img_input.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
 			print("vglClNdConvolution: Error: this function supports only OpenCL data as buffer and img_input isn't.")
 			exit()
@@ -83,7 +83,7 @@ class cl2py_ND:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClNdDilate(self, img_input, img_output, window):
-
+		print("# Running vglClNdDilate")
 		if( not img_input.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
 			print("vglClNdDilate: Error: this function supports only OpenCL data as buffer and img_input isn't.")
 			exit()
@@ -117,7 +117,7 @@ class cl2py_ND:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClNdErode(self, img_input, img_output, window):
-
+		print("# Running vglClNdErode")
 		if( not img_input.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
 			print("vglClNdErode: Error: this function supports only OpenCL data as buffer and img_input isn't.")
 			exit()
@@ -151,7 +151,7 @@ class cl2py_ND:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClNdNot(self, img_input, img_output):
-
+		print("# Running vglClNdNot")
 		if( not img_input.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
 			print("vglClNdNot: Error: this function supports only OpenCL data as buffer and img_input isn't.")
 			exit()
@@ -177,7 +177,7 @@ class cl2py_ND:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClNdThreshold(self, img_input, img_output, thresh, top=255):
-
+		print("# Running vglClNdThreshold")
 		if( not img_input.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
 			print("vglClNdThreshold: Error: this function supports only OpenCL data as buffer and img_input isn't.")
 			exit()

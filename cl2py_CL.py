@@ -29,7 +29,7 @@ class cl2py_CL:
 			self.ocl = cl_ctx.get_vglClContext_attributes()
 
 	def vglClBlurSq3(self, img_input, img_output):
-
+		print("# Running vglClBlurSq3")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -44,7 +44,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 	
 	def vglClConvolution(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
-		
+		print("# Running vglClConvolution")		
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
@@ -90,7 +90,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClCopy(self, img_input, img_output):
-
+		print("# Running vglClCopy")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
@@ -105,7 +105,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
-		
+		print("# Running vglClDilate")		
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
@@ -150,7 +150,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
-		
+		print("# Running vglClErode")		
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
@@ -196,7 +196,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClInvert(self, img_input, img_output):
-
+		print("# Running vglClInvert")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
@@ -211,7 +211,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClMax(self, img_input, img_input2, img_output):
-
+		print("# Running vglClMax")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
@@ -228,7 +228,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClMin(self, img_input, img_input2, img_output):
-
+		print("# Running vglClMin")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
@@ -245,7 +245,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClSub(self, img_input, img_input2, img_output):
-
+		print("# Running vglClSub")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
@@ -262,7 +262,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClSum(self, img_input, img_input2, img_output):
-
+		print("# Running vglClSum")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
@@ -279,7 +279,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 	
 	def vglClSwapRgb(self, img_input, img_output):
-
+		print("# Running vglClSwapRgb")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -294,7 +294,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglClThreshold(self, img_input, img_output, thresh, top=1.0):
-
+		print("# Running vglClThreshold")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -329,7 +329,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglCl3dBlurSq3(self, img_input, img_output):
-
+		print("# Running vglCl3dBlurSq3")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -344,7 +344,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 	
 	def vglCl3dConvolution(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
-		
+		print("# Running vglCl3dConvolution")		
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
@@ -400,7 +400,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglCl3dCopy(self, img_input, img_output):
-
+		print("# Running vglCl3dCopy")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
@@ -415,7 +415,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglCl3dDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
-		
+		print("# Running vglCl3dDilate")		
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
@@ -471,7 +471,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglCl3dErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
-		
+		print("# Running vglCl3dErode")		
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 		
@@ -526,7 +526,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglCl3dNot(self, img_input, img_output):
-
+		print("# Running vglCl3dNot")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -541,7 +541,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglCl3dMax(self, img_input, img_input2, img_output):
-
+		print("# Running vglCl3dMax")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
@@ -558,7 +558,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglCl3dMin(self, img_input, img_input2, img_output):
-
+		print("# Running vglCl3dMin")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
@@ -575,7 +575,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglCl3dSub(self, img_input, img_input2, img_output):
-
+		print("# Running vglCl3dSub")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
@@ -592,7 +592,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
 	def vglCl3dSum(self, img_input, img_input2, img_output):
-
+		print("# Running vglCl3dSum")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
@@ -609,7 +609,7 @@ class cl2py_CL:
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 	
 	def vglCl3dThreshold(self, img_input, img_output, thresh, top=1.0):
-
+		print("# Running vglCl3dThreshold")
 		vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
 		vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
@@ -653,7 +653,6 @@ def salvando2d(img, name):
 	# SAVING IMAGE img
 	ext = name.split(".")
 	ext.reverse()
-	print(img.ipl.shape)
 
 	#vl.vglClDownload(img)
 	vl.vglCheckContext(img, vl.VGL_RAM_CONTEXT())

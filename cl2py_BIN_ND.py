@@ -56,13 +56,13 @@ class cl2py_BIN_ND:
 		kernel_run.set_arg(3, mobj_window)
 
 		_worksize_0 = img_input.getWidthIn()
-		if( img_input.depth == vl.IPL_DEPTH_1U ):
+		if( img_input.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_input.getWidthStep()
-		if( img_output.depth == vl.IPL_DEPTH_1U ):
+		if( img_output.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_output.getWidthStep()
 		
-		worksize = (_worksize_0, img_input.getHeigthIn(), img_input.getNFrames() )
-				
+		worksize = (np.int32(_worksize_0), img_input.getHeigthIn(), img_input.getNFrames() )
+		print("::::::::::::::::::::::::::", worksize)
 		# ENQUEUEING KERNEL EXECUTION
 		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, worksize, None)
 		#cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
@@ -99,12 +99,12 @@ class cl2py_BIN_ND:
 		kernel_run.set_arg(3, mobj_window)
 
 		_worksize_0 = img_input.getWidthIn()
-		if( img_input.depth == vl.IPL_DEPTH_1U ):
+		if( img_input.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_input.getWidthStep()
-		if( img_output.depth == vl.IPL_DEPTH_1U ):
+		if( img_output.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_output.getWidthStep()
 		
-		worksize = (_worksize_0, img_input.getHeigthIn(), img_input.getNFrames() )
+		worksize = (np.int32(_worksize_0), img_input.getHeigthIn(), img_input.getNFrames() )
 				
 		# ENQUEUEING KERNEL EXECUTION
 		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, worksize, None)
@@ -142,12 +142,12 @@ class cl2py_BIN_ND:
 		kernel_run.set_arg(3, mobj_window)
 				
 		_worksize_0 = img_input.getWidthIn()
-		if( img_input.depth == vl.IPL_DEPTH_1U ):
+		if( img_input.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_input.getWidthStep()
-		if( img_output.depth == vl.IPL_DEPTH_1U ):
+		if( img_output.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_output.getWidthStep()
 		
-		worksize = (_worksize_0, img_input.getHeigthIn(), img_input.getNFrames() )
+		worksize = (np.int32(_worksize_0), img_input.getHeigthIn(), img_input.getNFrames() )
 				
 		# ENQUEUEING KERNEL EXECUTION
 		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, worksize, None)
@@ -185,12 +185,12 @@ class cl2py_BIN_ND:
 		kernel_run.set_arg(3, mobj_window)
 				
 		_worksize_0 = img_input.getWidthIn()
-		if( img_input.depth == vl.IPL_DEPTH_1U ):
+		if( img_input.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_input.getWidthStep()
-		if( img_output.depth == vl.IPL_DEPTH_1U ):
+		if( img_output.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_output.getWidthStep()
 		
-		worksize = (_worksize_0, img_input.getHeigthIn(), img_input.getNFrames() )
+		worksize = (np.int32(_worksize_0), img_input.getHeigthIn(), img_input.getNFrames() )
 				
 		# ENQUEUEING KERNEL EXECUTION
 		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, worksize, None)
@@ -226,12 +226,14 @@ class cl2py_BIN_ND:
 		kernel_run.set_arg(2, img_output.get_oclPtr())
 				
 		_worksize_0 = img_input.getWidthIn()
-		if( img_input.depth == vl.IPL_DEPTH_1U ):
+		if( img_input.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_input.getWidthStep()
-		if( img_output.depth == vl.IPL_DEPTH_1U ):
+		if( img_input2.depth == vl.IPL_DEPTH_1U() ):
+			_worksize_0 = img_input2.getWidthStep()
+		if( img_output.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_output.getWidthStep()
 		
-		worksize = (_worksize_0, img_input.getHeigthIn(), img_input.getNFrames() )
+		worksize = (np.int32(_worksize_0), img_input.getHeigthIn(), img_input.getNFrames() )
 				
 		# ENQUEUEING KERNEL EXECUTION
 		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, worksize, None)
@@ -266,12 +268,14 @@ class cl2py_BIN_ND:
 		kernel_run.set_arg(2, img_output.get_oclPtr())
 		
 		_worksize_0 = img_input.getWidthIn()
-		if( img_input.depth == vl.IPL_DEPTH_1U ):
+		if( img_input.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_input.getWidthStep()
-		if( img_output.depth == vl.IPL_DEPTH_1U ):
+		if( img_input2.depth == vl.IPL_DEPTH_1U() ):
+			_worksize_0 = img_input2.getWidthStep()
+		if( img_output.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_output.getWidthStep()
 		
-		worksize = (_worksize_0, img_input.getHeigthIn(), img_input.getNFrames() )
+		worksize = (np.int32(_worksize_0), img_input.getHeigthIn(), img_input.getNFrames() )
 				
 		# ENQUEUEING KERNEL EXECUTION
 		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, worksize, None)
@@ -301,9 +305,9 @@ class cl2py_BIN_ND:
 		kernel_run.set_arg(1, img_output.get_oclPtr())
 				
 		_worksize_0 = img_input.getWidthIn()
-		if( img_input.depth == vl.IPL_DEPTH_1U ):
+		if( img_input.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_input.getWidthStep()
-		if( img_output.depth == vl.IPL_DEPTH_1U ):
+		if( img_output.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_output.getWidthStep()
 		
 		worksize = (_worksize_0, img_input.getHeigthIn(), img_input.getNFrames() )
@@ -355,12 +359,12 @@ class cl2py_BIN_ND:
 		kernel_run.set_arg(3, mobj_img_shape)
 				
 		_worksize_0 = img_input.getWidthIn()
-		if( img_input.depth == vl.IPL_DEPTH_1U ):
+		if( img_input.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_input.getWidthStep()
-		if( img_output.depth == vl.IPL_DEPTH_1U ):
+		if( img_output.depth == vl.IPL_DEPTH_1U() ):
 			_worksize_0 = img_output.getWidthStep()
 		
-		worksize = (_worksize_0, img_input.getHeigthIn(), img_input.getNFrames() )
+		worksize = (np.int32(_worksize_0), img_input.getHeigthIn(), img_input.getNFrames() )
 				
 		# ENQUEUEING KERNEL EXECUTION
 		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, worksize, None)
@@ -400,7 +404,16 @@ class cl2py_BIN_ND:
 		kernel_run.set_arg(3, mobj_img_shape_input)
 		kernel_run.set_arg(4, mobj_img_shape_output)
 				
-		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)
+		_worksize_0 = img_input.getWidthIn()
+		if( img_input.depth == vl.IPL_DEPTH_1U() ):
+			_worksize_0 = img_input.getWidthStep()
+		if( img_output.depth == vl.IPL_DEPTH_1U() ):
+			_worksize_0 = img_output.getWidthStep()
+		
+		worksize = (np.int32(_worksize_0), img_input.getHeigthIn(), img_input.getNFrames() )
+				
+		# ENQUEUEING KERNEL EXECUTION
+		cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, worksize, None)
 		
 		vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
