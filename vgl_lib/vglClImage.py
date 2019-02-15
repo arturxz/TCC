@@ -63,7 +63,7 @@ def vglClInit(ocl_context_a=None, ss_a=None, bin_image_pack_size_a=None):
 	or (bin_image_pack_size_a == vl.PACK_SIZE_64()) ):
 		bin_image_pack_size = bin_image_pack_size_a
 	elif( bin_image_pack_size_a is None ):
-		print("vglClInit: Warning: Assuming bin_image_pack_size as 8")
+		print(":vglClInit: Warning: Assuming bin_image_pack_size as 8")
 		bin_image_pack_size = vl.PACK_SIZE_8()
 	else:
 		print("vglClInit: Error! bin_image_pack_size not 8, 32 or 64. Ending execution.")
@@ -112,7 +112,7 @@ def vglClImageUpload(img):
 	mf = cl.mem_flags
 
 	# IMAGE VARS
-	print("Uploading image to device.")
+	print("-> vglClImageUpload: Starting.")
 	if( img.getVglShape().getNFrames() == 1 ):
 		origin = ( 0, 0, 0 )
 		region = ( img.getVglShape().getWidth(), img.getVglShape().getHeigth(), 1 )
@@ -133,7 +133,7 @@ def vglClImageUpload(img):
 
 	# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
 	cl.enqueue_copy(ocl.commandQueue, img.get_oclPtr(), img.get_ipl(), origin=origin, region=region, is_blocking=True)
-
+	print("<- vglClImageUpload: Ending.\n")
 """
 	THIS METHOD TAKES THE DEVICE-SIDE OPENCL IMAGE AND
 	COPY IT BACK TO THE RAM-SIDE. IN THE END, THE METHOD
@@ -144,7 +144,7 @@ def vglClImageDownload(img):
 	global ocl 
 
 	# MAKE IMAGE DOWNLOAD HERE
-	print("Downloading Image from device.")
+	print("-> vglClImageDownload: Starting")
 
 	if( img.getVglShape().getNFrames() == 1 ):
 		origin = ( 0, 0, 0 )
@@ -174,6 +174,7 @@ def vglClImageDownload(img):
 			buffer = np.frombuffer( buffer, img.get_ipl().dtype ).reshape( img.getVglShape().getNFrames(), img.getVglShape().getHeigth(), img.getVglShape().getWidth(), img.getVglShape().getNChannels() )
 
 	img.ipl = buffer
+	print("<- vglClImageDownload: Ending.\n")
 	vl.create_vglShape(img)
 
 """
@@ -184,8 +185,6 @@ def vglClImageDownload(img):
 def vglClNdImageUpload(img):
 	global ocl 
 	mf = cl.mem_flags
-
-	print("vglClNdImageUpload: Uploading to cl.Buffer")	
 	# CREATING DEVICE POINTER AND COPYING HOST TO DEVICE
 	img.oclPtr = cl.Buffer(ocl.context, mf.READ_ONLY, img.get_ipl().nbytes)
 	cl.enqueue_copy(ocl.commandQueue, img.get_oclPtr(), img.get_ipl().tobytes(), is_blocking=True)
@@ -198,8 +197,6 @@ def vglClNdImageUpload(img):
 """
 def vglClNdImageDownload(img):
 	global ocl
-	print("vglClNdImageDownload: Downloading from cl.Buffer")
-
 	cl.enqueue_copy(ocl.commandQueue, img.get_ipl(), img.get_oclPtr())
 	vl.create_vglShape(img)
 
@@ -256,10 +253,10 @@ def cl_channel_type(img):
 	oclPtr_dtype = None
 	if( img.ipl.dtype == np.uint8 ):
 		oclPtr_dtype = cl.channel_type.UNORM_INT8
-		print("cl_channel_type: 8bit Channel Size!")
+		#print("cl_channel_type: 8bit Channel Size!")
 	elif( img.ipl.dtype == np.uint16 ):
 		oclPtr_dtype = cl.channel_type.UNORM_INT16
-		print("cl_channel_type: 16bit Channel Size!")
+		#print("cl_channel_type: 16bit Channel Size!")
 
 	return oclPtr_dtype
 
@@ -296,11 +293,11 @@ def get_similar_oclPtr_object(img):
 	opencl_device: Union[cl.Image, cl.Buffer] = None
 
 	if( isinstance(img.get_oclPtr(), cl.Image) ):
-		print("get_similar_oclPtr_object: oclPtr is cl.Image.")
+		#print("get_similar_oclPtr_object: oclPtr is cl.Image.")
 		imgFormat = cl.ImageFormat(vl.cl_channel_order(img), vl.cl_channel_type(img))
 		opencl_device = cl.Image(ocl.context, mf.WRITE_ONLY, imgFormat, img.get_oclPtr().shape )
 	elif isinstance(img.get_oclPtr(), cl.Buffer):
-		print("get_similar_oclPtr_object: oclPtr is cl.Buffer.")
+		#print("get_similar_oclPtr_object: oclPtr is cl.Buffer.")
 		opencl_device = cl.Buffer(ocl.context, mf.WRITE_ONLY, img.get_ipl().nbytes)
 	
 	return opencl_device
@@ -343,4 +340,3 @@ def get_vglshape_opencl_buffer(shape):
 	buf = cl.Buffer(ocl.context, cl.mem_flags.READ_ONLY, shape.nbytes)
 	cl.enqueue_copy(ocl.commandQueue, buf, shape.tobytes(), is_blocking=True)
 	return buf
-
