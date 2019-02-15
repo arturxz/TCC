@@ -48,7 +48,7 @@ class opencl_context:
 			IF THE KERNEL IS ALREADY COMPILED, IT DOES NOTHING.
 	"""
 	def get_compiled_kernel(self, filepath, kernelname):
-		print("get_compiled_kernel: Loading OpenCL Kernel")
+		print("-> get_compiled_kernel: Starting")
 		kernel_file = None
 
 		try:
@@ -65,12 +65,13 @@ class opencl_context:
 		program = self.is_kernel_compiled(kernelname)
 		
 		if( program is None ):
-			print("get_compiled_kernel: Building Kernel.")
+			#print("get_compiled_kernel: Building Kernel.")
 			self.load_headers(filepath)
 			program = cl.Program(self.ctx, kernel_file.read())
 			self.programs.append( program.build(options=self.get_build_options()) )
 			
 		kernel_file.close()
+		print("<- get_compiled_kernel: Ending\n")
 		return self.is_kernel_compiled(kernelname)
 		
 	"""
@@ -84,11 +85,22 @@ class opencl_context:
 		return VglClContext(self.platform.int_ptr, self.device.int_ptr, self.ctx, self.queue)
 	
 	def load_headers(self, filepath):
-		print("Loading Headers")
+		#print("Loading Headers")
 		self.kernel_file = open(filepath, "r")
 		buildDir = self.getDir(filepath)
 
 		self.build_options = "-I "+buildDir
+		self.build_options = self.build_options + " -D VGL_SHAPE_NCHANNELS={0}".format(vl.VGL_SHAPE_NCHANNELS())
+		self.build_options = self.build_options + " -D VGL_SHAPE_WIDTH={0}".format(vl.VGL_SHAPE_WIDTH())
+		self.build_options = self.build_options + " -D VGL_SHAPE_HEIGTH={0}".format(vl.VGL_SHAPE_HEIGTH())
+		self.build_options = self.build_options + " -D VGL_SHAPE_LENGTH={0}".format(vl.VGL_SHAPE_LENGTH())
+		self.build_options = self.build_options + " -D VGL_MAX_DIM={0}".format(vl.VGL_MAX_DIM())
+		self.build_options = self.build_options + " -D VGL_ARR_SHAPE_SIZE={0}".format(vl.VGL_ARR_SHAPE_SIZE())
+		self.build_options = self.build_options + " -D VGL_ARR_CLSTREL_SIZE={0}".format(vl.VGL_ARR_CLSTREL_SIZE())
+		self.build_options = self.build_options + " -D VGL_STREL_CUBE={0}".format(vl.VGL_STREL_CUBE())
+		self.build_options = self.build_options + " -D VGL_STREL_CROSS={0}".format(vl.VGL_STREL_CROSS())
+		self.build_options = self.build_options + " -D VGL_STREL_GAUSS={0}".format(vl.VGL_STREL_GAUSS())
+		self.build_options = self.build_options + " -D VGL_STREL_MEAN={0}".format(vl.VGL_STREL_MEAN())
 
 		# READING THE HEADER FILES BEFORE COMPILING THE KERNEL
 		while( buildDir ):
