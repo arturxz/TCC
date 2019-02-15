@@ -75,11 +75,11 @@ class VglImage(object):
 
 		if(self.ndim is None):
 			self.ndim = vl.VGL_IMAGE_2D_IMAGE()
-			print("Assuming 2D Image!")
+			print(":Assuming 2D Image!")
 		elif(self.ndim is vl.VGL_IMAGE_2D_IMAGE()):
-			print("Creating 2D Image!")
+			print(":Creating 2D Image!")
 		elif(self.ndim is vl.VGL_IMAGE_3D_IMAGE()):
-			print("Creating 3D Image!")
+			print(":Creating 3D Image!")
 		else:
 			print("vglImage: Warning! Image is not 2D or 3D. Execution will continue.")
 
@@ -222,17 +222,17 @@ def vglLoadImage(img, filename=""):
 		print(str(fnf))
 		exit()
 	except Exception as e:
-		print("vglImage: vglLoadImage: Unrecognized exception was thrown.")
+		print("vglImage: vglLoadImage Error: Unrecognized exception was thrown.")
 		print(str(e))
 		exit()
 	
 	if( isinstance(img.ipl, np.ndarray) ):
-		print("vglImage: Image loaded! VGL_RAM_CONTEXT.")
+		#print("vglImage: Image loaded! VGL_RAM_CONTEXT.")
 
-	vl.create_vglShape(img)
+		vl.create_vglShape(img)
 
-	img.depth = img.getVglShape().getNFrames()
-	img.nChannels = img.getVglShape().getNChannels()
+		img.depth = img.getVglShape().getNFrames()
+		img.nChannels = img.getVglShape().getNChannels()
 	
 	
 """
@@ -240,7 +240,7 @@ def vglLoadImage(img, filename=""):
 	METHODS IN vglImage.cpp
 """
 def vglSaveImage(filename, img):
-	print("Saving Picture in Hard Drive")
+	print("::Saving Picture in Hard Drive")
 	io.imsave(filename, img.ipl)
 
 """
@@ -254,41 +254,42 @@ def vglSaveImage(filename, img):
 """
 def create_vglShape(img):
 	if(img.ipl is not None):
-		print("create_vglShape: The image is valid. Creating vglShape.")
+		print("-> create_vglShape: Starting")
 
 		img.vglShape = vl.VglShape()
 		if( img.ndim == vl.VGL_IMAGE_2D_IMAGE() ):
-			print("2D Image")
+			#print("2D Image")
 			if( len(img.ipl.shape) == 2 ):
 				# SHADES OF GRAY IMAGE
-				print("VglImage LUMINANCE")
+				#print("VglImage LUMINANCE")
 				img.vglShape.constructor2DShape(1, img.ipl.shape[1], img.ipl.shape[0])
 			elif(len(img.ipl.shape) == 3):
 				# MORE THAN ONE COLOR CHANNEL
-				print("VglImage RGB")
+				#print("VglImage RGB")
 				img.vglShape.constructor2DShape(img.ipl.shape[2], img.ipl.shape[1], img.ipl.shape[0])
 		elif( img.ndim == vl.VGL_IMAGE_3D_IMAGE() ):
-			print("3D Image")
+			#print("3D Image")
 			if( len(img.ipl.shape) == 3 ):
 				# SHADES OF GRAY IMAGE
-				print("VglImage LUMINANCE")
+				#print("VglImage LUMINANCE")
 				img.vglShape.constructor3DShape( 1, img.ipl.shape[2], img.ipl.shape[1], img.ipl.shape[0] )
 			elif(len(img.ipl.shape) == 4):
 				# MORE THAN ONE COLOR CHANNEL
-				print("VglImage RGB")
+				#print("VglImage RGB")
 				img.vglShape.constructor3DShape( img.ipl.shape[3], img.ipl.shape[2], img.ipl.shape[1], img.ipl.shape[0] )
 		else:
 			print("vglImage: create_vglShape Error: image dimension not recognized. img.ndim:", img.ndim)
 			exit()
 	else:
-		print("create_vglShape: img.ipl is None. Please, load image first!")
+		print("vglImage: create_vglShape Error: img.ipl is None. Please, load image first!")
 		exit()
+	print("<- create_vglShape: Ending\n")
 
 """
 	EQUIVALENT TO vglImage.3To4Channels()
 """
 def rgb_to_rgba(img):
-	print("[RGB -> RGBA]")
+	print("::[RGB -> RGBA]")
 	ipl_rgba = np.empty((img.vglShape.getHeigth(), img.vglShape.getWidth(), 4), img.ipl.dtype)
 
 	ipl_rgba[:,:,0] = img.ipl[:,:,0]
@@ -303,7 +304,7 @@ def rgb_to_rgba(img):
 	EQUIVALENT TO vglImage.3To4Channels()
 """
 def rgba_to_rgb(img):
-	print("[RGBA -> RGB]")
+	print("::[RGBA -> RGB]")
 	if( (img.ipl[0,0,:].size < 4) | (img.ipl[0,0,:].size > 4) ):
 		print("vglImage: rgba_to_rgb: Error: IMAGE IS NOT RGBA.")
 		exit()
@@ -315,6 +316,3 @@ def rgba_to_rgb(img):
 
 		img.ipl = ipl_rgb
 		vl.create_vglShape(img)
-
-"""
-"""
