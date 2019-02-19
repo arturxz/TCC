@@ -671,23 +671,23 @@ if __name__ == "__main__":
 		CL.IMAGE OBJECTS
 	"""
 
-	img_input = vl.VglImage("yamamoto.jpg", vl.VGL_IMAGE_2D_IMAGE())
+	img_input = vl.VglImage("yamamoto.jpg", None, vl.VGL_IMAGE_2D_IMAGE())
 	vl.vglLoadImage(img_input)
 	if( img_input.getVglShape().getNChannels() == 3 ):
 		vl.rgb_to_rgba(img_input)
 	
 	vl.vglClUpload(img_input)
 	
-	img_input2 = vl.VglImage("yamamoto-vglClThreshold.jpg", vl.VGL_IMAGE_2D_IMAGE())
+	img_input2 = vl.VglImage("yamamoto-vglClThreshold.jpg", None, vl.VGL_IMAGE_2D_IMAGE())
 	vl.vglLoadImage(img_input2)
 	if( img_input2.getVglShape().getNChannels() == 3 ):
 		vl.rgb_to_rgba(img_input2)
 
-	img_input_3d = vl.VglImage("3d.tif", vl.VGL_IMAGE_3D_IMAGE())
+	img_input_3d = vl.VglImage("3d.tif", None, vl.VGL_IMAGE_3D_IMAGE())
 	vl.vglLoadImage(img_input_3d)
 	vl.vglClUpload(img_input_3d)
 
-	img_input2_3d = vl.VglImage("3d-2.tif", vl.VGL_IMAGE_3D_IMAGE())
+	img_input2_3d = vl.VglImage("3d-2.tif", None, vl.VGL_IMAGE_3D_IMAGE())
 	vl.vglLoadImage(img_input2_3d)
 
 	img_output = vl.create_blank_image_as(img_input)

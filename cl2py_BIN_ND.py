@@ -441,7 +441,7 @@ if __name__ == "__main__":
 	# STRUCTURANT ELEMENT
 	window = vl.VglStrEl()
 	window.constructorFromTypeNdim(vl.VGL_STREL_CROSS(), 2)
-
+	"""
 	wrp.vglClNdBinDilate(img_input, img_output, window)
 	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
 	vl.vglSaveImage("bin-vglClNdBinDilate.pgm", img_output)
@@ -473,6 +473,10 @@ if __name__ == "__main__":
 	wrp.vglClNdBinRoi(img_output, np.uint32((25, 25)), np.uint32((75, 75)))
 	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
 	vl.vglSaveImage("bin-vglClNdBinRoi.pgm", img_output)
+	"""
+	wrp.vglClNdBinThreshold(img_input, img_output, 100)
+	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
+	vl.vglSaveImage("bin-vglClNdBinThreshold.jpg", img_output)
 
 	wrp.vglClNdBinThreshold(img_input, img_output, 100)
 	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())

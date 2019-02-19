@@ -51,20 +51,30 @@ from typing import Union
 		GLuint cudaPbo equivalent; (CUDA not implemented)
 """
 class VglImage(object):
-	def __init__(self, imgPath="", ndim=None, clForceAsBuf=None ):
+	def __init__(self, imgPath="", depth=None, ndim=None, clForceAsBuf=None ):
 		# IF THE IMAGE TYPE IS NOT SPECIFIED, A 2D IMAGE WILL BE ASSUMED
 		# INICIALIZING DATA
 		self.ipl = None
 		self.ndim = ndim
 		self.shape = np.zeros((2*vl.VGL_MAX_DIM()), np.uint8)
 		self.vglShape: Union[None, vl.vglShape] = None
-		self.depth = 0
+		self.depth = depth
 		self.nChannels = 0
 		self.has_mipmap = 0
 		self.oclPtr: Union[cl.Image, cl.Buffer] = None
 		self.clForceAsBuf = clForceAsBuf
 		self.inContext = 0
 		self.filename = imgPath
+
+		# NOT IMPLEMENTED IN PYTHON-SIDE
+		self.fbo = -1
+		self.tex = -1
+
+		self.cudaPtr = None
+		self.cudaPbo = -1
+
+		if( self.depth == None ):
+			self.depth = vl.IPL_DEPTH_1U()
 
 		if( self.clForceAsBuf is None ):
 			self.clForceAsBuf = vl.IMAGE_CL_OBJECT()
@@ -82,6 +92,11 @@ class VglImage(object):
 			print(":Creating 3D Image!")
 		else:
 			print("vglImage: Warning! Image is not 2D or 3D. Execution will continue.")
+		
+		print(":::-->path", imgPath)
+		print(":::-->dept", depth)
+		print(":::-->ndim", ndim)
+		print(":::-->forc", clForceAsBuf)
 
 	def getVglShape(self):
 		return self.vglShape
@@ -132,7 +147,6 @@ class VglImage(object):
 	
 	def getNFrames(self):
 		return self.vglShape.getNFrames()
-
 	
 	def getBitsPerSample(self):
 		return self.depth & 255
@@ -233,7 +247,6 @@ def vglLoadImage(img, filename=""):
 
 		img.depth = img.getVglShape().getNFrames()
 		img.nChannels = img.getVglShape().getNChannels()
-	
 	
 """
 	EQUIVALENT TO DIFFERENT IMAGE SAVE

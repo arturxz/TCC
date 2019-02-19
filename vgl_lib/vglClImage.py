@@ -134,6 +134,7 @@ def vglClImageUpload(img):
 	# COPYING NDARRAY IMAGE TO OPENCL IMAGE OBJECT
 	cl.enqueue_copy(ocl.commandQueue, img.get_oclPtr(), img.get_ipl(), origin=origin, region=region, is_blocking=True)
 	print("<- vglClImageUpload: Ending.\n")
+
 """
 	THIS METHOD TAKES THE DEVICE-SIDE OPENCL IMAGE AND
 	COPY IT BACK TO THE RAM-SIDE. IN THE END, THE METHOD
@@ -310,7 +311,7 @@ def get_similar_oclPtr_object(img):
 	THE img.inContext IS SET AS VGL_BLANK_CONTEXT().
 """
 def create_blank_image_as(img):
-	image = vl.VglImage(img.filename, img.ndim, img.clForceAsBuf)
+	image = vl.VglImage(img.filename, img.depth, img.ndim, img.clForceAsBuf)
 	image.ipl		= np.asarray(img.ipl, img.ipl.dtype)
 	image.shape		= img.shape
 	image.vglShape	= img.vglShape
