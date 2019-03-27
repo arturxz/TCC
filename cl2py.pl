@@ -796,7 +796,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
   open CPP, ">>", "$output.py";
 #  open HEAD, ">>", "$output.h";
 
-  print CPP "    \"\"\"\n$comment\n    \"\"\"\n";
+  print CPP "    \"\"\"\n    $comment    \n    \"\"\"\n";
 #  print HEAD "$comment\n";
 
   print CPP "    def $basename(";
@@ -805,15 +805,15 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
     print ">>>$type[$i]<<< becomes ";
     if ( ($semantics[$i] eq "__read_only") or ($semantics[$i] eq "__write_only") or ($semantics[$i] eq "__global") ){
       if ( ($type[$i] eq "image2d_t") or ($type[$i] eq "image3d_t") or ($type[$i] eq "char*") or ($type[$i] eq "int*") or ($type[$i] eq "unsigned char*") or ($type[$i] eq "unsigned int*") ){
-        $type[$i] = "VglImage*";
+        $type[$i] = "";
       }
     }
     else{
       $type[$i] =~ s#^\s*((unsigned)?\s*[a-zA-Z_][a-zA-Z0-9_]*)##;
       $type[$i] = $1;
     }
-    if ($type[$i] eq "VglClStrEl"){
-      $type[$i] = "VglStrEl";
+    if ($type[$i] eq ""){
+      $type[$i] = "";
     }
     print ">>>$type[$i]<<<\n";
   }
@@ -824,7 +824,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
       next;
     }
     if ( ($is_array[$i]) or ($type[$i] eq "VglStrEl") ){
-      $p = "*";
+      $p = "";
     }
     if (($i > 0) and (not $is_shape[0])){
       print CPP ", ";
@@ -836,18 +836,18 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
 #      print HEAD " $default[$i]";
     }
   }
-  print CPP "):\n";
+  print CPP "):\n\n";                                 # ESCOPO DA FUNCAO TERMINA AQUI
 #  print HEAD ");\n\n";
 
   for ($i = 0; $i <= $#type; $i++){
     if ($semantics[$i] eq "__global"){
         $var = $variable[$i];
         print CPP "
-  if (  ( ($var->ndim == 2) || ($var->ndim == 3) )  &&  !($var->clForceAsBuf)  )
-  {
-    fprintf(stderr, \"%s: %s: Error: this function supports only OpenCL data as buffer. Please call vglClForceAsBuf() just after creating $var.\\n\", __FILE__, __FUNCTION__);
-    exit(1);
-  }";
+        if( not $var.clForceAsBuf == vl.IMAGE_ND_ARRAY() ):
+            print(\"vglClNdCopy: Error: this function supports only OpenCL data as buffer and img_input isn't.\")
+            exit(1)
+
+";
     }
     elsif (  ($semantics[$i] eq "__read_only") or ($semantics[$i] eq "__write_only")  ){
       #TODO: add code to check image compatibility.
@@ -856,14 +856,14 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
 
   for ($i = 0; $i <= $#type; $i++){
     if ($semantics[$i] eq "__read_only" or $semantics[$i] eq "__write_only" or $semantics[$i] eq "__read_write" or $semantics[$i] eq "__global"){
-        print CPP "\n        vl.vglCheckContext($variable[$i], vl.VGL_CL_CONTEXT())";
+        print CPP "        vl.vglCheckContext($variable[$i], vl.VGL_CL_CONTEXT())\n";
     }
   }
 
-  print CPP "
+#  print CPP " ------------------------------ a versao python nao tem o tratamento de erro como no c
 
-  cl_int _err;
-";
+#  cl_int _err;
+#";
 
   for ($i = 0; $i <= $#type; $i++){
 
@@ -972,31 +972,33 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
     }
   }
 
-  print CPP "
-  int _ndim = 2;
-  if ($var_worksize->ndim > 2){
-    _ndim = 3;
-  }
+#  print CPP "
+#  int _ndim = 2;
+#  if ($var_worksize->ndim > 2){           ----------------- worksize nao e setado assim no python
+#    _ndim = 3;
+#  }
+#
+#  size_t _worksize_0 = $var_worksize->getWidthIn();";
 
-  size_t _worksize_0 = $var_worksize->getWidthIn();";
+#  for ($i = 0; $i <= $#type; $i++){
+#    if ($type[$i] eq "VglImage*"){
+#      print CPP "
+#  if ($variable[$i]->depth == IPL_DEPTH_1U)
+#  {
+#    _worksize_0 = $variable[$i]->getWidthStep();
+#  }";
+#    }
+#  }
 
-  for ($i = 0; $i <= $#type; $i++){
-    if ($type[$i] eq "VglImage*"){
-      print CPP "
-  if ($variable[$i]->depth == IPL_DEPTH_1U)
-  {
-    _worksize_0 = $variable[$i]->getWidthStep();
-  }";
-    }
-  }
+#  print CPP "
+#
+#  size_t worksize[] = { _worksize_0, $var_worksize->getHeightIn(),  $var_worksize->getNFrames() };
+#  clEnqueueNDRangeKernel( cl.commandQueue, _kernel, _ndim, NULL, worksize, 0, 0, 0, 0 );
+#        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, $var_worksize.get_ipl().shape, None)
+#  vglClCheckError( _err, (char*) \"clEnqueueNDRangeKernel\" );
+#";
 
-  print CPP "
-
-  size_t worksize[] = { _worksize_0, $var_worksize->getHeightIn(),  $var_worksize->getNFrames() };
-  clEnqueueNDRangeKernel( cl.commandQueue, _kernel, _ndim, NULL, worksize, 0, 0, 0, 0 );
-
-  vglClCheckError( _err, (char*) \"clEnqueueNDRangeKernel\" );
-";
+  print CPP "\n        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, kernel_run, img_output.get_ipl().shape, None)";
 
   for ($i = 0; $i <= $#type; $i++){
     if (    ( ($type[$i] ne "VglImage*") && ($semantics[$i] ne "__write_only") && ($is_array[$i] != 0) ) or
