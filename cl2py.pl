@@ -874,14 +874,23 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
         my $e = "&";
         if ($is_array[$i]){
           $e = "";
-	}
-        print CPP "
-  cl_mem mobj_$var = NULL;
-  mobj_$var = clCreateBuffer(cl.context, CL_MEM_READ_ONLY, ($size[$i])*sizeof($type[$i]), NULL, &_err);
-  vglClCheckError( _err, (char*) \"clCreateBuffer $var\" );
-  _err = clEnqueueWriteBuffer(cl.commandQueue, mobj_$var, CL_TRUE, 0, ($size[$i])*sizeof($type[$i]), $e$var, 0, NULL, NULL);
-  vglClCheckError( _err, (char*) \"clEnqueueWriteBuffer $var\" );
-";
+        }
+    print CPP "
+        try:
+            mobj_$var = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, $e$var.nbytes)
+            cl.enqueue_copy(self.ocl.commandQueue, mobj_$var, $e$var.tobytes(), is_blocking=True)
+            $e$var = mobj_$var
+        except Exception as e:
+            print(\"vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.\")
+            print(str(e))
+            exit()
+\n"
+#  cl_mem mobj_$var = NULL;
+#  mobj_$var = clCreateBuffer(cl.context, CL_MEM_READ_ONLY, ($size[$i])*sizeof($type[$i]), NULL, &_err);
+#  vglClCheckError( _err, (char*) \"clCreateBuffer $var\" );
+#  _err = clEnqueueWriteBuffer(cl.commandQueue, mobj_$var, CL_TRUE, 0, ($size[$i])*sizeof($type[$i]), $e$var, 0, NULL, NULL);
+#  vglClCheckError( _err, (char*) \"clEnqueueWriteBuffer $var\" );
+#";
     }
     elsif ( ($type[$i] eq "VglClShape") and ($is_shape[$i]) ){
         $var = $variable[$i];
