@@ -919,37 +919,40 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
     }
   }
 
-        print CPP "
-  static cl_program _program = NULL;
-  if (_program == NULL)
-  {
-    char* _file_path = (char*) \"$cpp_read_path$basename\.cl\";
-    printf(\"Compiling %s\\n\", _file_path);
-    std::ifstream _file(_file_path);
-    if(_file.fail())
-    {
-      fprintf(stderr, \"%s:%s: Error: File %s not found.\\n\", __FILE__, __FUNCTION__, _file_path);
-      exit(1);
-    }
-    std::string _prog( std::istreambuf_iterator<char>( _file ), ( std::istreambuf_iterator<char>() ) );
-    const char *_source_str = _prog.c_str();
+print CPP "
+        _program = self.cl_ctx.get_compiled_kernel(\"../$cpp_read_path$basename\.cl\", \"vglClConvolution\")
+        _kernel = _program.$basename
+\n";  
+#  static cl_program _program = NULL;
+#  if (_program == NULL)
+#  {
+#    char* _file_path = (char*) \"$cpp_read_path$basename\.cl\";
+#    printf(\"Compiling %s\\n\", _file_path);
+#    std::ifstream _file(_file_path);
+#    if(_file.fail())
+#    {
+#      fprintf(stderr, \"%s:%s: Error: File %s not found.\\n\", __FILE__, __FUNCTION__, _file_path);
+#      exit(1);
+#    }
+#    std::string _prog( std::istreambuf_iterator<char>( _file ), ( std::istreambuf_iterator<char>() ) );
+#    const char *_source_str = _prog.c_str();
 #ifdef __DEBUG__
-    printf(\"Kernel to be compiled:\\n%s\\n\", _source_str);
+#    printf(\"Kernel to be compiled:\\n%s\\n\", _source_str);
 #endif
-    _program = clCreateProgramWithSource(cl.context, 1, (const char **) &_source_str, 0, &_err );
-    vglClCheckError(_err, (char*) \"clCreateProgramWithSource\" );
-    _err = clBuildProgram(_program, 1, cl.deviceId, \"-I $cpp_read_path\", NULL, NULL );
-    vglClBuildDebug(_err, _program);
-  }
-
-  static cl_kernel _kernel = NULL;
-  if (_kernel == NULL)
-  {
-    _kernel = clCreateKernel( _program, \"$basename\", &_err );
-    vglClCheckError(_err, (char*) \"clCreateKernel\" );
-  }
-
-";
+#    _program = clCreateProgramWithSource(cl.context, 1, (const char **) &_source_str, 0, &_err );
+#    vglClCheckError(_err, (char*) \"clCreateProgramWithSource\" );
+#    _err = clBuildProgram(_program, 1, cl.deviceId, \"-I $cpp_read_path\", NULL, NULL );
+#    vglClBuildDebug(_err, _program);
+#  }
+#
+#  static cl_kernel _kernel = NULL;
+#  if (_kernel == NULL)
+#  {
+#    _kernel = clCreateKernel( _program, \"$basename\", &_err );
+#    vglClCheckError(_err, (char*) \"clCreateKernel\" );
+# }
+#
+#";
 
   for ($i = 0; $i <= $#type; $i++){
     if ($type[$i] eq "VglImage*"){
