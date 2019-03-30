@@ -804,7 +804,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
   for ($i = 0; $i <= $#type; $i++){
     print ">>>$type[$i]<<< becomes ";
     if ( ($semantics[$i] eq "__read_only") or ($semantics[$i] eq "__write_only") or ($semantics[$i] eq "__global") ){
-      if ( ($type[$i] eq "image2d_t") or ($type[$i] eq "image3d_t") or ($type[$i] eq "char*") or ($type[$i] eq "int*") or ($type[$i] eq "unsigned char*") or ($type[$i] eq "unsigned int*") or ($type[$i] eq "float") or ($type[$i] eq "int") ){
+      if ( ($type[$i] eq "image2d_t") or ($type[$i] eq "image3d_t") or ($type[$i] eq "char*") or ($type[$i] eq "int*") or ($type[$i] eq "unsigned char*") or ($type[$i] eq "unsigned int*") ){
         $type[$i] = "";
       }
     }
@@ -830,10 +830,11 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
       print CPP ", ";
 #      print HEAD ", ";
     }
-    print CPP "$type[$i]$p $variable[$i]";
+    print CPP "$variable[$i]";
+#    print CPP "$type[$i]$p $variable[$i]";
 #    print HEAD "$type[$i]$p $variable[$i]";
     if ($default[$i]){
-#      print HEAD " $default[$i]";
+      print CPP " $default[$i]";
     }
   }
   print CPP "):\n\n";                                 # ESCOPO DA FUNCAO TERMINA AQUI
@@ -844,12 +845,9 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
         $var = $variable[$i];
         print CPP "
         if( not $var\.clForceAsBuf == vl\.IMAGE_ND_ARRAY() ):
-            print(\"vglClNdCopy: Error: this function supports only OpenCL data as buffer and img_input isn't\.\")
-            exit(1)
-
-";
-    }
-    elsif (  ($semantics[$i] eq "__read_only") or ($semantics[$i] eq "__write_only")  ){
+            print(\"vglClNdCopy: Error: this function supports only OpenCL data as buffer and $var isn't\.\")
+            exit(1)\n\n";
+    } elsif (  ($semantics[$i] eq "__read_only") or ($semantics[$i] eq "__write_only")  ){
       #TODO: add code to check image compatibility.
     }
   }
@@ -883,39 +881,42 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
         except Exception as e:
             print(\"vglClConvolution: Error!! Impossible to convert convolution_window to cl\.Buffer object\.\")
             print(str(e))
-            exit()
-\n";
-    }
-    elsif ( ($type[$i] eq "VglClShape") and ($is_shape[$i]) ){
+            exit()\n";
+    } elsif ( ($type[$i] eq "VglClShape") and ($is_shape[$i]) ){
         $var = $variable[$i];
         print CPP "
         # CREATING OPENCL BUFFER TO vglShape
-        mobj_$var = $var\.getVglShape()\.get_asVglClShape_buffer()
-\n";
-#  cl_mem mobj_$var = NULL;
-#  mobj_$var = clCreateBuffer(cl.context, CL_MEM_READ_ONLY, sizeof($type[$i]), NULL, &_err);
-#  vglClCheckError( _err, (char*) \"clCreateBuffer $var\" );
-#  _err = clEnqueueWriteBuffer(cl.commandQueue, mobj_$var, CL_TRUE, 0, sizeof($type[$i]), $size[$i], 0, NULL, NULL);
-#  vglClCheckError( _err, (char*) \"clEnqueueWriteBuffer $var\" );
-#";
-    }
-    elsif ($type[$i] eq "VglStrEl"){
+        mobj_$var = $var\.getVglShape()\.get_asVglClShape_buffer()\n";
+    } elsif ($type[$i] eq "VglStrEl"){
         $var = $variable[$i];
         $t = "VglClStrEl";
         print CPP "
         if( not isinstance($var, vl\.VglStrEl) ):
-            print(\"vglClNdConvolution: Error: $var is not a VglStrEl object\. aborting execution\.\")
+            print(\"vglClNdConvolution: Error: $var is not a $t object\. aborting execution\.\")
             exit()
 
         # CREATING OPENCL BUFFER TO VglStrEl
-        mobj_$var = $var\.get_asVglClStrEl_buffer()
-\n";
-#  cl_mem mobj_$var = NULL;
-#  mobj_$var = clCreateBuffer(cl.context, CL_MEM_READ_ONLY, sizeof($t), NULL, &_err);
-#  vglClCheckError( _err, (char*) \"clCreateBuffer $var\" );
-#  _err = clEnqueueWriteBuffer(cl.commandQueue, mobj_$var, CL_TRUE, 0, sizeof($t), $var->asVglClStrEl(), 0, NULL, NULL);
-#  vglClCheckError( _err, (char*) \"clEnqueueWriteBuffer $var\" );
-#";
+        mobj_$var = $var\.get_asVglClStrEl_buffer()\n";
+    } elsif ($type[$i] eq "int"){
+              print CPP "
+        if( not isinstance($variable[$i], np.uint32) ):
+            print(\"vglClConvolution: Warning: $variable[$i] not np\.uint32! Trying to convert\.\.\.\")
+            try:
+                $variable[$i] = np\.uint32($variable[$i])
+            except Exception as e:
+                print(\"vglClConvolution: Error!! Impossible to convert $variable[$i] as a np\.uint32 object.\")
+                print(str(e))
+                exit()\n";
+    } elsif ($type[$i] eq "float"){
+              print CPP "
+        if( not isinstance($variable[$i], np.float32) ):
+            print(\"vglClConvolution: Warning: $variable[$i] not np\.float32! Trying to convert\.\.\.\")
+            try:
+                $variable[$i] = np\.float32($variable[$i])
+            except Exception as e:
+                print(\"vglClConvolution: Error!! Impossible to convert $variable[$i] as a np\.float32 object.\")
+                print(str(e))
+                exit()\n";
     }
   }
 
