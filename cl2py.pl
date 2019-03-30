@@ -799,13 +799,13 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
   print CPP "    \"\"\"\n    $comment    \n    \"\"\"\n";
 #  print HEAD "$comment\n";
 
-  print CPP "    def $basename(";
+  print CPP "    def $basename(self, ";
 #  print HEAD "void $basename(";
   for ($i = 0; $i <= $#type; $i++){
     print ">>>$type[$i]<<< becomes ";
     if ( ($semantics[$i] eq "__read_only") or ($semantics[$i] eq "__write_only") or ($semantics[$i] eq "__global") ){
       if ( ($type[$i] eq "image2d_t") or ($type[$i] eq "image3d_t") or ($type[$i] eq "char*") or ($type[$i] eq "int*") or ($type[$i] eq "unsigned char*") or ($type[$i] eq "unsigned int*") ){
-        $type[$i] = "";
+        $type[$i] = "VglImage*";
       }
     }
     else{
@@ -873,13 +873,13 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
         if ($is_array[$i]){
           $e = "";
         }
-        print CPP "
+        print CPP "        # EVALUATING IF $e$var IS IN CORRECT TYPE
         try:
             mobj_$var = cl\.Buffer(self\.ocl\.context, cl\.mem_flags\.READ_ONLY, $e$var\.nbytes)
             cl\.enqueue_copy(self\.ocl\.commandQueue, mobj_$var, $e$var\.tobytes(), is_blocking=True)
             $e$var = mobj_$var
         except Exception as e:
-            print(\"vglClConvolution: Error!! Impossible to convert convolution_window to cl\.Buffer object\.\")
+            print(\"vglClConvolution: Error!! Impossible to convert $e$var to cl\.Buffer object\.\")
             print(str(e))
             exit()\n";
     } elsif ( ($type[$i] eq "VglClShape") and ($is_shape[$i]) ){
@@ -890,7 +890,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
     } elsif ($type[$i] eq "VglStrEl"){
         $var = $variable[$i];
         $t = "VglClStrEl";
-        print CPP "
+        print CPP "        # EVALUATING IF $variable[$i] IS IN CORRECT TYPE
         if( not isinstance($var, vl\.VglStrEl) ):
             print(\"vglClNdConvolution: Error: $var is not a $t object\. aborting execution\.\")
             exit()
@@ -898,7 +898,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
         # CREATING OPENCL BUFFER TO VglStrEl
         mobj_$var = $var\.get_asVglClStrEl_buffer()\n";
     } elsif ($type[$i] eq "int"){
-              print CPP "
+              print CPP "        # EVALUATING IF $variable[$i] IS IN CORRECT TYPE
         if( not isinstance($variable[$i], np.uint32) ):
             print(\"vglClConvolution: Warning: $variable[$i] not np\.uint32! Trying to convert\.\.\.\")
             try:
@@ -908,7 +908,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
                 print(str(e))
                 exit()\n";
     } elsif ($type[$i] eq "float"){
-              print CPP "
+              print CPP "        # EVALUATING IF $variable[$i] IS IN CORRECT TYPE
         if( not isinstance($variable[$i], np.float32) ):
             print(\"vglClConvolution: Warning: $variable[$i] not np\.float32! Trying to convert\.\.\.\")
             try:
@@ -921,7 +921,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
   }
 
 print CPP "
-        _program = self\.cl_ctx\.get_compiled_kernel(\"\.\./$cpp_read_path$basename\.cl\", \"vglClConvolution\")
+        _program = self\.cl_ctx\.get_compiled_kernel(\"\.\./$cpp_read_path$basename\.cl\", \"$basename\")
         _kernel = _program\.$basename\n";  
 #  static cl_program _program = NULL;
 #  if (_program == NULL)
@@ -974,7 +974,7 @@ print CPP "
       $sizeof = "$type[$i]";
     }
 
-
+    
     print CPP "
         _kernel\.set_arg($i, $addr)";
 #  _err = clSetKernelArg( _kernel, $i, sizeof( $sizeof ), $addr );
@@ -991,10 +991,10 @@ print CPP "
 
 #  print CPP "
 #  int _ndim = 2;
-#  if ($var_worksize->ndim > 2){           ----------------- worksize nao e setado assim no python
+#  if ($var_worksize->ndim > 2){
 #    _ndim = 3;
 #  }
-#
+
 #  size_t _worksize_0 = $var_worksize->getWidthIn();";
 
   for ($i = 0; $i <= $#type; $i++){
@@ -1007,12 +1007,14 @@ print CPP "
     }
   }
 
-  print CPP "\n
-        cl\.enqueue_nd_range_kernel(self\.ocl\.commandQueue, kernel_run, $variable\.get_ipl()\.shape, None)
-";
+  print CPP "\n\n        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+        cl\.enqueue_nd_range_kernel(self\.ocl\.commandQueue, _kernel, $var_worksize\.get_ipl()\.shape, None)\n";
 
+#  print CPP "
+#
 #  size_t worksize[] = { _worksize_0, $var_worksize->getHeightIn(),  $var_worksize->getNFrames() };
 #  clEnqueueNDRangeKernel( cl.commandQueue, _kernel, _ndim, NULL, worksize, 0, 0, 0, 0 );
+
 #  vglClCheckError( _err, (char*) \"clEnqueueNDRangeKernel\" );
 #";
 
@@ -1029,8 +1031,7 @@ print CPP "
 
   for ($i = 0; $i <= $#type; $i++){
     if ($semantics[$i] eq "__write_only" or $semantics[$i] eq "__read_write" or $semantics[$i] eq "__global"){
-      print CPP "
-        vl\.vglSetContext($variable[$i], vl\.VGL_CL_CONTEXT())\n";
+      print CPP "\n        vl\.vglSetContext($variable[$i], vl\.VGL_CL_CONTEXT())\n";
 #  vglSetContext($variable[$i]".", VGL_CL_CONTEXT);
 #";
     }
