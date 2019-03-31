@@ -1008,7 +1008,7 @@ print CPP "
   }
 
   print CPP "\n\n        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl\.enqueue_nd_range_kernel(self\.ocl\.commandQueue, _kernel, $var_worksize\.get_ipl()\.shape, None)\n";
+        cl\.enqueue_nd_range_kernel(self\.ocl\.commandQueue, _kernel, $var_worksize\.get_oclPtr()\.shape, None)\n";
 
 #  print CPP "
 #
