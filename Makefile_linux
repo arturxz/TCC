@@ -1,0 +1,632 @@
+#
+# Makefile for visiongl
+#
+# ddantas 5/7/2013
+#
+
+BINARY_NAME          = visiongl
+CUDA_NAME            = cuda
+FRACTAL_NAME         = fractal
+CAM_NAME             = cam
+GDCM_NAME            = gdcm
+DCMTK_NAME           = dcmtk
+CL3D_NAME            = cl3d
+CLND_NAME            = clnd
+TIFF_NAME            = tiff
+IO_NAME		     = io
+BIN_NAME	     = bin
+KEY_NAME             = key
+BENCHMARK_CV_NAME    = benchmark_cv
+BENCHMARK_CVOCL_NAME = benchmark_cvocl
+BENCHMARK_CL_NAME    = benchmark_cl
+BENCHMARK_CL3D_NAME  = benchmark_cl3d
+BENCHMARK_CLND_NAME  = benchmark_clnd
+BENCHMARK_MM_NAME    = benchmark_MM
+BENCHMARK_CLBIN_NAME = benchmark_clbin
+BENCHMARK_CL3DBIN_NAME = benchmark_cl3dbin
+BENCHMARK_CLNDBIN_NAME = benchmark_clndbin
+BENCHMARK_FUZZYTOPHAT_NAME    = benchmark_FuzzyTophat
+BENCHMARK_MP_NAME    = benchmark_MP
+COLORDECONV_NAME     = colordeconv
+
+ROOTPATH           = .
+INCLUDE_PATH       = $(ROOTPATH)/src
+INCLUDE_DIR        = -I $(INCLUDE_PATH)
+
+OUTPUT_ROOTPATH    = $(ROOTPATH)
+OUTPUT_INCLUDEPATH = $(OUTPUT_ROOTPATH)/include
+OUTPUT_LIBPATH     = $(OUTPUT_ROOTPATH)/lib
+OUTPUT_BINPATH     = $(OUTPUT_ROOTPATH)/bin
+OUTPUT_INCLUDEDIR  = -I $(OUTPUT_INCLUDEPATH)
+OUTPUT_LIBDIR      = -L $(OUTPUT_LIBPATH)
+
+
+
+WITH_CUDA = 0
+WITH_OPENCL = 1
+WITH_OPENCV = 0
+WITH_GDCM = 0
+WITH_DCMTK = 0
+WITH_TIFF = 1
+
+ifeq ($(WITH_OPENCL), 1)
+	OPENCL_DEF        = -D__OPENCL__
+endif
+
+ifeq ($(WITH_OPENCV), 1)
+	OPENCV_DEF        = -D__OPENCV__
+	OPENCV_PATH        = /usr/local/opencv
+	OPENCV_INCLUDEPATH = $(OPENCV_PATH)/include/
+	OPENCV_LIBPATH     = $(OPENCV_PATH)/lib
+	OPENCV_INCLUDEDIR  = -I $(OPENCV_INCLUDEPATH)
+	OPENCV_LIBDIR      = -L $(OPENCV_LIBPATH)
+	OPENCV_LIBRARIES   = -lopencv_highgui -lopencv_core -lopencv_imgproc -lopencv_legacy
+else
+	#OPENCV_FILES       = src/vglOpencv.cpp
+endif
+
+ifeq ($(WITH_CUDA), 1)
+	CUDA_DEF         = -D__CUDA__
+	CUDA_PATH        = /usr/local/cuda
+	CUDA_INCLUDEPATH = $(CUDA_PATH)/include
+	CUDA_LIBPATH     = $(CUDA_PATH)/lib64
+	CUDA_INCLUDEDIR  = -I $(CUDA_INCLUDEPATH)
+	CUDA_LIBDIR      = -L $(CUDA_LIBPATH)
+	CUDA_LIBRARIES   = -lcudart
+	CUDA_OPTIONS     = 
+	CUDA_FILES       = src/*.cu     
+	CC               = $(CUDA_PATH)/bin/nvcc 
+	FPIC             = -Xcompiler -fPIC 
+else
+	CC               = g++
+	FPIC             = -fPIC 
+endif
+
+ifeq ($(WITH_OPENCL), 1)
+        OPENCL_PATH        = /opt/intel/opencl-1.2-4.4.0.117/lib64/
+        OPENCL_PATH        = /opt/AMDAPP
+        #OPENCL_PATH        = /usr/local/cuda/
+        OPENCL_INCLUDEPATH = $(OPENCL_PATH)/include/
+        OPENCL_LIBPATH     = $(OPENCL_PATH)/lib/x86_64
+        #OPENCL_LIBPATH     = $(OPENCL_PATH)/lib64
+        #OPENCL_LIBPATH     = /usr/lib/
+        OPENCL_INCLUDEDIR  = -I $(OPENCL_INCLUDEPATH)
+        OPENCL_LIBDIR      = -L $(OPENCL_LIBPATH)
+        OPENCL_LIBRARIES   = -lOpenCL
+        OPENCL_FILES = src/cl2cpp_shaders.cpp src/vglClFunctions.cpp src/vglClImage.cpp src/cl2cpp_MM.cpp src/cl2cpp_ND.cpp src/cl2cpp_BIN.cpp
+
+        OPENGL_INCLUDEPATH = $(OPENCL_INCLUDEPATH)
+        OPENGL_INCLUDEDIR  = $(OPENCL_INCLUDEDIR)
+else
+        OPENGL_INCLUDEPATH = /usr/include/
+        OPENGL_INCLUDEDIR  = -I $(OPENGL_INCLUDEPATH)
+endif
+
+ifeq ($(WITH_GDCM), 1)
+	GDCM_DEF         = -D__GDCM__
+	GDCM_PATH        = /usr/local/gdcm
+	GDCM_INCLUDEPATH = $(GDCM_PATH)/include/gdcm-2.4
+	GDCM_LIBPATH     = $(GDCM_PATH)/lib
+	GDCM_INCLUDEDIR  = -I $(GDCM_INCLUDEPATH)
+	GDCM_LIBDIR      = -L $(GDCM_LIBPATH)
+	GDCM_LIBRARIES   = -lgdcmcharls -lgdcmCommon -lgdcmDICT -lgdcmDSED -lgdcmexpat -lgdcmIOD -lgdcmjpeg8 -lgdcmjpeg12 -lgdcmjpeg16 -lgdcmMEXD -lgdcmMSFF -lgdcmopenjpeg -lgdcmuuid -lgdcmzlib -lsocketxx
+endif
+
+ifeq ($(WITH_DCMTK), 1)
+	DCMTK_DEF         = -D__DCMTK__
+	DCMTK_PATH        = /usr/local/dcmtk
+	DCMTK_INCLUDEPATH = $(DCMTK_PATH)/include
+	DCMTK_LIBPATH     = $(DCMTK_PATH)/lib
+	DCMTK_INCLUDEDIR  = -I $(DCMTK_INCLUDEPATH)
+	DCMTK_LIBDIR      = -L $(DCMTK_LIBPATH)
+	DCMTK_LIBRARIES   = -ldcmjpeg -lijg8 -lijg12  -lijg16 -ldcmimage -ldcmpstat -ldcmimgle -ldcmqrdb -ldcmnet -ldcmdata -loflog -lofstd -lz -lpthread 
+        #-ltiff -lpng
+endif
+
+ifeq ($(WITH_TIFF), 1)
+	TIFF_DEF        = -D__TIFF__
+	TIFF_INCLUDEPATH = /usr/include/x86_64-linux-gnu/
+	TIFF_LIBPATH     = /usr/lib/x86_64-linux-gnu/
+	TIFF_INCLUDEDIR  = -I $(TIFF_INCLUDEPATH)
+	TIFF_LIBDIR      = -L $(TIFF_LIBPATH)
+	TIFF_LIBRARIES   = -ltiff
+endif
+
+
+
+
+VGL_FILES = src/glsl2cpp_shaders.cpp src/vglContext.cpp src/vglSimpleBGModel.cpp src/glsl2cpp_BG.cpp src/glsl2cpp_Stereo.cpp src/vglImage.cpp src/vglLoadShader.cpp src/vglGdcmIo.cpp src/vglDcmtkIo.cpp src/vglTiffIo.cpp src/vglDeconv.cpp src/iplImage.cpp src/vglOpencv.cpp src/vglShape.cpp src/vglStrEl.cpp 
+
+
+INSTALL_PATH        = $(HOME)/script
+INSTALL_INCLUDEPATH = $(INSTALL_PATH)/include
+INSTALL_LIBPATH     = $(INSTALL_PATH)/lib
+
+OPENGL_LIBDIR = -L /usr/X11R6/lib
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$(CUDA_LIBPATH):$(OPENCV_LIBPATH):$(INSTALL_LIBPATH):$(GDCM_LIBPATH):$(DCMTK_LIBPATH):$(OPENCL_LIBPATH)
+
+
+COMPILER_FLAGS   = -g -pg -DGL_GLEXT_PROTOTYPES -DGLX_GLXEXT_PROTOTYPES 
+OPENGL_LIBRARIES    = -lGLEW -lGLU -lGL -lglut 
+
+
+LINUXAMD64_DIRS_LIBS =  $(INCLUDE_DIR) \
+                        $(OUTPUT_LIBDIR) \
+                        $(OPENGL_LIBDIR) \
+                        $(OPENGL_LIBRARIES) \
+                        $(OPENCV_DEF) \
+                        $(OPENCV_INCLUDEDIR) \
+                        $(OPENCV_LIBDIR) \
+                        $(OPENCV_LIBRARIES) \
+                        $(CUDA_DEF) \
+                        $(CUDA_INCLUDEDIR) \
+                        $(CUDA_LIBDIR) \
+                        $(CUDA_LIBRARIES)\
+                        $(OPENCL_DEF) \
+                        $(OPENCL_INCLUDEDIR) \
+                        $(OPENCL_LIBDIR) \
+                        $(OPENCL_LIBRARIES) \
+                        $(GDCM_DEF) \
+                        $(GDCM_INCLUDEDIR) \
+                        $(GDCM_LIBDIR) \
+                        $(GDCM_LIBRARIES) \
+			$(DCMTK_DEF) \
+                        $(DCMTK_INCLUDEDIR) \
+			$(DCMTK_LIBDIR) \
+                        $(DCMTK_LIBRARIES) \
+			$(TIFF_DEF) \
+                        $(TIFF_INCLUDEDIR) \
+                        $(TIFF_LIBDIR) \
+                        $(TIFF_LIBRARIES) \
+
+
+LINUXAMD64_LIB = $(CC) $(COMPILER_FLAGS) \
+                        -shared $(CUDA_OPTIONS) $(FPIC) \
+                        -o $(OUTPUT_LIBPATH)/lib$(BINARY_NAME).so \
+                          $(CUDA_FILES) $(VGL_FILES) $(OPENCL_FILES) \
+                         $(LINUXAMD64_DIRS_LIBS) $(CUDA_DIRS_LIBS) 
+
+LINUXAMD64_DEMO_CL3D = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(CL3D_NAME) \
+                         src/demo/$(CL3D_NAME).cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS)
+
+LINUXAMD64_DEMO_CLND = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(CLND_NAME) \
+                         src/demo/$(CLND_NAME).cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS)
+
+LINUXAMD64_DEMO_FRACTAL = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(FRACTAL_NAME) \
+                         src/demo/$(FRACTAL_NAME).cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS)
+
+LINUXAMD64_DEMO_CAM = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(CAM_NAME) \
+                         src/demo/$(CAM_NAME).cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS)
+
+LINUXAMD64_DEMO_CUDA = $(CC) $(COMPILER_FLAGS) -D__CUDA__ \
+                         -o $(OUTPUT_BINPATH)/demo_$(CUDA_NAME) \
+                          src/demo/$(CUDA_NAME).cpp \
+                         -lvisiongl \
+                          $(LINUXAMD64_DIRS_LIBS) \
+
+LINUXAMD64_DEMO_GDCM = $(CC) $(COMPILER_FLAGS) -D__GDCM__ \
+                         -o $(OUTPUT_BINPATH)/demo_$(GDCM_NAME) \
+                          src/demo/$(GDCM_NAME).cpp \
+                         -lvisiongl \
+                          $(LINUXAMD64_DIRS_LIBS) \
+
+LINUXAMD64_DEMO_DCMTK = $(CC) $(COMPILER_FLAGS) -D__DCMTK__ \
+                         -o $(OUTPUT_BINPATH)/demo_$(DCMTK_NAME) \
+                          src/demo/$(DCMTK_NAME).cpp \
+                         -lvisiongl \
+                          $(LINUXAMD64_DIRS_LIBS) \
+
+LINUXAMD64_DEMO_TIFF = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(TIFF_NAME) \
+                         src/demo/$(TIFF_NAME).cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS)
+
+LINUXAMD64_DEMO_IO = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(IO_NAME) \
+                         src/demo/$(IO_NAME).cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS)
+
+LINUXAMD64_DEMO_BIN = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(BIN_NAME) \
+                         src/demo/$(BIN_NAME).cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS)
+
+LINUXAMD64_DEMO_KEY = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(KEY_NAME) \
+                         src/demo/$(KEY_NAME)/*.cpp \
+                         -I /usr/local/sgb/include/ \
+                         -L /usr/local/sgb/lib/ \
+                         -I $(INSTALL_INCLUDEPATH) \
+                         -L $(INSTALL_LIBPATH) \
+                         -L /usr/lib/x86_64-linux-gnu/ \
+                         -lvisiongl -lgb -ltimer -lcalibrate -lfftw3 -lhitmiss \
+                         -lopencv_calib3d -lopencv_video \
+                         -I $(ROOTPATH)/src/demo/$(KEY_NAME)/ \
+                         $(OPENCV_INCLUDEDIR) \
+                         $(LINUXAMD64_DIRS_LIBS)
+
+
+ifeq ($(WITH_OPENCL), 1)
+        LINUXAMD64_DEMO_BENCHMARK_CL = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(BENCHMARK_CL_NAME) \
+                         src/demo/$(BENCHMARK_CL_NAME).cpp src/demo/timer.cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS) \
+
+        LINUXAMD64_DEMO_BENCHMARK_CL3D = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(BENCHMARK_CL3D_NAME) \
+                         src/demo/$(BENCHMARK_CL3D_NAME).cpp src/demo/timer.cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS) \
+
+        LINUXAMD64_DEMO_BENCHMARK_CLND = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(BENCHMARK_CLND_NAME) \
+                         src/demo/$(BENCHMARK_CLND_NAME).cpp src/demo/timer.cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS) \
+
+        LINUXAMD64_DEMO_BENCHMARK_MM = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(BENCHMARK_MM_NAME) \
+                         src/demo/$(BENCHMARK_MM_NAME).cpp src/demo/timer.cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS) \
+
+        LINUXAMD64_DEMO_BENCHMARK_FUZZYTOPHAT = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(BENCHMARK_FUZZYTOPHAT_NAME) \
+                         src/demo/$(BENCHMARK_FUZZYTOPHAT_NAME).cpp src/demo/timer.cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS) \
+
+        LINUXAMD64_DEMO_BENCHMARK_CLBIN = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(BENCHMARK_CLBIN_NAME) \
+                         src/demo/$(BENCHMARK_CLBIN_NAME).cpp src/demo/timer.cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS) \
+
+        LINUXAMD64_DEMO_BENCHMARK_CL3DBIN = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(BENCHMARK_CL3DBIN_NAME) \
+                         src/demo/$(BENCHMARK_CL3DBIN_NAME).cpp src/demo/timer.cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS) \
+
+        LINUXAMD64_DEMO_BENCHMARK_CLNDBIN = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(BENCHMARK_CLNDBIN_NAME) \
+                         src/demo/$(BENCHMARK_CLNDBIN_NAME).cpp src/demo/timer.cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS) \
+
+endif
+
+LINUXAMD64_DEMO_BENCHMARK_CV = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(BENCHMARK_CV_NAME) \
+                         src/demo/$(BENCHMARK_CV_NAME).cpp src/demo/timer.cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS) \
+
+LINUXAMD64_DEMO_BENCHMARK_CVOCL = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(BENCHMARK_CVOCL_NAME) \
+                         src/demo/$(BENCHMARK_CVOCL_NAME).cpp src/demo/timer.cpp \
+                         -lvisiongl -lopencv_ocl \
+                         $(LINUXAMD64_DIRS_LIBS) \
+
+LINUXAMD64_DEMO_COLORDECONV = $(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/demo_$(COLORDECONV_NAME) \
+                         src/demo/$(COLORDECONV_NAME).cpp \
+                         -lvisiongl \
+                         $(LINUXAMD64_DIRS_LIBS)
+
+
+
+GENERATE_HEADER = cat $(INCLUDE_PATH)/vglHead.h $(INCLUDE_PATH)/vglImage.h $(INCLUDE_PATH)/vglCudaImage.h $(INCLUDE_PATH)/vglClImage.h $(INCLUDE_PATH)/vglGdcmIo.h $(INCLUDE_PATH)/vglDcmtkIo.h $(INCLUDE_PATH)/vglTiffIo.h $(INCLUDE_PATH)/vglContext.h $(INCLUDE_PATH)/vglSimpleBGModel.h $(INCLUDE_PATH)/glsl2cpp*.h $(INCLUDE_PATH)/kernel2cu*.h $(INCLUDE_PATH)/cl2cpp*.h $(INCLUDE_PATH)/vglClFunctions*.h $(INCLUDE_PATH)/iplImage*.h $(INCLUDE_PATH)/vglOpencv*.h $(INCLUDE_PATH)/vglTail.h $(INCLUDE_PATH)/vglDeconv.h > /tmp/$(BINARY_NAME).h; grep -v vglImage\.h /tmp/$(BINARY_NAME).h > $(OUTPUT_INCLUDEPATH)/$(BINARY_NAME).h
+
+
+all:
+	echo $(LD_LIBRARY_PATH)
+	$(GENERATE_HEADER)
+	$(LINUXAMD64_LIB)
+
+lib:
+	$(LINUXAMD64_LIB)
+
+install: all
+	mkdir -p $(OUTPUT_INCLUDEPATH)
+	mkdir -p $(OUTPUT_LIBPATH)
+	mkdir -p $(INSTALL_INCLUDEPATH)
+	mkdir -p $(INSTALL_LIBPATH)
+	cp $(OUTPUT_INCLUDEPATH)/$(BINARY_NAME).h $(INSTALL_INCLUDEPATH)
+	cp $(OUTPUT_LIBPATH)/lib$(BINARY_NAME).so $(INSTALL_LIBPATH)
+
+dox: all
+	doxygen $(BINARY_NAME).dox
+	cd dox/latex; pwd; make; xdvi refman.dvi&
+
+demofrac:
+	$(LINUXAMD64_DEMO_FRACTAL)
+
+democam:
+	$(LINUXAMD64_DEMO_CAM)
+
+democuda:
+	$(LINUXAMD64_DEMO_CUDA)
+
+demogdcm:
+	$(LINUXAMD64_DEMO_GDCM)
+
+demodcmtk:
+	$(LINUXAMD64_DEMO_DCMTK)
+
+demotiff:
+	$(LINUXAMD64_DEMO_TIFF)
+
+demoio:
+	$(LINUXAMD64_DEMO_IO)
+
+demobin:
+	$(LINUXAMD64_DEMO_BIN)
+
+demokey:
+	$(LINUXAMD64_DEMO_KEY)
+
+democl3d:
+	$(LINUXAMD64_DEMO_CL3D)
+
+democlnd:
+	$(LINUXAMD64_DEMO_CLND)
+
+demobenchmark:
+	#$(LINUXAMD64_DEMO_BENCHMARK_CV)
+	#$(LINUXAMD64_DEMO_BENCHMARK_CVOCL)
+	$(LINUXAMD64_DEMO_BENCHMARK_CL)
+	$(LINUXAMD64_DEMO_BENCHMARK_CL3D)
+	$(LINUXAMD64_DEMO_BENCHMARK_MM)
+	$(LINUXAMD64_DEMO_BENCHMARK_FUZZYTOPHAT)
+	rm /tmp/*.so
+
+demobenchmarkclbin:
+	$(LINUXAMD64_DEMO_BENCHMARK_CLBIN)
+	$(LINUXAMD64_DEMO_BENCHMARK_CL3DBIN)
+	$(LINUXAMD64_DEMO_BENCHMARK_CLNDBIN)
+	rm /tmp/*.so
+
+demobenchmarkclnd:
+	$(LINUXAMD64_DEMO_BENCHMARK_CLND)
+
+democolordeconv:
+	$(LINUXAMD64_DEMO_COLORDECONV)
+
+.PHONY: lib
+
+
+rundemocl3d:
+	cd $(OUTPUT_BINPATH); ./demo_$(CL3D_NAME) ../images/dicom/0003.dcm.%d.PGM 0 16 /tmp
+
+rundemoclnd:
+	#cd $(OUTPUT_BINPATH); ./demo_$(CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 /tmp 256 86016 -1d
+	#cd $(OUTPUT_BINPATH); ./demo_$(CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 /tmp 256 86016
+	cd $(OUTPUT_BINPATH); ./demo_$(CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 /tmp
+	#cd $(OUTPUT_BINPATH); ./demo_$(CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 /tmp 0 0 336
+	#cd $(OUTPUT_BINPATH); ./demo_$(CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 /tmp 0 0 2 168
+	#cd $(OUTPUT_BINPATH); ./demo_$(CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 /tmp 0 0 2 24 7
+
+rundemofrac:
+	cd $(OUTPUT_BINPATH); ./demo_$(FRACTAL_NAME)
+
+rundemocam:
+	cd $(OUTPUT_BINPATH); ./demo_$(CAM_NAME)
+
+rundemocuda:
+	cd $(OUTPUT_BINPATH); ./demo_$(CUDA_NAME) ../images/lena_std.tif /tmp/outputcuda.pgm
+
+rundemogdcm:
+	cd $(OUTPUT_BINPATH); ./demo_$(GDCM_NAME) ../images/dicom/0003.dcm /tmp/outputgdcm.dcm  
+	#cd $(OUTPUT_BINPATH); ./demo_$(GDCM_NAME) ../images/dicom/esopecho.dcm /tmp/outputgdcmrgb.dcm -c 
+	#cd $(OUTPUT_BINPATH); ./demo_$(GDCM_NAME) ../images/dicom/I_000032.dcm /tmp/outputgdcmybr.dcm -c
+	#cd $(OUTPUT_BINPATH); ./demo_$(GDCM_NAME) ../images/dicom/0003.dcm.%d.PGM /tmp/outputgdcmheader.dcm 0 3  
+	#cd $(OUTPUT_BINPATH); ./demo_$(GDCM_NAME) ../images/dicom/I_000003.dcm.%d.PGM /tmp/outputgdcmheadercor.dcm 0 3 -c 
+	#cd $(OUTPUT_BINPATH); ./demo_$(GDCM_NAME) ../images/dicom/E1154S7I_16bit.dcm /tmp/outputgdcm16_compress.dcm -c  
+	#cd $(OUTPUT_BINPATH); ./demo_$(GDCM_NAME) ../images/dicom/E1154S7I_16bit.dcm /tmp/outputgdcm16.dcm	
+
+rundemodcmtk:
+	cd $(OUTPUT_BINPATH); ./demo_$(DCMTK_NAME) ../images/dicom/0003.dcm /tmp/outputdcmtk.dcm -c
+	#cd $(OUTPUT_BINPATH); ./demo_$(DCMTK_NAME) ../images/dicom/esopecho.dcm /tmp/outputdcmtkrgb.dcm -c 
+	#cd $(OUTPUT_BINPATH); ./demo_$(DCMTK_NAME) ../images/dicom/I_000032.dcm /tmp/outputdcmtkybr.dcm -c
+	#cd $(OUTPUT_BINPATH); ./demo_$(DCMTK_NAME) ../images/dicom/0003.dcm.%d.PGM /tmp/outputdcmtkheader.dcm 0 3 -c
+	#cd $(OUTPUT_BINPATH); ./demo_$(DCMTK_NAME) ../images/dicom/I_000003.dcm.%d.PGM /tmp/outputdcmtkheadercor.dcm 0 3 -c
+	#cd $(OUTPUT_BINPATH); ./demo_$(DCMTK_NAME) ../images/dicom/E1154S7I_16bit.dcm /tmp/outputdcmtk16_compress.dcm -c
+	#cd $(OUTPUT_BINPATH); ./demo_$(DCMTK_NAME) ../images/dicom/E1154S7I_16bit.dcm /tmp/outputdcmtk16.dcm 
+
+rundemotiff:
+	cd $(OUTPUT_BINPATH); ./demo_$(TIFF_NAME) ../images/tif/E1154S7I_3d.tif /tmp/demo_tif_out.tif
+
+rundemoio:
+	cd $(OUTPUT_BINPATH); ./demo_$(IO_NAME) ../images/lena_std.tif /tmp/lena_std.tif -1
+	cd $(OUTPUT_BINPATH); ./demo_$(IO_NAME) ../images/lena_gray.tif /tmp/lena_gray.tif -1
+	cd $(OUTPUT_BINPATH); ./demo_$(IO_NAME) ../images/tif/E1154S7I_001.tif /tmp/E1154S7I_001.tif -1
+
+	cd $(OUTPUT_BINPATH); ./demo_$(IO_NAME) ../images/lena_std.tif /tmp/lena_std.ppm -1
+	cd $(OUTPUT_BINPATH); ./demo_$(IO_NAME) ../images/lena_gray.tif /tmp/lena_gray.pgm -1
+
+	cd $(OUTPUT_BINPATH); ./demo_$(IO_NAME) /tmp/lena_std.ppm /tmp/lena_std_UNCHANGED.ppm -1
+	cd $(OUTPUT_BINPATH); ./demo_$(IO_NAME) /tmp/lena_gray.pgm /tmp/lena_gray_UNCHANGED.pgm -1
+
+	cd $(OUTPUT_BINPATH); ./demo_$(IO_NAME) /tmp/lena_std.ppm /tmp/lena_std_GRAYSCALE.pgm 0
+	cd $(OUTPUT_BINPATH); ./demo_$(IO_NAME) /tmp/lena_gray.pgm /tmp/lena_gray_GRAYSCALE.pgm 0
+
+	cd $(OUTPUT_BINPATH); ./demo_$(IO_NAME) /tmp/lena_std.ppm /tmp/lena_std_BGR.ppm 1
+	cd $(OUTPUT_BINPATH); ./demo_$(IO_NAME) /tmp/lena_gray.pgm /tmp/lena_gray_BGR.ppm 1
+
+rundemobin:
+	cd $(OUTPUT_BINPATH); ./demo_$(BIN_NAME) ../images/test_mm.pgm /tmp 0
+	#cd $(OUTPUT_BINPATH); ./demo_$(BIN_NAME) ../images/lena_std.ppm /tmp 0
+
+rundemobinconway:
+	cd $(OUTPUT_BINPATH); ./demo_$(BIN_NAME) ../images/test_conway.pgm /tmp 40
+	cd /tmp; convert -delay 1 -loop 0 demo_bin_conway*.pbm animation.gif
+	cd /tmp; convert animation.gif -filter box -resize 400% animation4x.gif
+
+
+rundemokey:
+	LD_LIBRARY_PATH=$(CUDA_LIBPATH):$(OPENCV_LIBPATH):$(INSTALL_LIBPATH):$(GDCM_LIBPATH):$(DCMTK_LIBPATH):$(OPENCL_LIBPATH):/usr/local/sgb/lib; cd $(OUTPUT_BINPATH); ./demo_$(KEY_NAME)
+	echo $(LD_LIBRARY_PATH)
+
+
+rundemobenchmark:
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CV_NAME) ../images/lena_std.tif 10 /tmp
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CVOCL_NAME) ../images/lena_std.tif 10 /tmp
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CL_NAME) ../images/lena_std.tif 1 /tmp
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CL3D_NAME) ../images/dicom/0003.dcm.%d.PGM 0 16 1 /tmp
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_MM_NAME) ../images/01_test.tif 10 /tmp
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_FUZZYTOPHAT_NAME) ../images/01_test.tif 10 /tmp
+
+STEPS=100
+rundemobenchmarkclnd:
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 2048 10752
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 256 86016 -1d
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 256 86016
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 0 0 336
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 0 0 2 168
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLND_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 0 0 2 24 7
+
+rundemobenchmark16:
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CV_NAME) ../images/E1154S7I_001.tif $(STEPS) /tmp
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CVOCL_NAME) ../images/lena_std.tif $(STEPS) /tmp
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CL_NAME) ../images/E1154S7I_001.tif $(STEPS)  /tmp
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CL3D_NAME) ../images/E1154S7I_00%d.tif 1 7 $(STEPS) /tmp
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_MM_NAME) ../images/E1154S7I_001.tif $(STEPS) /tmp
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_FUZZYTOPHAT_NAME) ../images/E1154S7I_001.tif $(STEPS) /tmp
+
+rundemobenchmarkclbin:
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLBIN_NAME) ../images/lena_std.pgm $(STEPS) /tmp
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLBIN_NAME) ~/Dropbox/_UFS/_APAGAR/out_00000.pgm $(STEPS) /tmp
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLBIN_NAME) ../images/test_mm.pgm $(STEPS) /tmp
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CL3DBIN_NAME) ../images/dicom/0003.dcm.%d.PGM 0 16 $(STEPS) /tmp
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CL3DBIN_NAME) ../images/test_mm.pgm 0 1 $(STEPS) /tmp
+	cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CL3DBIN_NAME) ../images/lena_std.pgm 0 1 $(STEPS) /tmp
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLNDBIN_NAME) ../images/lena_gray_500.pgm 0 0 $(STEPS) /tmp 500 512
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLNDBIN_NAME) ../images/lena_gray.tif 0 0 $(STEPS) /tmp 512 512
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLNDBIN_NAME) ../images/test_mm.pgm 0 0 $(STEPS) /tmp 0 0
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLNDBIN_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 2048 10752
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLNDBIN_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 256 86016 -1d
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLNDBIN_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 256 86016
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLNDBIN_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 0 0 336
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLNDBIN_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 0 0 2 168
+	#cd $(OUTPUT_BINPATH); ./demo_$(BENCHMARK_CLNDBIN_NAME) ../images/mitosis/mitosis-5d%04d.tif 0 335 $(STEPS) /tmp 0 0 2 24 7
+
+rundemocolordeconv:
+	cd $(OUTPUT_BINPATH); ./demo_$(COLORDECONV_NAME) ../images/Emphysema_H_and_E.jpg 1 /tmp/image.%d.pgm 0.0 1.0 1.0 1.0 0.0 1.0 1.0 1.0 0.0
+
+cuda:
+	./perlModules/kernel2cu.pl -o src/kernel2cu_shaders src/CUDA/*.kernel
+
+frag:
+	./perlModules/glsl2cpp.pl -o src/glsl2cpp_shaders -p FS src/FS/*.frag
+
+frag_bg:
+	./perlModules/glsl2cpp.pl -o src/glsl2cpp_BG -p FS_BG src/FS_BG/*.frag
+
+frag_stereo:
+	./perlModules/glsl2cpp.pl -o src/glsl2cpp_Stereo -p FS_Stereo src/FS_Stereo/*.frag
+
+frag_diffeq:
+	./perlModules/glsl2cpp.pl -o src/glsl2cpp_DiffEq -p FS_DiffEq src/FS_DiffEq/*.frag
+
+cl:
+	./perlModules/cl2cpp.pl -o src/cl2cpp_shaders -p CL src/CL/*.cl
+
+py:
+	./perlModules/cl2py.pl -o src/cl2py_ND -p CL_ND src/CL_ND/*.cl
+	#./perlModules/cl2py.pl -o src/cl2py_shaders -p CL src/CL/*.cl && ./perlModules/cl2py.pl -o src/cl2py_ND -p CL_ND src/CL_ND/*.cl && ./perlModules/cl2py.pl -o src/cl2py_MM -p CL_MM src/CL_MM/*.cl
+
+cl_nd:
+	./perlModules/cl2cpp.pl -o src/cl2cpp_ND -p CL_ND src/CL_ND/*.cl
+
+cloud_cl:
+	./perlModules/cl2cloud.pl -o src/cloud_CL src/CL/*.cl
+
+cl_mm:
+	./perlModules/cl2cpp.pl -o src/cl2cpp_MM -p CL_MM src/CL_MM/*.cl
+
+cl_bin:
+	./perlModules/cl2cpp.pl -o src/cl2cpp_BIN -p CL_BIN src/CL_BIN/*.cl
+
+run:
+	cd $(OUTPUT_BINPATH); ./$(BINARY_NAME)
+
+runtestcam:
+	cd $(OUTPUT_BINPATH); ./$(TESTCAM_NAME)
+
+debug:
+	cd $(OUTPUT_BINPATH); ddd ./$(BINARY_NAME)
+
+bkp:
+	rm -f bkp.tgz
+	tar -cvzf bkp.tgz *
+
+
+CLOUD_DIRS   := src/cloud
+CLOUD_SOURCE := $(foreach dir, $(CLOUD_DIRS), $(wildcard $(dir)/*))
+CLOUD_BIN     = $(CLOUD_SOURCE:%.cpp=%)
+CLOUD_BASE    = $(notdir $(basename $(CLOUD_SOURCE) ) ) 
+
+
+cloud: $(CLOUD_BASE)
+
+cloud0:
+	echo $(CLOUD_SOURCE)
+	echo $(CLOUD_BIN)
+	echo $(CLOUD_BASE)
+
+%: %.cpp
+	$(CC) $*.cpp -o $* $(OPENCL_DEF) $(OUTPUT_INCLUDEDIR) $(OPENCV_INCLUDEDIR) $(OPENCL_INCLUDEDIR) $(OUTPUT_LIBDIR) $(OPENCV_LIBDIR) $(OPENCV_LIBRARIES) -lvisiongl
+
+runcloud:
+	cd src/cloud; ./template_for_cloud --input ../../images/lena_std.tif --output /tmp/lixo.tif --window_convolution "[.2, .2, .2, .2, .2]" --window_size_x 1 --window_size_y 5
+
+#-L $(INSTALL_LIBPATH) -lvisiongl
+
+
+#  $(OPENCV_LIBDIR) $(OPENCV_LIBRARIES) $(OPENCL_LIBDIR) $(OPENCL_LIBRARIES) $(OUTPUT_LIBDIR) -lvisiongl
+
+
+lala:
+	file := $(foreach file, $(files), echo $(file))
+	export LINUXAMD64_CLOUD="$(CC) $(COMPILER_FLAGS) \
+                        -o $(OUTPUT_BINPATH)/cloud/$(CLOUD_NAME) \
+                         src/cloud/$(CLOUD_NAME).cpp \
+                         -lvisiongl" 
+	$(LINUXAMD64_CLOUD)
+
+
+cltest:
+	g++ src/demo/cltest.cpp $(OPENCL_INCLUDEDIR) $(OPENCL_LIBDIR) $(OPENCL_LIBRARIES) -lGL -o src/demo/cltest
+
+runcltest:
+	./src/demo/cltest
+
+clinfo:
+	g++ src/demo/clinfo.cpp $(OPENCL_INCLUDEDIR) $(OPENCL_LIBDIR) $(OPENCL_LIBRARIES) -lGL -o src/demo/clinfo
+
+runclinfo:
+	./src/demo/clinfo
+
+utils:
+	g++ $(COMPILER_FLAGS) src/demo/image_info.cpp $(OPENCV_INCLUDEDIR) $(OPENGL_INCLUDEDIR) -I src -lvisiongl $(OUTPUT_LIBDIR) $(GDCM_DEF) $(GDCM_INCLUDEDIR) $(DCMTK_DEF) $(DCMTK_INCLUDEDIR) -o src/demo/image_info
+
+runutils:
+	./src/demo/image_info images/lena_std.tif -p
