@@ -550,8 +550,7 @@ cl:
 	./perlModules/cl2cpp.pl -o src/cl2cpp_shaders -p CL src/CL/*.cl
 
 py:
-	./perlModules/cl2py.pl -o src/cl2py_ND -p CL_ND src/CL_ND/*.cl
-	#./perlModules/cl2py.pl -o src/cl2py_shaders -p CL src/CL/*.cl && ./perlModules/cl2py.pl -o src/cl2py_ND -p CL_ND src/CL_ND/*.cl && ./perlModules/cl2py.pl -o src/cl2py_MM -p CL_MM src/CL_MM/*.cl
+	./perlModules/cl2py.pl -o src/py/cl2py_shaders -p CL src/CL/*.cl && ./perlModules/cl2py.pl -o src/py/cl2py_ND -p CL_ND src/CL_ND/*.cl && ./perlModules/cl2py.pl -o src/py/cl2py_MM -p CL_MM src/CL_MM/*.cl
 
 cl_nd:
 	./perlModules/cl2cpp.pl -o src/cl2cpp_ND -p CL_ND src/CL_ND/*.cl

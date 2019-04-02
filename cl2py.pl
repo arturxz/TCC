@@ -1069,7 +1069,7 @@ print CPP "
   }
 
 
-  print CPP "\n\n";
+  print CPP "\n";
 
 
   close CPP;
@@ -1212,6 +1212,8 @@ $topMsg = "\"\"\"
     ************************************************************************
 \"\"\"\n";
 
+my $className = substr($cpp_read_path, 0, length($cpp_read_path)-1); # removes last character, that is '/'
+
 open CPP, ">>", "$output.py";
 print CPP $topMsg;
 print CPP "
@@ -1228,7 +1230,7 @@ from typing import Union
 import numpy as np
 import sys
 
-class $archiveName:
+class $className:
     def __init__(self, cl_ctx=None):
         # PYTHON-EXCLUSIVE VARIABLES
         self.cl_ctx: Union[None, vl.opencl_context] = cl_ctx
