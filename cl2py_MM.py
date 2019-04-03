@@ -1,3 +1,4 @@
+
 """
     ************************************************************************
     ***                                                                  ***
@@ -7,6 +8,7 @@
     ***                                                                  ***
     ************************************************************************
 """
+#!/usr/bin/python3 python3
 
 # OPENCL LIBRARY
 import pyopencl as cl
@@ -14,1931 +16,1910 @@ import pyopencl as cl
 # VGL LIBRARYS
 import vgl_lib as vl
 
-# TO INFER TYPE TO THE VARIABLE
-from typing import Union
-
 #TO WORK WITH MAIN
 import numpy as np
-import sys
 
-class CL_MM:
-    def __init__(self, cl_ctx=None):
-        # PYTHON-EXCLUSIVE VARIABLES
-        self.cl_ctx: Union[None, vl.opencl_context] = cl_ctx
-
-        # COMMON VARIABLES. self.ocl IS EQUIVALENT TO cl.
-        self.ocl: Union[None, vl.VglClContext] = None
-
-        # SE O CONTEXTO OPENCL NÃO FOR DEFINIDO
-        # ELE INSTANCIADO E DEFINIDO
-        if( self.cl_ctx is None ):
-            vl.vglClInit()
-            self.ocl = vl.get_ocl()
-            self.cl_ctx = vl.get_ocl_context()
-        else:
-            self.ocl = cl_ctx.get_vglClContext_attributes()
-
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyAlgDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyAlgDilate(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyAlgDilate.cl", "vglCl3dFuzzyAlgDilate")
-        _kernel = _program.vglCl3dFuzzyAlgDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyAlgDilate.cl", "vglCl3dFuzzyAlgDilate")
+    _kernel = _program.vglCl3dFuzzyAlgDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyAlgErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyAlgErode(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyAlgErode.cl", "vglCl3dFuzzyAlgErode")
-        _kernel = _program.vglCl3dFuzzyAlgErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyAlgErode.cl", "vglCl3dFuzzyAlgErode")
+    _kernel = _program.vglCl3dFuzzyAlgErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyArithDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyArithDilate(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyArithDilate.cl", "vglCl3dFuzzyArithDilate")
-        _kernel = _program.vglCl3dFuzzyArithDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyArithDilate.cl", "vglCl3dFuzzyArithDilate")
+    _kernel = _program.vglCl3dFuzzyArithDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyArithErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyArithErode(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyArithErode.cl", "vglCl3dFuzzyArithErode")
-        _kernel = _program.vglCl3dFuzzyArithErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyArithErode.cl", "vglCl3dFuzzyArithErode")
+    _kernel = _program.vglCl3dFuzzyArithErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyBoundDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyBoundDilate(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyBoundDilate.cl", "vglCl3dFuzzyBoundDilate")
-        _kernel = _program.vglCl3dFuzzyBoundDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyBoundDilate.cl", "vglCl3dFuzzyBoundDilate")
+    _kernel = _program.vglCl3dFuzzyBoundDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyBoundErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyBoundErode(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyBoundErode.cl", "vglCl3dFuzzyBoundErode")
-        _kernel = _program.vglCl3dFuzzyBoundErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyBoundErode.cl", "vglCl3dFuzzyBoundErode")
+    _kernel = _program.vglCl3dFuzzyBoundErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyDaPDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z, gama):
+"""
+def vglCl3dFuzzyDaPDilate(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z, gama):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF gama IS IN CORRECT TYPE
-        if( not isinstance(gama, np.float32) ):
-            print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
-            try:
-                gama = np.float32(gama)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF gama IS IN CORRECT TYPE
+    if( not isinstance(gama, np.float32) ):
+        print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
+        try:
+            gama = np.float32(gama)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyDaPDilate.cl", "vglCl3dFuzzyDaPDilate")
-        _kernel = _program.vglCl3dFuzzyDaPDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyDaPDilate.cl", "vglCl3dFuzzyDaPDilate")
+    _kernel = _program.vglCl3dFuzzyDaPDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
-        _kernel.set_arg(6, gama)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(6, gama)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyDaPErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z, gama):
+"""
+def vglCl3dFuzzyDaPErode(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z, gama):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF gama IS IN CORRECT TYPE
-        if( not isinstance(gama, np.float32) ):
-            print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
-            try:
-                gama = np.float32(gama)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF gama IS IN CORRECT TYPE
+    if( not isinstance(gama, np.float32) ):
+        print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
+        try:
+            gama = np.float32(gama)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyDaPErode.cl", "vglCl3dFuzzyDaPErode")
-        _kernel = _program.vglCl3dFuzzyDaPErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyDaPErode.cl", "vglCl3dFuzzyDaPErode")
+    _kernel = _program.vglCl3dFuzzyDaPErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
-        _kernel.set_arg(6, gama)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(6, gama)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyDrasticDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyDrasticDilate(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyDrasticDilate.cl", "vglCl3dFuzzyDrasticDilate")
-        _kernel = _program.vglCl3dFuzzyDrasticDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyDrasticDilate.cl", "vglCl3dFuzzyDrasticDilate")
+    _kernel = _program.vglCl3dFuzzyDrasticDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyDrasticErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyDrasticErode(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyDrasticErode.cl", "vglCl3dFuzzyDrasticErode")
-        _kernel = _program.vglCl3dFuzzyDrasticErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyDrasticErode.cl", "vglCl3dFuzzyDrasticErode")
+    _kernel = _program.vglCl3dFuzzyDrasticErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyGeoDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyGeoDilate(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyGeoDilate.cl", "vglCl3dFuzzyGeoDilate")
-        _kernel = _program.vglCl3dFuzzyGeoDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyGeoDilate.cl", "vglCl3dFuzzyGeoDilate")
+    _kernel = _program.vglCl3dFuzzyGeoDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyGeoErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyGeoErode(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyGeoErode.cl", "vglCl3dFuzzyGeoErode")
-        _kernel = _program.vglCl3dFuzzyGeoErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyGeoErode.cl", "vglCl3dFuzzyGeoErode")
+    _kernel = _program.vglCl3dFuzzyGeoErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyHamacherDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z, gama):
+"""
+def vglCl3dFuzzyHamacherDilate(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z, gama):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF gama IS IN CORRECT TYPE
-        if( not isinstance(gama, np.float32) ):
-            print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
-            try:
-                gama = np.float32(gama)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF gama IS IN CORRECT TYPE
+    if( not isinstance(gama, np.float32) ):
+        print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
+        try:
+            gama = np.float32(gama)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyHamacherDilate.cl", "vglCl3dFuzzyHamacherDilate")
-        _kernel = _program.vglCl3dFuzzyHamacherDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyHamacherDilate.cl", "vglCl3dFuzzyHamacherDilate")
+    _kernel = _program.vglCl3dFuzzyHamacherDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
-        _kernel.set_arg(6, gama)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(6, gama)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyHamacherErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z, gama):
+"""
+def vglCl3dFuzzyHamacherErode(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z, gama):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF gama IS IN CORRECT TYPE
-        if( not isinstance(gama, np.float32) ):
-            print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
-            try:
-                gama = np.float32(gama)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF gama IS IN CORRECT TYPE
+    if( not isinstance(gama, np.float32) ):
+        print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
+        try:
+            gama = np.float32(gama)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyHamacherErode.cl", "vglCl3dFuzzyHamacherErode")
-        _kernel = _program.vglCl3dFuzzyHamacherErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyHamacherErode.cl", "vglCl3dFuzzyHamacherErode")
+    _kernel = _program.vglCl3dFuzzyHamacherErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
-        _kernel.set_arg(6, gama)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(6, gama)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyStdDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyStdDilate(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyStdDilate.cl", "vglCl3dFuzzyStdDilate")
-        _kernel = _program.vglCl3dFuzzyStdDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyStdDilate.cl", "vglCl3dFuzzyStdDilate")
+    _kernel = _program.vglCl3dFuzzyStdDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglCl3dFuzzyStdErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
+"""
+def vglCl3dFuzzyStdErode(img_input, img_output, convolution_window, window_size_x, window_size_y, window_size_z):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_z IS IN CORRECT TYPE
-        if( not isinstance(window_size_z, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
-            try:
-                window_size_z = np.uint32(window_size_z)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF window_size_z IS IN CORRECT TYPE
+    if( not isinstance(window_size_z, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_z not np.uint32! Trying to convert...")
+        try:
+            window_size_z = np.uint32(window_size_z)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_z as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglCl3dFuzzyStdErode.cl", "vglCl3dFuzzyStdErode")
-        _kernel = _program.vglCl3dFuzzyStdErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyStdErode.cl", "vglCl3dFuzzyStdErode")
+    _kernel = _program.vglCl3dFuzzyStdErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, window_size_z)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, window_size_z)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyAlgDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyAlgDilate(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyAlgDilate.cl", "vglClFuzzyAlgDilate")
-        _kernel = _program.vglClFuzzyAlgDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyAlgDilate.cl", "vglClFuzzyAlgDilate")
+    _kernel = _program.vglClFuzzyAlgDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyAlgErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyAlgErode(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyAlgErode.cl", "vglClFuzzyAlgErode")
-        _kernel = _program.vglClFuzzyAlgErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyAlgErode.cl", "vglClFuzzyAlgErode")
+    _kernel = _program.vglClFuzzyAlgErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyArithDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyArithDilate(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyArithDilate.cl", "vglClFuzzyArithDilate")
-        _kernel = _program.vglClFuzzyArithDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyArithDilate.cl", "vglClFuzzyArithDilate")
+    _kernel = _program.vglClFuzzyArithDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyArithErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyArithErode(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyArithErode.cl", "vglClFuzzyArithErode")
-        _kernel = _program.vglClFuzzyArithErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyArithErode.cl", "vglClFuzzyArithErode")
+    _kernel = _program.vglClFuzzyArithErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyBoundDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyBoundDilate(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyBoundDilate.cl", "vglClFuzzyBoundDilate")
-        _kernel = _program.vglClFuzzyBoundDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyBoundDilate.cl", "vglClFuzzyBoundDilate")
+    _kernel = _program.vglClFuzzyBoundDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyBoundErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyBoundErode(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyBoundErode.cl", "vglClFuzzyBoundErode")
-        _kernel = _program.vglClFuzzyBoundErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyBoundErode.cl", "vglClFuzzyBoundErode")
+    _kernel = _program.vglClFuzzyBoundErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyDaPDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y, gama):
+"""
+def vglClFuzzyDaPDilate(img_input, img_output, convolution_window, window_size_x, window_size_y, gama):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF gama IS IN CORRECT TYPE
-        if( not isinstance(gama, np.float32) ):
-            print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
-            try:
-                gama = np.float32(gama)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF gama IS IN CORRECT TYPE
+    if( not isinstance(gama, np.float32) ):
+        print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
+        try:
+            gama = np.float32(gama)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyDaPDilate.cl", "vglClFuzzyDaPDilate")
-        _kernel = _program.vglClFuzzyDaPDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyDaPDilate.cl", "vglClFuzzyDaPDilate")
+    _kernel = _program.vglClFuzzyDaPDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, gama)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, gama)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyDaPErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y, gama):
+"""
+def vglClFuzzyDaPErode(img_input, img_output, convolution_window, window_size_x, window_size_y, gama):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF gama IS IN CORRECT TYPE
-        if( not isinstance(gama, np.float32) ):
-            print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
-            try:
-                gama = np.float32(gama)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF gama IS IN CORRECT TYPE
+    if( not isinstance(gama, np.float32) ):
+        print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
+        try:
+            gama = np.float32(gama)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyDaPErode.cl", "vglClFuzzyDaPErode")
-        _kernel = _program.vglClFuzzyDaPErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyDaPErode.cl", "vglClFuzzyDaPErode")
+    _kernel = _program.vglClFuzzyDaPErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, gama)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, gama)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyDrasticDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyDrasticDilate(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyDrasticDilate.cl", "vglClFuzzyDrasticDilate")
-        _kernel = _program.vglClFuzzyDrasticDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyDrasticDilate.cl", "vglClFuzzyDrasticDilate")
+    _kernel = _program.vglClFuzzyDrasticDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyDrasticErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyDrasticErode(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyDrasticErode.cl", "vglClFuzzyDrasticErode")
-        _kernel = _program.vglClFuzzyDrasticErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyDrasticErode.cl", "vglClFuzzyDrasticErode")
+    _kernel = _program.vglClFuzzyDrasticErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyGeoDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyGeoDilate(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyGeoDilate.cl", "vglClFuzzyGeoDilate")
-        _kernel = _program.vglClFuzzyGeoDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyGeoDilate.cl", "vglClFuzzyGeoDilate")
+    _kernel = _program.vglClFuzzyGeoDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyGeoErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyGeoErode(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyGeoErode.cl", "vglClFuzzyGeoErode")
-        _kernel = _program.vglClFuzzyGeoErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyGeoErode.cl", "vglClFuzzyGeoErode")
+    _kernel = _program.vglClFuzzyGeoErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyHamacherDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y, gama):
+"""
+def vglClFuzzyHamacherDilate(img_input, img_output, convolution_window, window_size_x, window_size_y, gama):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF gama IS IN CORRECT TYPE
-        if( not isinstance(gama, np.float32) ):
-            print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
-            try:
-                gama = np.float32(gama)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF gama IS IN CORRECT TYPE
+    if( not isinstance(gama, np.float32) ):
+        print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
+        try:
+            gama = np.float32(gama)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyHamacherDilate.cl", "vglClFuzzyHamacherDilate")
-        _kernel = _program.vglClFuzzyHamacherDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyHamacherDilate.cl", "vglClFuzzyHamacherDilate")
+    _kernel = _program.vglClFuzzyHamacherDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, gama)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, gama)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyHamacherErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y, gama):
+"""
+def vglClFuzzyHamacherErode(img_input, img_output, convolution_window, window_size_x, window_size_y, gama):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF gama IS IN CORRECT TYPE
-        if( not isinstance(gama, np.float32) ):
-            print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
-            try:
-                gama = np.float32(gama)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
+    # EVALUATING IF gama IS IN CORRECT TYPE
+    if( not isinstance(gama, np.float32) ):
+        print("vglClConvolution: Warning: gama not np.float32! Trying to convert...")
+        try:
+            gama = np.float32(gama)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert gama as a np.float32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyHamacherErode.cl", "vglClFuzzyHamacherErode")
-        _kernel = _program.vglClFuzzyHamacherErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyHamacherErode.cl", "vglClFuzzyHamacherErode")
+    _kernel = _program.vglClFuzzyHamacherErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
-        _kernel.set_arg(5, gama)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(5, gama)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyStdDilate(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyStdDilate(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyStdDilate.cl", "vglClFuzzyStdDilate")
-        _kernel = _program.vglClFuzzyStdDilate
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyStdDilate.cl", "vglClFuzzyStdDilate")
+    _kernel = _program.vglClFuzzyStdDilate
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
-    """
+"""
     /** Erosion of src image by mask. Result is stored in dst image.
 
   */    
-    """
-    def vglClFuzzyStdErode(self, img_input, img_output, convolution_window, window_size_x, window_size_y):
+"""
+def vglClFuzzyStdErode(img_input, img_output, convolution_window, window_size_x, window_size_y):
 
-        vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
-        vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
-        # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
+    vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
+    # EVALUATING IF convolution_window IS IN CORRECT TYPE
+    try:
+        mobj_convolution_window = cl.Buffer(vl.get_ocl().context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
+        cl.enqueue_copy(vl.get_ocl().commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
+        convolution_window = mobj_convolution_window
+    except Exception as e:
+        print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+        print(str(e))
+        exit()
+    # EVALUATING IF window_size_x IS IN CORRECT TYPE
+    if( not isinstance(window_size_x, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
         try:
-            mobj_convolution_window = cl.Buffer(self.ocl.context, cl.mem_flags.READ_ONLY, convolution_window.nbytes)
-            cl.enqueue_copy(self.ocl.commandQueue, mobj_convolution_window, convolution_window.tobytes(), is_blocking=True)
-            convolution_window = mobj_convolution_window
+            window_size_x = np.uint32(window_size_x)
         except Exception as e:
-            print("vglClConvolution: Error!! Impossible to convert convolution_window to cl.Buffer object.")
+            print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
             print(str(e))
             exit()
-        # EVALUATING IF window_size_x IS IN CORRECT TYPE
-        if( not isinstance(window_size_x, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_x not np.uint32! Trying to convert...")
-            try:
-                window_size_x = np.uint32(window_size_x)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_x as a np.uint32 object.")
-                print(str(e))
-                exit()
-        # EVALUATING IF window_size_y IS IN CORRECT TYPE
-        if( not isinstance(window_size_y, np.uint32) ):
-            print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
-            try:
-                window_size_y = np.uint32(window_size_y)
-            except Exception as e:
-                print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
-                print(str(e))
-                exit()
+    # EVALUATING IF window_size_y IS IN CORRECT TYPE
+    if( not isinstance(window_size_y, np.uint32) ):
+        print("vglClConvolution: Warning: window_size_y not np.uint32! Trying to convert...")
+        try:
+            window_size_y = np.uint32(window_size_y)
+        except Exception as e:
+            print("vglClConvolution: Error!! Impossible to convert window_size_y as a np.uint32 object.")
+            print(str(e))
+            exit()
 
-        _program = self.cl_ctx.get_compiled_kernel("../CL_MM/vglClFuzzyStdErode.cl", "vglClFuzzyStdErode")
-        _kernel = _program.vglClFuzzyStdErode
+    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyStdErode.cl", "vglClFuzzyStdErode")
+    _kernel = _program.vglClFuzzyStdErode
 
-        _kernel.set_arg(0, img_input.get_oclPtr())
-        _kernel.set_arg(1, img_output.get_oclPtr())
-        _kernel.set_arg(2, mobj_convolution_window)
-        _kernel.set_arg(3, window_size_x)
-        _kernel.set_arg(4, window_size_y)
+    _kernel.set_arg(0, img_input.get_oclPtr())
+    _kernel.set_arg(1, img_output.get_oclPtr())
+    _kernel.set_arg(2, mobj_convolution_window)
+    _kernel.set_arg(3, window_size_x)
+    _kernel.set_arg(4, window_size_y)
 
-        # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
-        cl.enqueue_nd_range_kernel(self.ocl.commandQueue, _kernel, img_input.get_oclPtr().shape, None)
+    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    cl.enqueue_nd_range_kernel(vl.get_ocl().commandQueue, _kernel, img_input.get_oclPtr().shape, None)
 
-        mobj_convolution_window = None
-        vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
+    mobj_convolution_window = None
+    vl.vglSetContext(img_output, vl.VGL_CL_CONTEXT())
 
