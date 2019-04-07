@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/env python3
 
 # OPENCL LIBRARY
 import pyopencl as cl
@@ -13,9 +13,15 @@ import numpy as np
 from cl2py_ND import * 
 
 import time as t
+import sys
 
 """
-	HERE FOLLOWS THE KERNEL CALLS
+	THIS BENCHMARK TOOL EXPECTS JUST 1 ARGUMENT:
+
+	ARGV[1]: PRIMARY 2D-IMAGE PATH (COLORED OR GRAYSCALE)
+		IT WILL BE USED IN ALL KERNELS AS INPUT IMAGE
+
+	THE RESULT IMAGES WILL BE SAVED AS IMG-[PROCESSNAME].JPG
 """
 if __name__ == "__main__":
 	
@@ -24,7 +30,7 @@ if __name__ == "__main__":
 	msg = ""
 
 	# INPUT IMAGE
-	img_input = vl.VglImage("img-1.jpg", None, vl.VGL_IMAGE_2D_IMAGE(), vl.IMAGE_ND_ARRAY())
+	img_input = vl.VglImage(sys.argv[1], None, vl.VGL_IMAGE_2D_IMAGE(), vl.IMAGE_ND_ARRAY())
 	vl.vglLoadImage(img_input)
 	vl.vglClUpload(img_input)
 
@@ -41,42 +47,42 @@ if __name__ == "__main__":
 	vglClNdCopy(img_input, img_output)
 	fim = t.time()
 	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
-	vl.vglSaveImage("yamamoto-vglNdCopy.jpg", img_output)
+	vl.vglSaveImage("img-vglNdCopy.jpg", img_output)
 	msg = msg + "Tempo de execução do método vglClNdCopy:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"
 
 	inicio = t.time()
 	vglClNdConvolution(img_input, img_output, window)
 	fim = t.time()
 	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
-	vl.vglSaveImage("yamamoto-vglNdConvolution.jpg", img_output)
+	vl.vglSaveImage("img-vglNdConvolution.jpg", img_output)
 	msg = msg + "Tempo de execução do método vglClNdConvolution:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"
 
 	inicio = t.time()
 	vglClNdDilate(img_input, img_output, window)
 	fim = t.time()
 	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
-	vl.vglSaveImage("yamamoto-vglNdDilate.jpg", img_output)
+	vl.vglSaveImage("img-vglNdDilate.jpg", img_output)
 	msg = msg + "Tempo de execução do método vglClNdDilate:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"
 
 	inicio = t.time()
 	vglClNdErode(img_input, img_output, window)
 	fim = t.time()
 	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
-	vl.vglSaveImage("yamamoto-vglNdErode.jpg", img_output)
+	vl.vglSaveImage("img-vglNdErode.jpg", img_output)
 	msg = msg + "Tempo de execução do método vglClNdErode:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"
 
 	inicio = t.time()
 	vglClNdNot(img_input, img_output)
 	fim = t.time()
 	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
-	vl.vglSaveImage("yamamoto-vglNdNot.jpg", img_output)
+	vl.vglSaveImage("img-vglNdNot.jpg", img_output)
 	msg = msg + "Tempo de execução do método vglClNdNot:\t\t" +str( round( (fim-inicio), 9 ) ) +"s\n"
 
 	inicio = t.time()
 	vglClNdThreshold(img_input, img_output, np.uint8(120), np.uint8(190))
 	fim = t.time()
 	vl.vglCheckContext(img_output, vl.VGL_RAM_CONTEXT())
-	vl.vglSaveImage("yamamoto-vglNdThreshold.jpg", img_output)
+	vl.vglSaveImage("img-vglNdThreshold.jpg", img_output)
 	msg = msg + "Tempo de execução do método vglClNdThreshold:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"
 
 	print("-------------------------------------------------------------")
@@ -87,4 +93,3 @@ if __name__ == "__main__":
 	img_input = None
 	img_output = None
 	window = None
-

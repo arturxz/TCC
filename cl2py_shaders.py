@@ -32,7 +32,7 @@ def vglCl3dBlurSq3(img_input, img_output):
     vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglCl3dBlurSq3.cl", "vglCl3dBlurSq3")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglCl3dBlurSq3.cl", "vglCl3dBlurSq3")
     _kernel = _program.vglCl3dBlurSq3
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -89,7 +89,7 @@ def vglCl3dConvolution(img_input, img_output, convolution_window, window_size_x,
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglCl3dConvolution.cl", "vglCl3dConvolution")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglCl3dConvolution.cl", "vglCl3dConvolution")
     _kernel = _program.vglCl3dConvolution
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -115,7 +115,7 @@ def vglCl3dCopy(img_input, img_output):
     vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglCl3dCopy.cl", "vglCl3dCopy")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglCl3dCopy.cl", "vglCl3dCopy")
     _kernel = _program.vglCl3dCopy
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -172,7 +172,7 @@ def vglCl3dDilate(img_input, img_output, convolution_window, window_size_x, wind
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglCl3dDilate.cl", "vglCl3dDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglCl3dDilate.cl", "vglCl3dDilate")
     _kernel = _program.vglCl3dDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -234,7 +234,7 @@ def vglCl3dErode(img_input, img_output, convolution_window, window_size_x, windo
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglCl3dErode.cl", "vglCl3dErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglCl3dErode.cl", "vglCl3dErode")
     _kernel = _program.vglCl3dErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -261,7 +261,7 @@ def vglCl3dMax(img_input1, img_input2, img_output):
     vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglCl3dMax.cl", "vglCl3dMax")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglCl3dMax.cl", "vglCl3dMax")
     _kernel = _program.vglCl3dMax
 
     _kernel.set_arg(0, img_input1.get_oclPtr())
@@ -284,7 +284,7 @@ def vglCl3dMin(img_input1, img_input2, img_output):
     vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglCl3dMin.cl", "vglCl3dMin")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglCl3dMin.cl", "vglCl3dMin")
     _kernel = _program.vglCl3dMin
 
     _kernel.set_arg(0, img_input1.get_oclPtr())
@@ -306,7 +306,7 @@ def vglCl3dNot(img_input, img_output):
     vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglCl3dNot.cl", "vglCl3dNot")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglCl3dNot.cl", "vglCl3dNot")
     _kernel = _program.vglCl3dNot
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -328,7 +328,7 @@ def vglCl3dSub(img_input1, img_input2, img_output):
     vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglCl3dSub.cl", "vglCl3dSub")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglCl3dSub.cl", "vglCl3dSub")
     _kernel = _program.vglCl3dSub
 
     _kernel.set_arg(0, img_input1.get_oclPtr())
@@ -351,7 +351,7 @@ def vglCl3dSum(img_input1, img_input2, img_output):
     vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglCl3dSum.cl", "vglCl3dSum")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglCl3dSum.cl", "vglCl3dSum")
     _kernel = _program.vglCl3dSum
 
     _kernel.set_arg(0, img_input1.get_oclPtr())
@@ -391,7 +391,7 @@ def vglCl3dThreshold(src, dst, thresh, top = 1.0):
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglCl3dThreshold.cl", "vglCl3dThreshold")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglCl3dThreshold.cl", "vglCl3dThreshold")
     _kernel = _program.vglCl3dThreshold
 
     _kernel.set_arg(0, src.get_oclPtr())
@@ -414,7 +414,7 @@ def vglClBlurSq3(img_input, img_output):
     vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClBlurSq3.cl", "vglClBlurSq3")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClBlurSq3.cl", "vglClBlurSq3")
     _kernel = _program.vglClBlurSq3
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -462,7 +462,7 @@ def vglClConvolution(img_input, img_output, convolution_window, window_size_x, w
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClConvolution.cl", "vglClConvolution")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClConvolution.cl", "vglClConvolution")
     _kernel = _program.vglClConvolution
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -487,7 +487,7 @@ def vglClCopy(img_input, img_output):
     vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClCopy.cl", "vglClCopy")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClCopy.cl", "vglClCopy")
     _kernel = _program.vglClCopy
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -535,7 +535,7 @@ def vglClDilate(img_input, img_output, convolution_window, window_size_x, window
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClDilate.cl", "vglClDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClDilate.cl", "vglClDilate")
     _kernel = _program.vglClDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -587,7 +587,7 @@ def vglClErode(img_input, img_output, convolution_window, window_size_x, window_
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClErode.cl", "vglClErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClErode.cl", "vglClErode")
     _kernel = _program.vglClErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -612,7 +612,7 @@ def vglClInvert(img_input, img_output):
     vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClInvert.cl", "vglClInvert")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClInvert.cl", "vglClInvert")
     _kernel = _program.vglClInvert
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -634,7 +634,7 @@ def vglClMax(img_input1, img_input2, img_output):
     vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClMax.cl", "vglClMax")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClMax.cl", "vglClMax")
     _kernel = _program.vglClMax
 
     _kernel.set_arg(0, img_input1.get_oclPtr())
@@ -657,7 +657,7 @@ def vglClMin(img_input1, img_input2, img_output):
     vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClMin.cl", "vglClMin")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClMin.cl", "vglClMin")
     _kernel = _program.vglClMin
 
     _kernel.set_arg(0, img_input1.get_oclPtr())
@@ -680,7 +680,7 @@ def vglClSub(img_input1, img_input2, img_output):
     vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClSub.cl", "vglClSub")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClSub.cl", "vglClSub")
     _kernel = _program.vglClSub
 
     _kernel.set_arg(0, img_input1.get_oclPtr())
@@ -703,7 +703,7 @@ def vglClSum(img_input1, img_input2, img_output):
     vl.vglCheckContext(img_input2, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClSum.cl", "vglClSum")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClSum.cl", "vglClSum")
     _kernel = _program.vglClSum
 
     _kernel.set_arg(0, img_input1.get_oclPtr())
@@ -724,7 +724,7 @@ def vglClSwapRgb(src, dst):
     vl.vglCheckContext(src, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(dst, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClSwapRgb.cl", "vglClSwapRgb")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClSwapRgb.cl", "vglClSwapRgb")
     _kernel = _program.vglClSwapRgb
 
     _kernel.set_arg(0, src.get_oclPtr())
@@ -763,7 +763,7 @@ def vglClThreshold(src, dst, thresh, top = 1.0):
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL/vglClThreshold.cl", "vglClThreshold")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL/vglClThreshold.cl", "vglClThreshold")
     _kernel = _program.vglClThreshold
 
     _kernel.set_arg(0, src.get_oclPtr())

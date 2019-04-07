@@ -65,7 +65,7 @@ def vglCl3dFuzzyAlgDilate(img_input, img_output, convolution_window, window_size
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyAlgDilate.cl", "vglCl3dFuzzyAlgDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyAlgDilate.cl", "vglCl3dFuzzyAlgDilate")
     _kernel = _program.vglCl3dFuzzyAlgDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -127,7 +127,7 @@ def vglCl3dFuzzyAlgErode(img_input, img_output, convolution_window, window_size_
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyAlgErode.cl", "vglCl3dFuzzyAlgErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyAlgErode.cl", "vglCl3dFuzzyAlgErode")
     _kernel = _program.vglCl3dFuzzyAlgErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -189,7 +189,7 @@ def vglCl3dFuzzyArithDilate(img_input, img_output, convolution_window, window_si
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyArithDilate.cl", "vglCl3dFuzzyArithDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyArithDilate.cl", "vglCl3dFuzzyArithDilate")
     _kernel = _program.vglCl3dFuzzyArithDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -251,7 +251,7 @@ def vglCl3dFuzzyArithErode(img_input, img_output, convolution_window, window_siz
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyArithErode.cl", "vglCl3dFuzzyArithErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyArithErode.cl", "vglCl3dFuzzyArithErode")
     _kernel = _program.vglCl3dFuzzyArithErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -313,7 +313,7 @@ def vglCl3dFuzzyBoundDilate(img_input, img_output, convolution_window, window_si
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyBoundDilate.cl", "vglCl3dFuzzyBoundDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyBoundDilate.cl", "vglCl3dFuzzyBoundDilate")
     _kernel = _program.vglCl3dFuzzyBoundDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -375,7 +375,7 @@ def vglCl3dFuzzyBoundErode(img_input, img_output, convolution_window, window_siz
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyBoundErode.cl", "vglCl3dFuzzyBoundErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyBoundErode.cl", "vglCl3dFuzzyBoundErode")
     _kernel = _program.vglCl3dFuzzyBoundErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -446,7 +446,7 @@ def vglCl3dFuzzyDaPDilate(img_input, img_output, convolution_window, window_size
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyDaPDilate.cl", "vglCl3dFuzzyDaPDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyDaPDilate.cl", "vglCl3dFuzzyDaPDilate")
     _kernel = _program.vglCl3dFuzzyDaPDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -518,7 +518,7 @@ def vglCl3dFuzzyDaPErode(img_input, img_output, convolution_window, window_size_
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyDaPErode.cl", "vglCl3dFuzzyDaPErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyDaPErode.cl", "vglCl3dFuzzyDaPErode")
     _kernel = _program.vglCl3dFuzzyDaPErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -581,7 +581,7 @@ def vglCl3dFuzzyDrasticDilate(img_input, img_output, convolution_window, window_
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyDrasticDilate.cl", "vglCl3dFuzzyDrasticDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyDrasticDilate.cl", "vglCl3dFuzzyDrasticDilate")
     _kernel = _program.vglCl3dFuzzyDrasticDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -643,7 +643,7 @@ def vglCl3dFuzzyDrasticErode(img_input, img_output, convolution_window, window_s
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyDrasticErode.cl", "vglCl3dFuzzyDrasticErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyDrasticErode.cl", "vglCl3dFuzzyDrasticErode")
     _kernel = _program.vglCl3dFuzzyDrasticErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -705,7 +705,7 @@ def vglCl3dFuzzyGeoDilate(img_input, img_output, convolution_window, window_size
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyGeoDilate.cl", "vglCl3dFuzzyGeoDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyGeoDilate.cl", "vglCl3dFuzzyGeoDilate")
     _kernel = _program.vglCl3dFuzzyGeoDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -767,7 +767,7 @@ def vglCl3dFuzzyGeoErode(img_input, img_output, convolution_window, window_size_
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyGeoErode.cl", "vglCl3dFuzzyGeoErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyGeoErode.cl", "vglCl3dFuzzyGeoErode")
     _kernel = _program.vglCl3dFuzzyGeoErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -838,7 +838,7 @@ def vglCl3dFuzzyHamacherDilate(img_input, img_output, convolution_window, window
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyHamacherDilate.cl", "vglCl3dFuzzyHamacherDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyHamacherDilate.cl", "vglCl3dFuzzyHamacherDilate")
     _kernel = _program.vglCl3dFuzzyHamacherDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -910,7 +910,7 @@ def vglCl3dFuzzyHamacherErode(img_input, img_output, convolution_window, window_
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyHamacherErode.cl", "vglCl3dFuzzyHamacherErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyHamacherErode.cl", "vglCl3dFuzzyHamacherErode")
     _kernel = _program.vglCl3dFuzzyHamacherErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -973,7 +973,7 @@ def vglCl3dFuzzyStdDilate(img_input, img_output, convolution_window, window_size
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyStdDilate.cl", "vglCl3dFuzzyStdDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyStdDilate.cl", "vglCl3dFuzzyStdDilate")
     _kernel = _program.vglCl3dFuzzyStdDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1035,7 +1035,7 @@ def vglCl3dFuzzyStdErode(img_input, img_output, convolution_window, window_size_
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglCl3dFuzzyStdErode.cl", "vglCl3dFuzzyStdErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglCl3dFuzzyStdErode.cl", "vglCl3dFuzzyStdErode")
     _kernel = _program.vglCl3dFuzzyStdErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1088,7 +1088,7 @@ def vglClFuzzyAlgDilate(img_input, img_output, convolution_window, window_size_x
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyAlgDilate.cl", "vglClFuzzyAlgDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyAlgDilate.cl", "vglClFuzzyAlgDilate")
     _kernel = _program.vglClFuzzyAlgDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1140,7 +1140,7 @@ def vglClFuzzyAlgErode(img_input, img_output, convolution_window, window_size_x,
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyAlgErode.cl", "vglClFuzzyAlgErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyAlgErode.cl", "vglClFuzzyAlgErode")
     _kernel = _program.vglClFuzzyAlgErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1192,7 +1192,7 @@ def vglClFuzzyArithDilate(img_input, img_output, convolution_window, window_size
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyArithDilate.cl", "vglClFuzzyArithDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyArithDilate.cl", "vglClFuzzyArithDilate")
     _kernel = _program.vglClFuzzyArithDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1244,7 +1244,7 @@ def vglClFuzzyArithErode(img_input, img_output, convolution_window, window_size_
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyArithErode.cl", "vglClFuzzyArithErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyArithErode.cl", "vglClFuzzyArithErode")
     _kernel = _program.vglClFuzzyArithErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1296,7 +1296,7 @@ def vglClFuzzyBoundDilate(img_input, img_output, convolution_window, window_size
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyBoundDilate.cl", "vglClFuzzyBoundDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyBoundDilate.cl", "vglClFuzzyBoundDilate")
     _kernel = _program.vglClFuzzyBoundDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1348,7 +1348,7 @@ def vglClFuzzyBoundErode(img_input, img_output, convolution_window, window_size_
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyBoundErode.cl", "vglClFuzzyBoundErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyBoundErode.cl", "vglClFuzzyBoundErode")
     _kernel = _program.vglClFuzzyBoundErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1409,7 +1409,7 @@ def vglClFuzzyDaPDilate(img_input, img_output, convolution_window, window_size_x
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyDaPDilate.cl", "vglClFuzzyDaPDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyDaPDilate.cl", "vglClFuzzyDaPDilate")
     _kernel = _program.vglClFuzzyDaPDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1471,7 +1471,7 @@ def vglClFuzzyDaPErode(img_input, img_output, convolution_window, window_size_x,
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyDaPErode.cl", "vglClFuzzyDaPErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyDaPErode.cl", "vglClFuzzyDaPErode")
     _kernel = _program.vglClFuzzyDaPErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1524,7 +1524,7 @@ def vglClFuzzyDrasticDilate(img_input, img_output, convolution_window, window_si
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyDrasticDilate.cl", "vglClFuzzyDrasticDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyDrasticDilate.cl", "vglClFuzzyDrasticDilate")
     _kernel = _program.vglClFuzzyDrasticDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1576,7 +1576,7 @@ def vglClFuzzyDrasticErode(img_input, img_output, convolution_window, window_siz
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyDrasticErode.cl", "vglClFuzzyDrasticErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyDrasticErode.cl", "vglClFuzzyDrasticErode")
     _kernel = _program.vglClFuzzyDrasticErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1628,7 +1628,7 @@ def vglClFuzzyGeoDilate(img_input, img_output, convolution_window, window_size_x
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyGeoDilate.cl", "vglClFuzzyGeoDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyGeoDilate.cl", "vglClFuzzyGeoDilate")
     _kernel = _program.vglClFuzzyGeoDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1680,7 +1680,7 @@ def vglClFuzzyGeoErode(img_input, img_output, convolution_window, window_size_x,
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyGeoErode.cl", "vglClFuzzyGeoErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyGeoErode.cl", "vglClFuzzyGeoErode")
     _kernel = _program.vglClFuzzyGeoErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1741,7 +1741,7 @@ def vglClFuzzyHamacherDilate(img_input, img_output, convolution_window, window_s
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyHamacherDilate.cl", "vglClFuzzyHamacherDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyHamacherDilate.cl", "vglClFuzzyHamacherDilate")
     _kernel = _program.vglClFuzzyHamacherDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1803,7 +1803,7 @@ def vglClFuzzyHamacherErode(img_input, img_output, convolution_window, window_si
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyHamacherErode.cl", "vglClFuzzyHamacherErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyHamacherErode.cl", "vglClFuzzyHamacherErode")
     _kernel = _program.vglClFuzzyHamacherErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1856,7 +1856,7 @@ def vglClFuzzyStdDilate(img_input, img_output, convolution_window, window_size_x
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyStdDilate.cl", "vglClFuzzyStdDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyStdDilate.cl", "vglClFuzzyStdDilate")
     _kernel = _program.vglClFuzzyStdDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -1908,7 +1908,7 @@ def vglClFuzzyStdErode(img_input, img_output, convolution_window, window_size_x,
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_MM/vglClFuzzyStdErode.cl", "vglClFuzzyStdErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_MM/vglClFuzzyStdErode.cl", "vglClFuzzyStdErode")
     _kernel = _program.vglClFuzzyStdErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())

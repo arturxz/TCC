@@ -275,7 +275,7 @@ def cl_channel_order(img):
 		oclPtr_channel_order = cl.channel_order.RGB
 	elif( img.getVglShape().getNChannels() == 4 ):
 		oclPtr_channel_order = cl.channel_order.RGBA
-	
+
 	return oclPtr_channel_order
 
 """

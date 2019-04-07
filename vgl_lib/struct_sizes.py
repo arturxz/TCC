@@ -10,7 +10,7 @@ import vgl_lib as vl
 """
 class struct_sizes:
 	def __init__(self):
-		print("struct_sizes: Starting")
+		print("-> struct_sizes: Starting")
 		
 		# INSTANTIATING THE VARIABLE THAT WILL STORE THE DATA
 		self.struct_sizes_host = np.zeros(11, np.uint32)
@@ -28,7 +28,7 @@ class struct_sizes:
 		self.kernel_run = self._program.get_struct_sizes
 
 		self.execute()
-		print("struct_sizes: Ending")
+		print("<- struct_sizes: Ending\n")
 
 	def execute(self):
 

@@ -942,7 +942,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
   }
 
 print CPP "
-    _program = vl\.get_ocl_context()\.get_compiled_kernel(\"\.\./$cpp_read_path$basename\.cl\", \"$basename\")
+    _program = vl\.get_ocl_context()\.get_compiled_kernel(\"$cpp_read_path$basename\.cl\", \"$basename\")
     _kernel = _program\.$basename\n";  
 #  static cl_program _program = NULL;
 #  if (_program == NULL)

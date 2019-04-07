@@ -49,12 +49,14 @@ class opencl_context:
 	"""
 	def get_compiled_kernel(self, filepath, kernelname):
 		print("-> get_compiled_kernel: Starting")
+		import os
 		kernel_file = None
 
 		try:
 			kernel_file = open(filepath, "r")
 		except FileNotFoundError as fnf:
-			print("get_compiled_kernel: Error: Kernel File not found. Filepath:", filepath)    
+			# IF FILE WASN'T NOT FOUND, PRINT THE PATH SENT AND THE CURRENT WORKING DIRECTORY.
+			print("get_compiled_kernel: Error: Kernel File not found. Filepath:", filepath+", cwd:", os.getcwd())
 			print(str(fnf))
 			exit()
 		except Exception as e:

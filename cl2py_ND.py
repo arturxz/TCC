@@ -52,7 +52,7 @@ def vglClNdConvolution(img_input, img_output, window):
     vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_ND/vglClNdConvolution.cl", "vglClNdConvolution")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_ND/vglClNdConvolution.cl", "vglClNdConvolution")
     _kernel = _program.vglClNdConvolution
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -88,7 +88,7 @@ def vglClNdCopy(img_input, img_output):
     vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_ND/vglClNdCopy.cl", "vglClNdCopy")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_ND/vglClNdCopy.cl", "vglClNdCopy")
     _kernel = _program.vglClNdCopy
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -134,7 +134,7 @@ def vglClNdDilate(img_input, img_output, window):
     vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_ND/vglClNdDilate.cl", "vglClNdDilate")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_ND/vglClNdDilate.cl", "vglClNdDilate")
     _kernel = _program.vglClNdDilate
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -183,7 +183,7 @@ def vglClNdErode(img_input, img_output, window):
     vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_ND/vglClNdErode.cl", "vglClNdErode")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_ND/vglClNdErode.cl", "vglClNdErode")
     _kernel = _program.vglClNdErode
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -219,7 +219,7 @@ def vglClNdNot(img_input, img_output):
     vl.vglCheckContext(img_input, vl.VGL_CL_CONTEXT())
     vl.vglCheckContext(img_output, vl.VGL_CL_CONTEXT())
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_ND/vglClNdNot.cl", "vglClNdNot")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_ND/vglClNdNot.cl", "vglClNdNot")
     _kernel = _program.vglClNdNot
 
     _kernel.set_arg(0, img_input.get_oclPtr())
@@ -270,7 +270,7 @@ def vglClNdThreshold(img_input, img_output, thresh, top = 255):
             print(str(e))
             exit()
 
-    _program = vl.get_ocl_context().get_compiled_kernel("../CL_ND/vglClNdThreshold.cl", "vglClNdThreshold")
+    _program = vl.get_ocl_context().get_compiled_kernel("CL_ND/vglClNdThreshold.cl", "vglClNdThreshold")
     _kernel = _program.vglClNdThreshold
 
     _kernel.set_arg(0, img_input.get_oclPtr())
