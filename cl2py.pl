@@ -770,12 +770,12 @@ sub ProcessClFile { # ($filename, $output, $cpp_read_path) {
 }
 
 #############################################################################
-# PrintCppFile
+# PrintPythonFile
 #
-# Receives as input a CL filename and generates CPP wrapper function
+# Receives as input a CL filename and generates Python wrapper function
 #
 #
-sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $default, $is_array, $is_shape, $size, $output, $cpp_read_path) {
+sub PrintPythonFile { # ($basename, $comment, $semantics, $type, $variable, $default, $is_array, $is_shape, $size, $output, $cpp_read_path) {
   my $basename      = $_[0];
   my $comment       = $_[1];
   my $semantics     = $_[2];
@@ -794,14 +794,11 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
 
   print "Will write to $output.py\n";
 
-  open CPP, ">>", "$output.py";
-#  open HEAD, ">>", "$output.h";
+  open PYTHON, ">>", "$output.py";
 
-  print CPP "\"\"\"\n    $comment    \n\"\"\"\n";
-#  print HEAD "$comment\n";
+  print PYTHON "\"\"\"\n    $comment    \n\"\"\"\n";
 
-  print CPP "def $basename(";
-#  print HEAD "void $basename(";
+  print PYTHON "def $basename(";
   for ($i = 0; $i <= $#type; $i++){
     print ">>>$type[$i]<<< becomes ";
     if ( ($semantics[$i] eq "__read_only") or ($semantics[$i] eq "__write_only") or ($semantics[$i] eq "__global") ){
@@ -832,32 +829,27 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
       $p = "";
     }
     if (($i > 0) and (not $is_shape[0])){
-      print CPP ", ";
-#      print HEAD ", ";
+      print PYTHON ", ";
     }
-    print CPP "$variable[$i]";
-#    print CPP "$type[$i]$p $variable[$i]";
-#    print HEAD "$type[$i]$p $variable[$i]";
+    print PYTHON "$variable[$i]";
     if ($default[$i]){
-      print CPP " $default[$i]";
+      print PYTHON " $default[$i]";
     }
   }
-  print CPP "):\n\n";                                 # ESCOPO DA FUNCAO TERMINA AQUI
-#  print HEAD ");\n\n";
+  print PYTHON "):\n\n";                                 # ESCOPO DA FUNCAO TERMINA AQUI
 
   for ($i = 0; $i <= $#type; $i++){
     if ($semantics[$i] eq "__global"){
         $var = $variable[$i];
-        print CPP "
+        print PYTHON "
     if( not $var\.clForceAsBuf == vl\.IMAGE_ND_ARRAY() ):
         print(\"vglClNdCopy: Error: this function supports only OpenCL data as buffer and $var isn't\.\")
         exit(1)\n\n";
     } elsif ( ($semantics[$i] eq "__constant") ){
-      #print CPP "entrou: $type[$i]\n";
       if( $type[$i] eq "VglClStrEl" ){
         $var = $variable[$i];
         $t = "VglClStrEl";
-        print CPP "    # EVALUATING IF $variable[$i] IS IN CORRECT TYPE
+        print PYTHON "    # EVALUATING IF $variable[$i] IS IN CORRECT TYPE
     if( not isinstance($var, vl\.VglStrEl) ):
         print(\"vglClNdConvolution: Error: $var is not a $t object\. aborting execution\.\")
         exit()
@@ -869,7 +861,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
         $var = $variable[$i];
         $t = "VglClShape";
         $aux = substr($size[$i], 0, index($size[$i], "->"));
-        print CPP "    # CREATING OPENCL BUFFER TO $t
+        print PYTHON "    # CREATING OPENCL BUFFER TO $t
     mobj_$var = $aux\.getVglShape()\.get_asVglClShape_buffer()\n\n";
       }
 
@@ -880,14 +872,9 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
 
   for ($i = 0; $i <= $#type; $i++){
     if ($semantics[$i] eq "__read_only" or $semantics[$i] eq "__write_only" or $semantics[$i] eq "__read_write" or $semantics[$i] eq "__global"){
-        print CPP "    vl\.vglCheckContext($variable[$i], vl\.VGL_CL_CONTEXT())\n";
+        print PYTHON "    vl\.vglCheckContext($variable[$i], vl\.VGL_CL_CONTEXT())\n";
     }
   }
-
-#  print CPP " ------------------------------ a versao python nao tem o tratamento de erro como no c
-
-#  cl_int _err;
-#";
 
   for ($i = 0; $i <= $#type; $i++){
 
@@ -899,7 +886,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
         if ($is_array[$i]){
           $e = "";
         }
-        print CPP "    # EVALUATING IF $e$var IS IN CORRECT TYPE
+        print PYTHON "    # EVALUATING IF $e$var IS IN CORRECT TYPE
     try:
         mobj_$var = cl\.Buffer(vl\.get_ocl()\.context, cl\.mem_flags\.READ_ONLY, $e$var\.nbytes)
         cl\.enqueue_copy(vl\.get_ocl()\.commandQueue, mobj_$var, $e$var\.tobytes(), is_blocking=True)
@@ -909,7 +896,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
         print(str(e))
         exit()\n";
     } elsif ($type[$i] eq "int"){
-              print CPP "    # EVALUATING IF $variable[$i] IS IN CORRECT TYPE
+              print PYTHON "    # EVALUATING IF $variable[$i] IS IN CORRECT TYPE
     if( not isinstance($variable[$i], np\.uint32) ):
         print(\"vglClConvolution: Warning: $variable[$i] not np\.uint32! Trying to convert\.\.\.\")
         try:
@@ -919,7 +906,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
             print(str(e))
             exit()\n";
     } elsif ($type[$i] eq "unsigned char"){
-              print CPP "    # EVALUATING IF $variable[$i] IS IN CORRECT TYPE
+              print PYTHON "    # EVALUATING IF $variable[$i] IS IN CORRECT TYPE
     if( not isinstance($variable[$i], np\.uint8) ):
         print(\"vglClConvolution: Warning: $variable[$i] not np\.uint8! Trying to convert\.\.\.\")
         try:
@@ -929,7 +916,7 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
             print(str(e))
             exit()\n";
     } elsif ($type[$i] eq "float"){
-              print CPP "    # EVALUATING IF $variable[$i] IS IN CORRECT TYPE
+              print PYTHON "    # EVALUATING IF $variable[$i] IS IN CORRECT TYPE
     if( not isinstance($variable[$i], np.float32) ):
         print(\"vglClConvolution: Warning: $variable[$i] not np\.float32! Trying to convert\.\.\.\")
         try:
@@ -941,39 +928,9 @@ sub PrintCppFile { # ($basename, $comment, $semantics, $type, $variable, $defaul
     }
   }
 
-print CPP "
+print PYTHON "
     _program = vl\.get_ocl_context()\.get_compiled_kernel(\"$cpp_read_path$basename\.cl\", \"$basename\")
     _kernel = _program\.$basename\n";  
-#  static cl_program _program = NULL;
-#  if (_program == NULL)
-#  {
-#    char* _file_path = (char*) \"$cpp_read_path$basename\.cl\";
-#    printf(\"Compiling %s\\n\", _file_path);
-#    std::ifstream _file(_file_path);
-#    if(_file.fail())
-#    {
-#      fprintf(stderr, \"%s:%s: Error: File %s not found.\\n\", __FILE__, __FUNCTION__, _file_path);
-#      exit(1);
-#    }
-#    std::string _prog( std::istreambuf_iterator<char>( _file ), ( std::istreambuf_iterator<char>() ) );
-#    const char *_source_str = _prog.c_str();
-#ifdef __DEBUG__
-#    printf(\"Kernel to be compiled:\\n%s\\n\", _source_str);
-#endif
-#    _program = clCreateProgramWithSource(cl.context, 1, (const char **) &_source_str, 0, &_err );
-#    vglClCheckError(_err, (char*) \"clCreateProgramWithSource\" );
-#    _err = clBuildProgram(_program, 1, cl.deviceId, \"-I $cpp_read_path\", NULL, NULL );
-#    vglClBuildDebug(_err, _program);
-#  }
-#
-#  static cl_kernel _kernel = NULL;
-#  if (_kernel == NULL)
-#  {
-#    _kernel = clCreateKernel( _program, \"$basename\", &_err );
-#    vglClCheckError(_err, (char*) \"clCreateKernel\" );
-# }
-#
-#";
 
   for ($i = 0; $i <= $#type; $i++){
     if ($type[$i] eq "VglImage*"){
@@ -999,79 +956,47 @@ print CPP "
     }
 
     
-    print CPP "
+    print PYTHON "
     _kernel\.set_arg($i, $addr)";
-#  _err = clSetKernelArg( _kernel, $i, sizeof( $sizeof ), $addr );
-#  vglClCheckError( _err, (char*) \"clSetKernelArg $i\" );
-#";
   }
 
   for ($i = 0; $i <= $#type; $i++){
     if ($type[$i] eq "VglImage*"){
       $var_worksize = $variable[$i];
-      #print "**************************************************************************** $semantics[$i]\n";
-      #print "**************************************************************************** $variable[$i]\n";
-      #print "**************************************************************************** $type[$i]\n";
       last;
     }
   }
 
-#  print CPP "
-#  int _ndim = 2;
-#  if ($var_worksize->ndim > 2){
-#    _ndim = 3;
-#  }
-
-#  size_t _worksize_0 = $var_worksize->getWidthIn();";
-
   for ($i = 0; $i <= $#type; $i++){
     if ($type[$i] eq "VglImage*"){
-#      print CPP "
-#  if ($variable[$i]->depth == IPL_DEPTH_1U)
-#  {
-#    _worksize_0 = $variable[$i]->getWidthStep();
-#  }";
     }
   }
   if ( $vetor_ou_image eq "vetor" ){
-    print CPP "\n\n    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    print PYTHON "\n\n    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
     cl\.enqueue_nd_range_kernel(vl\.get_ocl()\.commandQueue, _kernel, $var_worksize\.get_ipl()\.shape, None)\n";
   } elsif( $vetor_ou_image eq "image" ){
-    print CPP "\n\n    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
+    print PYTHON "\n\n    # THIS IS A BLOCKING COMMAND. IT EXECUTES THE KERNEL.
     cl\.enqueue_nd_range_kernel(vl\.get_ocl()\.commandQueue, _kernel, $var_worksize\.get_oclPtr()\.shape, None)\n";
   }
-
-#  print CPP "
-#
-#  size_t worksize[] = { _worksize_0, $var_worksize->getHeightIn(),  $var_worksize->getNFrames() };
-#  clEnqueueNDRangeKernel( cl.commandQueue, _kernel, _ndim, NULL, worksize, 0, 0, 0, 0 );
-
-#  vglClCheckError( _err, (char*) \"clEnqueueNDRangeKernel\" );
-#";
 
   for ($i = 0; $i <= $#type; $i++){
     if (    ( ($type[$i] ne "VglImage*") && ($semantics[$i] ne "__write_only") && ($is_array[$i] != 0) ) or
             ($type[$i] eq "VglStrEl")    or     ($is_shape[$i])    ){
-      print CPP "\n    mobj_$variable[$i] = None";
-#  _err = clReleaseMemObject( mobj_$variable[$i] );
-#  vglClCheckError(_err, (char*) \"clReleaseMemObject mobj_$variable[$i]\");
-#";
+      print PYTHON "\n    mobj_$variable[$i] = None";
     }
   }
 
   for ($i = 0; $i <= $#type; $i++){
     if ($semantics[$i] eq "__write_only" or $semantics[$i] eq "__read_write" or $semantics[$i] eq "__global"){
-      print CPP "\n    vl\.vglSetContext($variable[$i], vl\.VGL_CL_CONTEXT())\n";
-#  vglSetContext($variable[$i]".", VGL_CL_CONTEXT);
-#";
+      print PYTHON "\n    vl\.vglSetContext($variable[$i], vl\.VGL_CL_CONTEXT())\n";
     }
   }
 
 
-  print CPP "\n";
+  print PYTHON "\n";
 
 
-  close CPP;
+  close PYTHON;
   close HEAD;
 }
 
@@ -1154,6 +1079,10 @@ InputFileList   List of input files. Wildcard characters are allowed.
 
 print $USAGE;
 
+##################
+# PYTHON WRAPPER #
+##################
+
 my $archiveName = "cl2py_shaders";
 $nargs = $#ARGV;
 $nargs++;
@@ -1163,7 +1092,7 @@ print "Number of args = $nargs\n";
 for ($i=0; $i<$nargs; $i=$i+2) {
   if    ($ARGV[$i] eq "-o") {
     $output = $ARGV[$i+1] ;
-    print ("Output Files: $output.cpp and $output.h\n") ;
+    print ("Output Files: $output.py\n") ;
   }
   elsif ($ARGV[$i] eq "-p") {
     $cpp_read_path = $ARGV[$i+1] ;
@@ -1199,7 +1128,6 @@ for ($i=0; $i<=$#files; $i=$i+1) {
 }
 
 unlink("$output.py");
-#unlink("$output.h");
 
 $topMsg = "
 \"\"\"
@@ -1214,9 +1142,9 @@ $topMsg = "
 
 my $className = substr($cpp_read_path, 0, length($cpp_read_path)-1); # removes last character, that is '/'
 
-open CPP, ">>", "$output.py";
-print CPP $topMsg;
-print CPP "#!/usr/bin/python3 python3
+open PYTHON, ">>", "$output.py";
+print PYTHON $topMsg;
+print PYTHON "#!/usr/bin/python3 python3
 
 # OPENCL LIBRARY
 import pyopencl as cl
@@ -1226,7 +1154,7 @@ import vgl_lib as vl
 
 #TO WORK WITH MAIN
 import numpy as np\n\n";
-close CPP;
+close PYTHON;
 
 $i = 0;
 
@@ -1244,7 +1172,6 @@ for ($i=0; $i<=$#files; $i++) {
     print "Path: $b\n";
     print "Basename: $a\n";
     print "Extenssion: $c\n";
-    #print "name: ".basename($fullname)." path: ".dirname($fullname)."\n";
     $basename = $a;
 
     undef $comment;
@@ -1256,6 +1183,6 @@ for ($i=0; $i<=$#files; $i++) {
 
     ($comment, $semantics, $type, $variable, $default, $uniform) = ProcessClFile($fullname);
 
-    PrintCppFile($basename, $comment, $semantics, $type, $variable, $default, $is_array, $is_shape, $size, $output, $cpp_read_path);
+    PrintPythonFile($basename, $comment, $semantics, $type, $variable, $default, $is_array, $is_shape, $size, $output, $cpp_read_path);
 
 }
