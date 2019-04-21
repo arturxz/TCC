@@ -33,98 +33,95 @@ if __name__ == "__main__":
 	"""
 		CL.IMAGE OBJECTS
 	"""
+	img_in_path = sys.argv[1]
+	nSteps		= int(sys.argv[2])
+	img_out_path= sys.argv[3]
+
+	print("in path", img_in_path)
+	print("steps", nSteps)
+	print("out path", img_out_path)
 
 	msg = ""
 
 	vl.vglClInit()
 
-	img_input_3d = vl.VglImage(sys.argv[1], None, vl.VGL_IMAGE_3D_IMAGE())
+	img_input_3d = vl.VglImage(img_in_path, None, vl.VGL_IMAGE_3D_IMAGE())
 	vl.vglLoadImage(img_input_3d)
 	vl.vglClUpload(img_input_3d)
 
-	img_input2_3d = vl.VglImage(sys.argv[2], None, vl.VGL_IMAGE_3D_IMAGE())
-	vl.vglLoadImage(img_input2_3d)
-
 	img_output_3d = vl.create_blank_image_as(img_input_3d)
 	img_output_3d.set_oclPtr( vl.get_similar_oclPtr_object(img_input_3d) )
+	
 	vl.vglAddContext(img_output_3d, vl.VGL_CL_CONTEXT())
 
-	convolution_window_3d = np.ones((5,5,5), np.float32) * (1/125)
+	convolution_window_3d_3x3x3 = np.ones((3,3,3), np.float32) * (1/27)
+	convolution_window_3d_5x5x5 = np.ones((5,5,5), np.float32) * (1/125)
 
-	morph_window_3d = np.zeros((3,3,3), np.uint8)
-	morph_window_3d[0,1,1] = 255
-	morph_window_3d[1,0,1] = 255
-	morph_window_3d[1,1,0] = 255
-	morph_window_3d[1,1,1] = 255
-	morph_window_3d[1,1,2] = 255
-	morph_window_3d[1,2,1] = 255
-	morph_window_3d[2,1,1] = 255
-
+	p = 0
 	inicio = t.time()
-	vglCl3dBlurSq3(img_input_3d, img_output_3d)
+	while(p < nSteps):
+		vglCl3dBlurSq3(img_input_3d, img_output_3d)
+		p = p + 1
+	vl.get_ocl().commandQueue.finish()
 	fim = t.time()
-	vl.vglSaveImage("3d-vglCl3dBlurSq3.tif", img_output_3d)
+	
+	vl.vglSaveImage(img_out_path+"3d-vglCl3dBlurSq3.tif", img_output_3d)
 	msg = msg + "Tempo de execução do método vglCl3dBlurSq3:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
 
+	p = 0
 	inicio = t.time()
-	vglCl3dConvolution(img_input_3d, img_output_3d, convolution_window_3d, np.uint32(5), np.uint32(5), np.uint32(5))
+	while(p < nSteps):
+		vglCl3dConvolution(img_input_3d, img_output_3d, convolution_window_3d_3x3x3, np.uint32(3), np.uint32(3), np.uint32(3))
+		p = p + 1
+	vl.get_ocl().commandQueue.finish()
 	fim = t.time()
-	vl.vglSaveImage("3d-vglCl3dConvolution.tif", img_output_3d)
+	
+	vl.vglSaveImage(img_out_path+"3d-vglCl3dConvolution.tif", img_output_3d)
 	msg = msg + "Tempo de execução do método vglCl3dConvolution:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
 
+	p = 0
 	inicio = t.time()
-	vglCl3dCopy(img_input_3d, img_output_3d)
+	while(p < nSteps):
+		vglCl3dConvolution(img_input_3d, img_output_3d, convolution_window_3d_5x5x5, np.uint32(5), np.uint32(5), np.uint32(5))
+		p = p + 1
+	vl.get_ocl().commandQueue.finish()
 	fim = t.time()
-	vl.vglSaveImage("3d-vglCl3dCopy.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dCopy:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
+	
+	vl.vglSaveImage(img_out_path+"3d-vglCl3dConvolution.tif", img_output_3d)
+	msg = msg + "Tempo de execução do método vglCl3dConvolution:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
 
+	p = 0
 	inicio = t.time()
-	vglCl3dDilate(img_input_3d, img_output_3d, morph_window_3d, np.uint32(3), np.uint32(3), np.uint32(3))
+	while(p < nSteps):
+		vglCl3dNot(img_input_3d, img_output_3d)
+		p = p + 1
+	vl.get_ocl().commandQueue.finish()
 	fim = t.time()
-	vl.vglSaveImage("3d-vglCl3dDilate.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dDilate:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
-
-	inicio = t.time()
-	vglCl3dErode(img_input_3d, img_output_3d, morph_window_3d, np.uint32(3), np.uint32(3), np.uint32(3))
-	fim = t.time()
-	vl.vglSaveImage("3d-vglCl3dErode.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dErode:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
-
-	inicio = t.time()
-	vglCl3dNot(img_input_3d, img_output_3d)
-	fim = t.time()
-	vl.vglSaveImage("3d-vglCl3dNot.tif", img_output_3d)
+	
+	vl.vglSaveImage(img_out_path+"3d-vglCl3dNot.tif", img_output_3d)
 	msg = msg + "Tempo de execução do método vglCl3dNot:\t\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
 
+	p = 0
 	inicio = t.time()
-	vglCl3dMax(img_input_3d, img_input2_3d, img_output_3d)
+	while(p < nSteps):
+		vglCl3dThreshold(img_input_3d, img_output_3d, np.float32(0.2))
+		p = p + 1
+	vl.get_ocl().commandQueue.finish()
 	fim = t.time()
-	vl.vglSaveImage("3d-vglCl3dMax.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dMax:\t\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
+	
+	vl.vglSaveImage(img_out_path+"3d-vglCl3dThreshold.tif", img_output_3d)
+	msg = msg + "Tempo de execução do método vglCl3dThreshold:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"
 
+	p = 0
 	inicio = t.time()
-	vglCl3dMin(img_input_3d, img_input2_3d, img_output_3d)
+	while(p < nSteps):
+		vglCl3dCopy(img_input_3d, img_output_3d)
+		p = p + 1
+	vl.get_ocl().commandQueue.finish()
 	fim = t.time()
-	vl.vglSaveImage("3d-vglCl3dMin.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dMin:\t\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
-
-	inicio = t.time()
-	vglCl3dSub(img_input_3d, img_input2_3d, img_output_3d)
-	fim = t.time()
-	vl.vglSaveImage("3d-vglCl3dSub.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dSub:\t\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
-
-	inicio = t.time()
-	vglCl3dSum(img_input_3d, img_input2_3d, img_output_3d)
-	fim = t.time()
-	vl.vglSaveImage("3d-vglCl3dSum.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dSum:\t\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
-
-	inicio = t.time()
-	vglCl3dThreshold(img_input_3d, img_output_3d, np.float32(0.4), np.float32(.8))
-	fim = t.time()
-	vl.vglSaveImage("3d-vglCl3dThreshold.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dThreshold:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
+	
+	vl.vglSaveImage(img_out_path+"3d-vglCl3dCopy.tif", img_output_3d)
+	msg = msg + "Tempo de execução do método vglCl3dCopy:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
 
 	print("-------------------------------------------------------------")
 	print(msg)
@@ -136,5 +133,4 @@ if __name__ == "__main__":
 
 	img_output_3d = None
 
-	convolution_window_3d = None	
-	morph_window_3d = None
+	convolution_window_3d = None
