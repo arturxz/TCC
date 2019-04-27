@@ -74,6 +74,12 @@ int main(int argc, char* argv[])
     vglPrintImageInfo(img, (char*) "IMG");
     vglPrintImageInfo(out, (char*) "OUT");
 
+    //First call to Blur 3x3x3
+    TimerStart();
+    vglCl3dBlurSq3(img, out);
+    vglClFlush();
+    printf("First call to          Blur 3x3x3:              %s\n", getTimeElapsedInSeconds());
+    //Total time spent on n operations Blur 3x3
     int p = 0;
     TimerStart();
     while (p < nSteps)
@@ -97,6 +103,12 @@ int main(int argc, char* argv[])
     float* mask555 = (float*) malloc(sizeof(float)*125);
     for(int i = 0; i < 125; i++)
         mask555[i] = 1.0f/125.0f;
+
+    //First call to Convolution 3x3x3
+    TimerStart();
+    vglCl3dConvolution(img, out, (float*) mask333, 3, 3, 3);
+    vglClFlush();
+    printf("First call to          Convolution 3x3x3:       %s\n", getTimeElapsedInSeconds());
 
     //Total time spent on n operations Convolution 3x3
     p = 0;
@@ -128,6 +140,34 @@ int main(int argc, char* argv[])
     sprintf(outFilename, "%s%s", outPath, "/out_cl3d_conv555_%03d.tif");
     vglSave3dImage(outFilename, out, imgIFirst, imgILast);
 
+    //First call to Erode 3x3x3
+    float erodeMask[] = { 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                          1, 1, 1, 1, 1, 1, 1, 1, 1,
+                          1, 1, 1, 1, 1, 1, 1, 1, 1};
+    TimerStart();
+    vglCl3dErode(img, out, erodeMask, 3, 3, 3);
+    vglClFlush();
+    printf("First call to          Erode 3x3x3:             %s \n", getTimeElapsedInSeconds());
+    //Total time spent on n operations Erode 3x3x3
+    p = 0;
+    TimerStart();
+    while (p < nSteps)
+    {
+        p++;
+        vglCl3dErode(img, out, erodeMask, 3, 3, 3);
+    }
+    vglClFlush();
+    printf("Time spent on %8d Erode 3x3x3:             %s\n", nSteps, getTimeElapsedInSeconds());
+
+    vglCheckContext(out, VGL_RAM_CONTEXT);
+    sprintf(outFilename, "%s%s", outPath, "/out_cl3d_erode333_%03d.tif");
+    vglSave3dImage(outFilename, out, imgIFirst, imgILast);
+
+    //First call to Invert
+    TimerStart();
+    vglCl3dNot(img, out);
+    vglClFlush();
+    printf("Fisrt call to          Invert:                  %s\n", getTimeElapsedInSeconds());
     //Total time spent on n operations Invert
     p = 0;
     TimerStart();
@@ -144,6 +184,11 @@ int main(int argc, char* argv[])
     vglSave3dImage(outFilename, out, imgIFirst, imgILast);
 
     float thresh = 0.2;
+    //First call to Threshold
+    TimerStart();
+    vglCl3dThreshold(img, out, thresh);
+    vglClFlush();
+    printf("Fisrt call to          Threshold:               %s\n", getTimeElapsedInSeconds());
     //Total time spent on n operations Threshold
     p = 0;
     TimerStart();
@@ -159,6 +204,12 @@ int main(int argc, char* argv[])
     sprintf(outFilename, "%s%s", outPath, "/out_cl3d_thresh_%03d.tif");
     vglSave3dImage(outFilename, out, imgIFirst, imgILast);
 
+    //First call to Copy GPU->GPU
+    TimerStart();
+    vglCl3dCopy(img,out);
+    vglClFlush();
+    printf("First call to          Copy GPU->GPU:           %s \n", getTimeElapsedInSeconds());
+    //Total time spent on n operations Copy GPU->GPU
     p = 0;
     TimerStart();
     while (p < nSteps)
@@ -173,7 +224,56 @@ int main(int argc, char* argv[])
     sprintf(outFilename, "%s%s", outPath, "/out_cl3d_gpuCopy_%03d.tif");
     vglSave3dImage(outFilename, out, imgIFirst, imgILast);
 
+    //First call to Copy CPU->GPU
+    vglCheckContext(img, VGL_RAM_CONTEXT);
+    TimerStart();
+    vglSetContext(img, VGL_RAM_CONTEXT);
+    vglClUpload(img);
+    vglClFlush();
+    printf("First call to          Copy CPU->GPU:           %s \n", getTimeElapsedInSeconds());
+    //Total time spent on n operations Copy CPU->GPU
+    p = 0;
+    TimerStart();
+    while (p < nSteps)
+    {
+        p++;
+        vglSetContext(img, VGL_RAM_CONTEXT);
+        vglClUpload(img);
+    }
+    vglClFlush();
+    printf("Time spent on %8d copy CPU->GPU:           %s\n", nSteps, getTimeElapsedInSeconds());
+
+    vglCheckContext(img, VGL_RAM_CONTEXT);
+    sprintf(outFilename, "%s%s", outPath, "/out_cl3d_upload_%03d.tif");
+    vglSave3dImage(outFilename, img, imgIFirst, imgILast);
+
+    //First call to Copy GPU->CPU
+    vglCheckContext(img, VGL_CL_CONTEXT);
+    TimerStart();
+    vglSetContext(img, VGL_CL_CONTEXT);
+    vglClDownload(img);
+    vglClFlush();
+    printf("First call to          Copy GPU->CPU:           %s \n", getTimeElapsedInSeconds());
+    //Total time spent on n operations Copy GPU->CPU
+    p = 0;
+    TimerStart();
+    while (p < nSteps)
+    {
+        p++;
+        vglSetContext(img, VGL_CL_CONTEXT);
+        vglClDownload(img);
+    }
+    vglClFlush();
+    printf("Time spent on %8d copy GPU->CPU:           %s\n", nSteps, getTimeElapsedInSeconds());
+
+    vglCheckContext(img, VGL_RAM_CONTEXT);
+    sprintf(outFilename, "%s%s", outPath, "/out_cl3d_download_%03d.tif");
+    vglSave3dImage(outFilename, img, imgIFirst, imgILast);
+
+    //flush
+    vglClFlush();
     return 0;
 }
 
 #endif
+

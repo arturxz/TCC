@@ -76,78 +76,95 @@ if __name__ == "__main__":
 											(6/256, 24/256, 36/256, 24/256, 6/256),
 											(4/256, 16/256, 24/256, 16/256, 4/256),
 											(1/256, 4/256,  6/256,  4/256,  1/256) ), np.float32)
-
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglClBlurSq3(img_input, img_output)
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	vglClBlurSq3(img_input, img_output)
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglClBlurSq3(img_input, img_output)
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 
 	salvando2d(img_output, img_out_path+"img-vglClBlurSq3.jpg")
 	vl.rgb_to_rgba(img_output)
-	msg = msg + "Tempo de execução do método vglClBlurSq3:\t\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
-	
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglClConvolution(img_input, img_output, convolution_window_2d_3x3, np.uint32(5), np.uint32(5))
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	msg = msg + "Tempo de execução do método vglClBlurSq3:\t\t" +str( round( ( media / 5 ), 9 ) ) +"s\n"	
+
+	vglClConvolution(img_input, img_output, convolution_window_2d_3x3, np.uint32(5), np.uint32(5))
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglClConvolution(img_input, img_output, convolution_window_2d_3x3, np.uint32(5), np.uint32(5))
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 
 	salvando2d(img_output, img_out_path+"img-vglClConvolution.jpg")
 	vl.rgb_to_rgba(img_output)
-	msg = msg + "Tempo de execução do método vglClConvolution 3x3:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"
+	msg = msg + "Tempo de execução do método vglClConvolution 3x3:\t" +str( round( (media / 5), 9 ) ) +"s\n"
 
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglClConvolution(img_input, img_output, convolution_window_2d_5x5, np.uint32(5), np.uint32(5))
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	vglClConvolution(img_input, img_output, convolution_window_2d_5x5, np.uint32(5), np.uint32(5))
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglClConvolution(img_input, img_output, convolution_window_2d_5x5, np.uint32(5), np.uint32(5))
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 	
 	salvando2d(img_output, img_out_path+"img-vglClConvolution.jpg")
 	vl.rgb_to_rgba(img_output)
-	msg = msg + "Tempo de execução do método vglClConvolution 5x5:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"
+	msg = msg + "Tempo de execução do método vglClConvolution 5x5:\t" +str( round( (media / 5), 9 ) ) +"s\n"
 
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglClInvert(img_input, img_output)
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	vglClInvert(img_input, img_output)
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglClInvert(img_input, img_output)
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 
 	salvando2d(img_output, img_out_path+"img-vglClInvert.jpg")
 	vl.rgb_to_rgba(img_output)
-	msg = msg + "Tempo de execução do método vglClInvert:\t\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
+	msg = msg + "Tempo de execução do método vglClInvert:\t\t" +str( round( (media / 5), 9 ) ) +"s\n"	
 
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglClThreshold(img_input, img_output, np.float32(0.5))
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	vglClThreshold(img_input, img_output, np.float32(0.5))
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglClThreshold(img_input, img_output, np.float32(0.5))
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 	
 	salvando2d(img_output, img_out_path+"img-vglClThreshold.jpg")
 	vl.rgb_to_rgba(img_output)
-	msg = msg + "Tempo de execução do método vglClThreshold:\t\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
+	msg = msg + "Tempo de execução do método vglClThreshold:\t\t" +str( round( (media / 5), 9 ) ) +"s\n"	
 
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglClCopy(img_input, img_output)
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	vglClCopy(img_input, img_output)
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglClCopy(img_input, img_output)
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 
 	salvando2d(img_output, img_out_path+"img-vglClCopy.jpg")
 	vl.rgb_to_rgba(img_output)
-	msg = msg + "Tempo de execução do método vglClCopy:\t\t\t" +str( round( (fim-inicio), 9 ) ) +"s"	
+	msg = msg + "Tempo de execução do método vglClCopy:\t\t\t" +str( round( (media / 5), 9 ) ) +"s"	
 
 	print("-------------------------------------------------------------")
 	print(msg)

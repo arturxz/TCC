@@ -56,72 +56,90 @@ if __name__ == "__main__":
 
 	convolution_window_3d_3x3x3 = np.ones((3,3,3), np.float32) * (1/27)
 	convolution_window_3d_5x5x5 = np.ones((5,5,5), np.float32) * (1/125)
-
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglCl3dBlurSq3(img_input_3d, img_output_3d)
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	
+	vglCl3dBlurSq3(img_input_3d, img_output_3d)
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglCl3dBlurSq3(img_input_3d, img_output_3d)
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 	
 	vl.vglSaveImage(img_out_path+"3d-vglCl3dBlurSq3.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dBlurSq3:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
+	msg = msg + "Tempo de execução do método vglCl3dBlurSq3:\t\t" +str( round( (media / 5), 9 ) ) +"s\n"	
 
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglCl3dConvolution(img_input_3d, img_output_3d, convolution_window_3d_3x3x3, np.uint32(3), np.uint32(3), np.uint32(3))
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	vglCl3dConvolution(img_input_3d, img_output_3d, convolution_window_3d_3x3x3, np.uint32(3), np.uint32(3), np.uint32(3))
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglCl3dConvolution(img_input_3d, img_output_3d, convolution_window_3d_3x3x3, np.uint32(3), np.uint32(3), np.uint32(3))
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 	
-	vl.vglSaveImage(img_out_path+"3d-vglCl3dConvolution.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dConvolution:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
+	vl.vglSaveImage(img_out_path+"3d-vglCl3dConvolution-3.tif", img_output_3d)
+	msg = msg + "Tempo de execução do método vglCl3dConvolution (3x3x3):\t" +str( round( (media / 5), 9 ) ) +"s\n"	
 
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglCl3dConvolution(img_input_3d, img_output_3d, convolution_window_3d_5x5x5, np.uint32(5), np.uint32(5), np.uint32(5))
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	vglCl3dConvolution(img_input_3d, img_output_3d, convolution_window_3d_5x5x5, np.uint32(5), np.uint32(5), np.uint32(5))
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglCl3dConvolution(img_input_3d, img_output_3d, convolution_window_3d_5x5x5, np.uint32(5), np.uint32(5), np.uint32(5))
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 	
-	vl.vglSaveImage(img_out_path+"3d-vglCl3dConvolution.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dConvolution:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
+	vl.vglSaveImage(img_out_path+"3d-vglCl3dConvolution-5.tif", img_output_3d)
+	msg = msg + "Tempo de execução do método vglCl3dConvolution (5x5x5):\t" +str( round( (media / 5), 9 ) ) +"s\n"	
 
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglCl3dNot(img_input_3d, img_output_3d)
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	vglCl3dNot(img_input_3d, img_output_3d)
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglCl3dNot(img_input_3d, img_output_3d)
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 	
 	vl.vglSaveImage(img_out_path+"3d-vglCl3dNot.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dNot:\t\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
+	msg = msg + "Tempo de execução do método vglCl3dNot:\t\t\t" +str( round( (media / 5), 9 ) ) +"s\n"	
 
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglCl3dThreshold(img_input_3d, img_output_3d, np.float32(0.2))
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	vglCl3dThreshold(img_input_3d, img_output_3d, np.float32(0.4), np.float32(.8))
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglCl3dThreshold(img_input_3d, img_output_3d, np.float32(0.4), np.float32(.8))
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 	
 	vl.vglSaveImage(img_out_path+"3d-vglCl3dThreshold.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dThreshold:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"
+	msg = msg + "Tempo de execução do método vglCl3dThreshold:\t\t" +str( round( (media / 5), 9 ) ) +"s\n"
 
-	p = 0
-	inicio = t.time()
-	while(p < nSteps):
-		vglCl3dCopy(img_input_3d, img_output_3d)
-		p = p + 1
-	vl.get_ocl().commandQueue.finish()
-	fim = t.time()
+	vglCl3dCopy(img_input_3d, img_output_3d)
+	media = 0.0
+	for i in range(0, 5):
+		p = 0
+		inicio = t.time()
+		while(p < nSteps):
+			vglCl3dCopy(img_input_3d, img_output_3d)
+			p = p + 1
+		fim = t.time()
+		media = media + (fim-inicio)
 	
 	vl.vglSaveImage(img_out_path+"3d-vglCl3dCopy.tif", img_output_3d)
-	msg = msg + "Tempo de execução do método vglCl3dCopy:\t" +str( round( (fim-inicio), 9 ) ) +"s\n"	
+	msg = msg + "Tempo de execução do método vglCl3dCopy:\t\t" +str( round( (media / 5), 9 ) ) +"s\n"	
 
 	print("-------------------------------------------------------------")
 	print(msg)
@@ -133,4 +151,5 @@ if __name__ == "__main__":
 
 	img_output_3d = None
 
-	convolution_window_3d = None
+	convolution_window_3d = None	
+	morph_window_3d = None
