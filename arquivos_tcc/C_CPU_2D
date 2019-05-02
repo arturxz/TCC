@@ -1,23 +1,23 @@
 UMA EXECUCOES
-Time spent on        5 Blur 3x3:                0.004521 s
-Time spent on        5 Convolution 3x3:         0.004825 s 
-Time spent on        5 Convolution 5x5:         0.012367 s
-Time spent on        5 Invert:                  0.000977 s
-Time spent on        5 Threshold:               0.001198 s
-Time spent on        5 copy GPU->GPU:           0.001270 s
+Time spent on        5 Blur 3x3:                0.004521s
+Time spent on        5 Convolution 3x3:         0.004825s 
+Time spent on        5 Convolution 5x5:         0.012367s
+Time spent on        5 Invert:                  0.000977s
+Time spent on        5 Threshold:               0.001198s
+Time spent on        5 copy GPU->GPU:           0.001270s
 
 DEZ EXECUCOES
-Time spent on       50 Blur 3x3:                0.044654 s
-Time spent on       50 Convolution 3x3:         0.047070 s 
-Time spent on       50 Convolution 5x5:         0.122656 s
-Time spent on       50 Invert:                  0.010368 s
-Time spent on       50 Threshold:               0.010929 s
-Time spent on       50 copy GPU->GPU:           0.012089 s
+Time spent on       50 Blur 3x3:                0.044654s
+Time spent on       50 Convolution 3x3:         0.047070s 
+Time spent on       50 Convolution 5x5:         0.122656s
+Time spent on       50 Invert:                  0.010368s
+Time spent on       50 Threshold:               0.010929s
+Time spent on       50 copy GPU->GPU:           0.012089s
 
 CEM EXECUCOES
-Time spent on      500 Blur 3x3:                0.428767 s
-Time spent on      500 Convolution 3x3:         0.480095 s 
-Time spent on      500 Convolution 5x5:         1.220655 s
-Time spent on      500 Invert:                  0.098271 s
-Time spent on      500 Threshold:               0.108916 s
-Time spent on      500 copy GPU->GPU:           0.088830 s
+Time spent on      500 Blur 3x3:                0.428767s
+Time spent on      500 Convolution 3x3:         0.480095s 
+Time spent on      500 Convolution 5x5:         1.220655s
+Time spent on      500 Invert:                  0.098271s
+Time spent on      500 Threshold:               0.108916s
+Time spent on      500 copy GPU->GPU:           0.088830s

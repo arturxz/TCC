@@ -19,7 +19,7 @@ CEM EXECUCOES
 Tempo de execução do método vglClBlurSq3:			0.015230513s
 Tempo de execução do método vglClConvolution 3x3:	0.057543898s
 Tempo de execução do método vglClConvolution 5x5:	0.057036972s
-Tempo de execução do método vglClInvert:			0.01634984s
+Tempo de execução do método vglClInvert:			0.016349840s
 Tempo de execução do método vglClThreshold:			0.021700191s
 Tempo de execução do método vglClCopy:				0.017977953s
 

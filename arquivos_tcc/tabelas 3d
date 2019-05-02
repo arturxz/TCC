@@ -1,0 +1,108 @@
+            %--------------------------------------------------------------------------------------------------------------------------------%
+            \begin{table}[h]
+            \centering
+            \caption{Tempo em segundos, de uma, dez e cem execuções do \textit{kernel CL/vglCl3dBlurSq3.cl}}
+                \centering
+                \begin{tabular}{cccc}
+                \toprule
+                    \textbf{Versão do \textit{wrapper} e CD} & \textbf{Uma Execução} & \textbf{Dez Execuções} & \textbf{Cem Execuções}\\
+                \midrule \midrule
+                    Wrapper C++ CPU     & 0.086522s & 0.860225s & 8.555013s\\
+                \midrule
+                    Wrapper Python CPU  & 0.002276s & 0.003144s & 0.034548s\\
+                \midrule
+                    Wrapper Python GPU  & 0.000705s & 0.00201s & 0.015923s\\ 
+                \bottomrule
+                \end{tabular}
+            \fonte{Tabelas criadas pelo autor.}
+            \end{table}
+            %--------------------------------------------------------------------------------------------------------------------------------%
+            \begin{table}[h]
+            \centering
+            \caption{Tempo em segundos, de uma, dez e cem execuções do \textit{kernel CL/vglCl3dConvolution.cl} (3x3)}
+                \centering
+                \begin{tabular}{cccc}
+                \toprule
+                    \textbf{Versão do \textit{wrapper} e CD} & \textbf{Uma Execução} & \textbf{Dez Execuções} & \textbf{Cem Execuções}\\
+                \midrule \midrule
+                    Wrapper C++ CPU     & 0.098138s & 0.978382s & 9.774385s\\
+                \midrule
+                    Wrapper Python CPU  & 0.15707s & 1.789116s & 18.177371s\\
+                \midrule
+                    Wrapper Python GPU  & 0.002564s & 0.017481s & 0.155471s\\ 
+                \bottomrule
+                \end{tabular}
+            \fonte{Tabelas criadas pelo autor.}
+            \end{table}
+            %--------------------------------------------------------------------------------------------------------------------------------%
+            \begin{table}[h]
+            \centering
+            \caption{Tempo em segundos, de uma, dez e cem execuções do \textit{kernel CL/vglCl3dConvolution.cl} (5x5)}
+                \centering
+                \begin{tabular}{cccc}
+                \toprule
+                    \textbf{Versão do \textit{wrapper} e CD} & \textbf{Uma Execução} & \textbf{Dez Execuções} & \textbf{Cem Execuções}\\
+                \midrule \midrule
+                    Wrapper C++ CPU     & 0.430130s & 4.329214s & 42.903538s\\
+                \midrule
+                    Wrapper Python CPU  & 0.360472s & 4.16083s & 42.26595s\\
+                \midrule
+                    Wrapper Python GPU  & 0.003585s & 0.032449s & 0.280147s\\ 
+                \bottomrule
+                \end{tabular}
+            \fonte{Tabelas criadas pelo autor.}
+            \end{table}
+            %--------------------------------------------------------------------------------------------------------------------------------%
+            \begin{table}[h]
+            \centering
+            \caption{Tempo em segundos, de uma, dez e cem execuções do \textit{kernel CL/vglCl3dNot.cl}}
+                \centering
+                \begin{tabular}{cccc}
+                \toprule
+                    \textbf{Versão do \textit{wrapper} e CD} & \textbf{Uma Execução} & \textbf{Dez Execuções} & \textbf{Cem Execuções}\\
+                \midrule \midrule
+                    Wrapper C++ CPU     & 0.006001s & 0.048467s & 0.504920s\\
+                \midrule
+                    Wrapper Python CPU  & 0.000765s & 0.003212s & 0.036966s\\
+                \midrule
+                    Wrapper Python GPU  & 0.000628s & 0.002338s & 0.016759s\\ 
+                \bottomrule
+                \end{tabular}
+            \fonte{Tabelas criadas pelo autor.}
+            \end{table}
+            %--------------------------------------------------------------------------------------------------------------------------------%
+            \begin{table}[h]
+            \centering
+            \caption{Tempo em segundos, de uma, dez e cem execuções do \textit{kernel CL/vglCl3dThreshold.cl}}
+                \centering
+                \begin{tabular}{cccc}
+                \toprule
+                    \textbf{Versão do \textit{wrapper} e CD} & \textbf{Uma Execução} & \textbf{Dez Execuções} & \textbf{Cem Execuções}\\
+                \midrule \midrule
+                    Wrapper C++ CPU     & 0.005177s & 0.052179s & 0.509527s\\
+                \midrule
+                    Wrapper Python CPU  & 0.000803s & 0.00763s & 0.04340s\\
+                \midrule
+                    Wrapper Python GPU  & 0.000650s & 0.002419s & 0.020139s\\ 
+                \bottomrule
+                \end{tabular}
+            \fonte{Tabelas criadas pelo autor.}
+            \end{table}
+            %--------------------------------------------------------------------------------------------------------------------------------%
+            \begin{table}[h]
+            \centering
+            \caption{Tempo em segundos, de uma, dez e cem execuções do \textit{kernel CL/vglCl3dCopy.cl}}
+                \centering
+                \begin{tabular}{cccc}
+                \toprule
+                    \textbf{Versão do \textit{wrapper} e CD} & \textbf{Uma Execução} & \textbf{Dez Execuções} & \textbf{Cem Execuções}\\
+                \midrule \midrule
+                    Wrapper C++ CPU     & 0.004796s & 0.048863s & 0.440614s\\
+                \midrule
+                    Wrapper Python CPU  & 0.001159s & 0.004136s & 0.036417s\\
+                \midrule
+                    Wrapper Python GPU  & 0.000628s & 0.002320s & 0.018694s\\ 
+                \bottomrule
+                \end{tabular}
+            \fonte{Tabelas criadas pelo autor.}
+            \end{table}
