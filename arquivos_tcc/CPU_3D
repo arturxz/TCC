@@ -1,0 +1,25 @@
+UMA EXECUCAO
+Tempo de execução do método vglCl3dBlurSq3:				0.002275705s
+Tempo de execução do método vglCl3dConvolution (3x3x3):	0.15707345s
+Tempo de execução do método vglCl3dConvolution (5x5x5):	0.360472202s
+Tempo de execução do método vglCl3dNot:					0.000764704s
+Tempo de execução do método vglCl3dThreshold:			0.000803089s
+Tempo de execução do método vglCl3dCopy:				0.001158667s
+
+
+DEZ EXECUCOES
+Tempo de execução do método vglCl3dBlurSq3:				0.003144073s
+Tempo de execução do método vglCl3dConvolution (3x3x3):	1.789115715s
+Tempo de execução do método vglCl3dConvolution (5x5x5):	4.16083293s
+Tempo de execução do método vglCl3dNot:					0.003211689s
+Tempo de execução do método vglCl3dThreshold:			0.00762639s
+Tempo de execução do método vglCl3dCopy:				0.004136419s
+
+
+CEM EXECUCOES
+Tempo de execução do método vglCl3dBlurSq3:				0.034548521s
+Tempo de execução do método vglCl3dConvolution (3x3x3):	18.177371073s
+Tempo de execução do método vglCl3dConvolution (5x5x5):	42.265951538s
+Tempo de execução do método vglCl3dNot:					0.036965656s
+Tempo de execução do método vglCl3dThreshold:			0.04340744s
+Tempo de execução do método vglCl3dCopy:				0.036417246s

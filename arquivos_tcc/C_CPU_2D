@@ -1,0 +1,39 @@
+5 EXECUCOES
+
+Compiling CL/vglClBlurSq3.cl
+Time spent on        5 Blur 3x3:                0.023249 s
+Compiling CL/vglClConvolution.cl
+Time spent on        5 Convolution 3x3:         0.025319 s 
+Time spent on        5 Convolution 5x5:         0.062858 s
+Compiling CL/vglClInvert.cl
+Time spent on        5 Invert:                  0.004494 s
+Compiling CL/vglClThreshold.cl
+Time spent on        5 Threshold:               0.006207 s
+Compiling CL/vglClCopy.cl
+Time spent on        5 copy GPU->GPU:           0.005741 s
+
+50 EXECUCOES
+Compiling CL/vglClBlurSq3.cl
+Time spent on       50 Blur 3x3:                0.215364 s
+Compiling CL/vglClConvolution.cl
+Time spent on       50 Convolution 3x3:         0.234826 s 
+Time spent on       50 Convolution 5x5:         0.607223 s
+Compiling CL/vglClInvert.cl
+Time spent on       50 Invert:                  0.046251 s
+Compiling CL/vglClThreshold.cl
+Time spent on       50 Threshold:               0.060764 s
+Compiling CL/vglClCopy.cl
+Time spent on       50 copy GPU->GPU:           0.050033 s
+
+500 EXECUCOES
+Compiling CL/vglClBlurSq3.cl
+Time spent on      500 Blur 3x3:                2.117728 s
+Compiling CL/vglClConvolution.cl
+Time spent on      500 Convolution 3x3:         2.356170 s 
+Time spent on      500 Convolution 5x5:         6.059670 s
+Compiling CL/vglClInvert.cl
+Time spent on      500 Invert:                  0.455351 s
+Compiling CL/vglClThreshold.cl
+Time spent on      500 Threshold:               0.621498 s
+Compiling CL/vglClCopy.cl
+Time spent on      500 copy GPU->GPU:           0.460115 s
