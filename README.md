@@ -61,8 +61,7 @@ And a special one:
 
 ## License
 
-I don't know much about licenses now. Later I'll put some here.
-But you can freely use, if you put references to this code if you publish something or create a new thing using this one.
+Follows MIT License.
 
 ## Acknowledgments
 
