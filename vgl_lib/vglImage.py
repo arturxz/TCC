@@ -6,9 +6,6 @@ import sys
 # VISIONGL IMPORTS
 import vgl_lib as vl
 
-# TO INFER TYPE TO THE VARIABLE
-from typing import Union
-
 """
 	img:
 		is the input image
@@ -57,11 +54,11 @@ class VglImage(object):
 		self.ipl = None
 		self.ndim = ndim
 		self.shape = np.zeros((2*vl.VGL_MAX_DIM()), np.uint8)
-		self.vglShape: Union[None, vl.vglShape] = None
+		self.vglShape = None
 		self.depth = depth
 		self.nChannels = 0
 		self.has_mipmap = 0
-		self.oclPtr: Union[cl.Image, cl.Buffer] = None
+		self.oclPtr = None
 		self.clForceAsBuf = clForceAsBuf
 		self.inContext = 0
 		self.filename = imgPath

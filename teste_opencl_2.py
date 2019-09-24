@@ -66,30 +66,9 @@ def get_device( device_type=cl.device_type.GPU ):
 
 
 if __name__ == "__main__":
-    """
-    print( len( cl.get_platforms() ), "platforms found:" )
-    for platform in cl.get_platforms():
-        print( "   Platform:", platform.name )
-        print( "   Platform vendor:", platform.vendor )
-        print( "  ", len( platform.get_devices() ), "devices found:" )
-        
-        for device in platform.get_devices():
-            print( "      Device name:", device.name )
-            print( "      Device type:", device_type_as_string( device.type ) )
-            print( "      Device Max Buf:", device.image_max_buffer_size )
-            print( "      Device Max CUs:", device.max_compute_units )
-            print( "      Device Max WIs:", device.max_work_item_sizes )
-            print( "      Device Max WGs:", device.max_work_group_size )
-            print( "      ------------------------------------------" )
+    ctx = cl.Context( [ get_device( cl.device_type.GPU ) ] )
+    fila = cl.CommandQueue( ctx )
 
-            #ctx  = cl.Context( [ device ] )
-            #fila = cl.CommandQueue( ctx )
-
-            # PREPARING TO RUN StructSizes
-            #host = np.zeros( 11, np.uint32 )
-
-            #_program    = ctx.get_compiled_kernel("vgl_lib/get_struct_sizes.cl", "get_struct_sizes")
-            #kernel_run  = _program.get_struct_sizes
-    """
-    print( "###",  get_device( cl.device_type.CPU ) )
-    print( "###", get_device( cl.device_type.GPU ) )
+    vl.vglClInit(ctx, None, None)
+    if( vl.vglClImage.struct_sizes is not None ):
+        print( "### Teste executado com sucesso! ###" )

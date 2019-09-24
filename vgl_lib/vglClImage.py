@@ -6,15 +6,12 @@ import sys
 # VISIONGL IMPORTS
 import vgl_lib as vl
 
-# TO INFER TYPE TO THE VARIABLE
-from typing import Union
-
 """
 	ocl AND ocl_context ARE GLOBAL VARIABLES.
 	ocl IS EQUIVALENT TO cl ON ORIGINAL vglClImage.
 """
-ocl: Union[vl.VglClContext] = None
-ocl_context: Union[vl.opencl_context] = None
+ocl = None
+ocl_context = None
 
 """
 	struct_sizes IS A PYTHON-EXCLUSIVE GLOBAL VARIABLE.
@@ -24,12 +21,12 @@ ocl_context: Union[vl.opencl_context] = None
 	DATA. WITH THE ORGANIZATION INFORMATION, THE BITWISE 
 	PROCESS CAN BE DONE.
 """
-struct_sizes: Union[np.ndarray] = None
+struct_sizes = None
 
 """
 	VARIABLE TO BINARY-IMAGES 
 """
-bin_image_pack_size: int = None
+bin_image_pack_size = None
 
 """
 	EQUIVALENT TO vglClInit METHOD, FOUND ON
@@ -63,7 +60,7 @@ def vglClInit(ocl_context_a=None, ss_a=None, bin_image_pack_size_a=None):
 	or (bin_image_pack_size_a == vl.PACK_SIZE_64()) ):
 		bin_image_pack_size = bin_image_pack_size_a
 	elif( bin_image_pack_size_a is None ):
-		print(":vglClInit: Warning: Assuming bin_image_pack_size as 8")
+		print("vglClInit: Warning: Assuming bin_image_pack_size as 8")
 		bin_image_pack_size = vl.PACK_SIZE_8()
 	else:
 		print("vglClInit: Error! bin_image_pack_size not 8, 32 or 64. Ending execution.")
@@ -291,7 +288,7 @@ def get_similar_oclPtr_object(img):
 	global ocl
 	mf = cl.mem_flags
 
-	opencl_device: Union[cl.Image, cl.Buffer] = None
+	opencl_device = None
 
 	if( isinstance(img.get_oclPtr(), cl.Image) ):
 		#print("get_similar_oclPtr_object: oclPtr is cl.Image.")
