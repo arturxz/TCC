@@ -32,7 +32,7 @@ if __name__ == "__main__":
             print( "      Device type:", device_type_as_string( device.type ) )
             print( "      ------------------------------------------" )
 
-            ctx  = cl.context( [ device ] )
+            ctx  = cl.Context( [ device ] )
             fila = cl.CommandQueue( ctx )
 
             # PREPARING TO RUN StructSizes
